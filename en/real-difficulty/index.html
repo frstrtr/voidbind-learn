@@ -68,7 +68,7 @@
  </tbody>
 </table></div>
 <h2 id="rd-16">Achieved difficulty and the overshoot</h2>
-<p id="rd-17">The first version of this page called it the &ldquo;real target&rdquo;: what the hash a miner actually found would have satisfied. Two ratios are useful, and they should not be mixed:</p>
+<p id="rd-17">The first version of this page used the term &ldquo;real target&rdquo; for the value a miner&rsquo;s actual hash would still have satisfied. Two ratios are useful, and they should not be mixed:</p>
 <ul id="rd-18">
  <li><b>Achieved difficulty</b> = target<sub>max</sub>&nbsp;/&nbsp;hash. The difficulty at which this particular hash would still have been valid. The dashboard&rsquo;s &ldquo;best share&rdquo; is of this kind.</li>
  <li><b>Overshoot</b> R = target&nbsp;/&nbsp;hash = achieved difficulty&nbsp;/&nbsp;difficulty. A valid block has R&nbsp;&ge;&nbsp;1. R tells how far below its target this hash happened to fall.</li>
@@ -86,7 +86,7 @@
 
 <p id="rd-20">In the second chart the difficulty is 1 throughout both epochs, so R is each block&rsquo;s achieved difficulty. The median near 2 is what <code>Pr[R &ge; r] = 1/r</code> predicts.</p>
 <div id="rd-45" class="v37"><span class="tag">V37</span><b>What achieved (&ldquo;real&rdquo;) difficulty is &mdash; and is not &mdash; used for.</b>
- <p>The <i>real target</i> above is the <b>achieved</b> difficulty of a hash &mdash; how far below its target it happened to fall. It is tempting to pay miners in proportion to it: &ldquo;you found a rarer hash, you earn more.&rdquo; <b>This is wrong, and provably so.</b></p>
+ <p>The <b>achieved</b> difficulty of a hash (the &ldquo;real target&rdquo; of the first version of this page) says how far below its target the hash happened to fall. It is tempting to pay miners in proportion to it: &ldquo;you found a rarer hash, you earn more.&rdquo; <b>This is wrong, and provably so.</b></p>
  <p>Achieved difficulty is <b>pure luck</b>. Conditioned on meeting the target, the overshoot <code>R = target/hash</code> follows a power law, <code>Pr[R &ge; r] = 1/r</code>, whose mean does not converge: a single fortunate hash can exceed the sum of all others by a factor on the order of the whole hash space. Paying by achieved difficulty would let one lucky share take an entire payout window &mdash; re-importing into the pool exactly the variance that pooling exists to remove.</p>
  <p><b>Work is therefore credited by the <i>target</i> a share was required to meet, never by the value its hash happened to reach.</b> Two shares meeting the same target are paid equally &mdash; the accounting stays <i>luck-neutral</i>.</p>
  <p>Work below the share target is counted by the same rule. A hash that met a lower target is itself a unit of work at that lower target, so a worker too weak to find shares often can still be credited for the work it did, by counting its hashes at that lower target. The overshoot is not needed for this. <b>Measurement, not payment.</b> This is how the Work Receipts paper credits work; see the <a href="/en/purple-paper/">Purple Paper summary</a>, &sect;5 (Proof-of-Work as Measurement) and &sect;8 (Recovering Work Below the Order).</p>

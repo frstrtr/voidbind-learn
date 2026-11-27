@@ -1,0 +1,61 @@
+term_id	en	fr	ru	de	zh	keep_en	note
+share	share	share	шара	Share	份额	no	A low-difficulty proof of work on the share chain. FR/DE keep the English word. RU: шара (pl. шары), the established miner usage.
+share_chain	share chain	chaîne de shares	цепочка шар	Share-Chain	份额链	no	Also written "sharechain" in quotes from code; render the same way.
+pplns	PPLNS	PPLNS	PPLNS	PPLNS	PPLNS	yes	Pay Per Last N Shares. Gloss once per page: FR « payer par les N dernières shares », RU «оплата за последние N шар», DE „Bezahlung pro letzte N Shares“, ZH 按最近 N 份额支付.
+merged_mining	merged mining	minage fusionné	объединённый майнинг	Merged Mining	联合挖矿	no	
+parent_chain	parent chain	chaîne parente	родительская цепь	Parent-Chain	父链	no	
+aux_chain	aux chain / merged chain / child chain	chaîne auxiliaire	вспомогательная цепь	Aux-Chain	辅助链	no	
+auxpow	AuxPoW	AuxPoW	AuxPoW	AuxPoW	AuxPoW	yes	
+coinbase	coinbase (transaction)	coinbase (transaction coinbase)	coinbase (coinbase-транзакция)	Coinbase (Coinbase-Transaktion)	coinbase（coinbase 交易）	yes	Never translate as the exchange name. First use per page: RU/ZH add the bracketed form.
+target	target	cible	цель (target)	Target	目标值	no	RU first use: «цель (target)».
+difficulty	difficulty	difficulté	сложность	Schwierigkeit	难度	no	
+achieved_difficulty	achieved difficulty	difficulté atteinte	достигнутая сложность	erreichte Schwierigkeit	实际达到的难度	no	
+overshoot	overshoot	dépassement	превышение	Überschuss	超出倍数	no	R = target/hash.
+retarget	retarget	réajustement	перерасчёт сложности	Retarget (Neuberechnung)	难度重定	no	
+median_time_past	median time past (MTP)	median time past (MTP)	медианное время (MTP)	Median Time Past (MTP)	过去中位时间（MTP）	no	Keep "MTP".
+nbits	nBits	nBits	nBits	nBits	nBits	yes	
+effort	effort	effort	усилие (effort)	Aufwand (Effort)	工作量（effort）	no	Dashboard term: blocks expected over a round.
+luck	luck	chance	удача	Glück	运气	no	
+round	round	tour	раунд	Runde	轮次	no	The time between two pool blocks.
+hashrate	hash rate	taux de hachage (hashrate)	хешрейт	Hashrate	算力	no	
+stratum	stratum	stratum	stratum	Stratum	stratum	yes	Protocol name.
+payout	payout	paiement	выплата	Auszahlung	支付	no	
+payout_address	payout address	adresse de paiement	адрес выплаты	Auszahlungsadresse	收款地址	no	
+redistribute	redistributed	redistribué	перераспределяется	umverteilt	重新分配	no	
+orphan	orphan	orphelin	орфан (сиротский блок)	verwaister Block	孤块	no	
+stale	stale	périmé (stale)	устаревший (stale)	veraltet (stale)	过期（stale）	no	
+doa	DOA	DOA	DOA	DOA	DOA	yes	Dead on arrival.
+work_receipts	Work Receipts	Work Receipts (reçus de travail)	Work Receipts (квитанции о работе)	Work Receipts (Arbeitsquittungen)	Work Receipts（工作收据）	yes	Name of the design; gloss once.
+receipt	receipt	reçu	квитанция	Quittung	收据	no	
+carrier	carrier	porteur	носитель	Träger	载体	no	Paper term.
+owed_balance	owed balance	solde dû	задолженность (owed balance)	geschuldeter Saldo	欠付余额	no	
+window	window	fenêtre	окно	Fenster	窗口	no	PPLNS window.
+half_life	half-life	demi-vie	период полураспада	Halbwertszeit	半衰期	no	
+flag_day	flag day	flag day (date d’activation fixe)	flag day (фиксированная дата активации)	Flag Day (fester Aktivierungstermin)	固定激活日（flag day）	no	
+autoratchet	AutoRatchet	AutoRatchet	AutoRatchet	AutoRatchet	AutoRatchet	yes	Name.
+share_version_3601	share version 3601	version de share 3601	версия шары 3601	Share-Version 3601	份额版本 3601	no	
+daemonless	daemonless / no coin daemon	sans démon	без демона (без узла монеты)	ohne Daemon	无需守护进程	no	
+embedded_node	embedded node	nœud embarqué	встроенный узел	eingebetteter Knoten	内置节点	no	
+mweb	MWEB	MWEB	MWEB	MWEB	MWEB	yes	MimbleWimble Extension Blocks.
+hogex	HogEx	HogEx	HogEx	HogEx	HogEx	yes	
+taproot	Taproot	Taproot	Taproot	Taproot	Taproot	yes	
+mast	MAST	MAST	MAST	MAST	MAST	yes	
+schnorr	Schnorr signature	signature Schnorr	подпись Шнорра	Schnorr-Signatur	Schnorr 签名	no	
+key_path	key path	chemin de clé	путь ключа (key path)	Key-Path	密钥路径	no	
+script_path	script path	chemin de script	путь скрипта (script path)	Script-Path	脚本路径	no	
+multisig	multisig	multisignature	мультиподпись	Multisig	多重签名	no	
+witness	witness	witness (témoin)	witness (свидетель)	Witness	见证（witness）	no	
+utxo	UTXO set	ensemble UTXO	множество UTXO	UTXO-Menge	UTXO 集	no	
+mempool	mempool	mempool	мемпул	Mempool	内存池	no	
+block_template	block template	modèle de bloc	шаблон блока	Block-Template	区块模板	no	
+header	header	en-tête	заголовок	Header	区块头	no	
+node	node	nœud	узел	Knoten	节点	no	
+dashboard	dashboard	tableau de bord	панель (дашборд)	Dashboard	仪表板	no	
+release	release	version	выпуск	Release	版本	no	
+soft_fork	soft fork	soft fork	софтфорк	Soft Fork	软分叉	no	
+hard_fork	hard fork	hard fork	хардфорк	Hard Fork	硬分叉	no	
+emergency_difficulty	emergency difficulty rule	règle de difficulté d’urgence	аварийное правило сложности	Notfall-Schwierigkeitsregel	紧急难度规则	no	
+share_period	share period	période de share	период шары	Share-Periode	份额周期	no	
+pool_hopping	pool hopping	pool hopping	пул-хоппинг	Pool-Hopping	跳池	no	
+custodial	custodial	dépositaire (custodial)	кастодиальный	verwahrend (custodial)	托管式	no	
+mainnet	mainnet / testnet / regtest / stagenet	mainnet / testnet / regtest / stagenet	mainnet / testnet / regtest / stagenet	Mainnet / Testnet / Regtest / Stagenet	主网 / 测试网 / regtest / stagenet	yes	

@@ -7,8 +7,9 @@ rewrites the marked shared regions of each page and checks the translations.
   python3 -I tools/site.py chrome          rewrite the shared regions (head, top bar, nav, footer)
   python3 -I tools/site.py check           report stale, missing and extra translated blocks; exit 1 on problems
   python3 -I tools/site.py mark            set or clear data-stale on translated blocks, then rewrite the regions
-  python3 -I tools/site.py stamp LANG SLUG [ID ...]
-                                           record the current EN hash on translated blocks (all of them if no ID)
+  python3 -I tools/site.py stamp LANG SLUG [ID ...] [--rev REV]
+                                           record the EN hash on translated blocks (all of them if no ID);
+                                           --rev: the EN text as of git revision REV, the one the translation was made from
 
 Page format (see README.md): every top-level block inside <article> starts at
 column 0 with an id="..." attribute. Nested lines are indented. A translated
@@ -192,8 +193,14 @@ def write_sitemap():
 
 # ---------------------------------------------------------------- check / mark / stamp
 
-def en_hashes(slug):
-    return {b[0]: h12(b[4]) for b in blocks(read(path_of('en', slug)))}
+def en_hashes(slug, rev=None):
+    if rev is None:
+        src = read(path_of('en', slug))
+    else:  # the English text as it was at a git revision (stamp a translation made from it)
+        import subprocess
+        rel = os.path.relpath(path_of('en', slug), ROOT)
+        src = subprocess.run(['git', '-C', ROOT, 'show', f'{rev}:{rel}'], check=True, capture_output=True).stdout.decode('utf-8')
+    return {b[0]: h12(b[4]) for b in blocks(src)}
 
 
 def analyse():
@@ -300,9 +307,9 @@ def cmd_mark():
     cmd_chrome()
 
 
-def cmd_stamp(lang, slug, ids):
+def cmd_stamp(lang, slug, ids, rev=None):
     slug = '' if slug in ('home', '-') else slug
-    eh = en_hashes(slug)
+    eh = en_hashes(slug, rev)
     def fn(bid, attrs):
         if bid in eh and (not ids or bid in ids):
             return set_attr(set_attr(attrs, 'data-src', eh[bid]), 'data-stale', None)
@@ -318,5 +325,9 @@ if __name__ == '__main__':
     if a[0] == 'chrome': cmd_chrome()
     elif a[0] == 'check': sys.exit(cmd_check())
     elif a[0] == 'mark': cmd_mark()
-    elif a[0] == 'stamp': cmd_stamp(a[1], a[2], a[3:])
+    elif a[0] == 'stamp':
+        rev = None
+        if '--rev' in a:
+            i = a.index('--rev'); rev = a[i + 1]; a = a[:i] + a[i + 2:]
+        cmd_stamp(a[1], a[2], a[3:], rev)
     else: print(__doc__); sys.exit(2)
