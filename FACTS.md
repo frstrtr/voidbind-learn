@@ -53,12 +53,14 @@ Legend: **C** = changed from the original text, **N** = new text, **K** = kept f
 | mk-u96 a ±10% clamp doubles the target in ≈ 7.3 shares and triples it in ≈ 11.5; the original "23 shares" is kept as written | arithmetic: ln 2 / ln 1.1, ln 3 / ln 1.1 |
 | mk-u74 names both chains (LTC, BTC) | as above |
 | wm-05 weights decide approval (contradiction with wm-upd removed) | editorial |
+| mk-u93 1 MH/s on 90 GH/s at 15 s per share ≈ 15.6 days per share | arithmetic; `src/impl/ltc/config_pool.hpp:50` |
 | Everything else (GENTX counts, timings, test topology, 12 address cases, OOM figures) | **H**: the original authors' June 2026 account, not re-verified |
 
 ## luck (K + N)
 | Claim | Source |
 |---|---|
 | Folklore sections | **K** as published |
+| lk-30 reworded: overshoot is not paid; a pool paying by it would overpay one hash | consistency with real-difficulty rd-19 |
 | Pr[R ≥ r] = 1/r; median 2 | standard result: for a uniform hash below target T, Pr[hash ≤ T/r] = 1/r |
 | "lonely tower at block ~1,450, R ≈ 7,000" | **H**: from the original chart data, not re-verified |
 | Dashboard model: Poisson, λ = H/(D·2^32), effort = ∫λ dt, per-block luck 100/effort never averaged, ~450% with 30 blocks, period luck k/Σeffort with exact Poisson 95% interval | `src/core/pool_luck.hpp:7-22` |
@@ -93,6 +95,7 @@ Legend: **C** = changed from the original text, **N** = new text, **K** = kept f
 | LTC 2.5 min, 3.5 days, 2016 blocks, full-interval lookback after the first period (Art Forz) | c2pool `src/impl/ltc/coin/header_chain.hpp:184-189, 276-291` |
 | DOGE 4 h window (240 blocks) to 145,000, DigiShield from 145,000, AuxPoW from 371,337 | c2pool `src/impl/doge/coin/chain_params.hpp:6-37`; `src/impl/doge/coin/template_builder.hpp:183-198` |
 | Share target from pool rate and share period; ±10% clamp; emergency rule | c2pool `src/impl/ltc/share_tracker.hpp:1975-2075`; `config_pool.hpp:50`; `src/impl/btc/config_pool.hpp:53` |
+| da-25 ASERT walks no window but still depends on the latest timestamp | aserti3-2d definition |
 | BCH uses an absolute schedule (ASERT) since November 2020 | c2pool `src/impl/bch/config_pool.hpp:27`; aserti3-2d upgrade of 15 November 2020 |
 
 ## taproot-coinbase (K + C + N)

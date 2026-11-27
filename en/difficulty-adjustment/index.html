@@ -114,7 +114,7 @@ def difficulty(target):
 </ul>
 <div id="da-25" class="v37"><span class="tag">V37</span><b>Target vs. difficulty, and an absolute schedule.</b>
  <p>Difficulty and target are inverses (difficulty = max_target / target), so the retarget multiplies the target by the timespan ratio and difficulty moves the opposite way: faster blocks (a smaller ratio) raise difficulty.</p>
- <p>Walking back through the chain to retarget is costly over long windows. An absolute schedule (ASERT-style) computes the target directly from an anchor block in constant time, and by construction no manipulation of timestamps in the window can make it drift. Bitcoin Cash has used one since November 2020. It is a candidate for a share chain&rsquo;s own difficulty in the V37 design work; the c2pool share chains today use the per-share rule above.</p>
+ <p>Walking back through the chain to retarget is costly over long windows. An absolute schedule (ASERT-style) computes the target directly from an anchor block and the latest block in constant time. It walks no window, so timestamps inside a window cannot make the target drift, although the latest block&rsquo;s own timestamp still matters. Bitcoin Cash has used one since November 2020. It is a candidate for a share chain&rsquo;s own difficulty in the V37 design work; the c2pool share chains today use the per-share rule above.</p>
  </div>
 </article>
 </main>
