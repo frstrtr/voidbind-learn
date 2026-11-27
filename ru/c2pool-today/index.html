@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>c2pool сегодня — Научные основы P2Pool</title>
+<meta name="description" content="Что такое c2pool и что он запускает сегодня: цепи, узлы без демона, цепочка шар Litecoin и публичные узлы.">
+<link rel="canonical" href="https://learn.voidbind.com/ru/c2pool-today/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/c2pool-today/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/c2pool-today/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/c2pool-today/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/c2pool-today/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/c2pool-today/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/c2pool-today/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Перейти к содержанию</a>
+<header class="top">
+<a class="brand" href="/ru/">Научные основы P2Pool</a>
+<nav class="langs" aria-label="Язык"><a class="lang" href="/en/c2pool-today/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/c2pool-today/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/c2pool-today/" hreflang="ru" lang="ru" data-lang="ru" aria-current="true">Русский</a> · <a class="lang" href="/de/c2pool-today/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/c2pool-today/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Содержание"><ul>
+<li><a href="/ru/">Главная</a></li>
+<li><a href="/ru/c2pool-today/" aria-current="page">c2pool сегодня</a></li>
+<li><a href="/ru/references/">Источники</a></li>
+<li><a href="/ru/making-of-c2pool/">Как создавался c2pool</a></li>
+<li><a href="/ru/luck/">Удача</a></li>
+<li><a href="/ru/real-difficulty/">Реальная сложность</a></li>
+<li><a href="/ru/difficulty-adjustment/">Корректировка сложности</a></li>
+<li><a href="/ru/taproot-coinbase/">Taproot в coinbase</a></li>
+<li><a href="/ru/weighted-multisig/">Взвешенная мультиподпись</a></li>
+<li><a href="/ru/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/ru/purple-paper/">Purple Paper</a></li>
+<li><a href="/ru/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Этот перевод ещё не проверен. <a href="/en/c2pool-today/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="c2pool сегодня" data-desc="Что такое c2pool и что он запускает сегодня: цепи, узлы без демона, цепочка шар Litecoin и публичные узлы.">
+<h1 id="ct-01" data-src="cc5297f4642c">c2pool сегодня</h1>
+<p id="ct-02" class="sub" data-src="ee20319b09b9">Состояние c2pool на момент выпуска <a href="https://github.com/frstrtr/c2pool/releases/tag/v0.2.12.16">v0.2.12.16</a> (25 ноября 2026 г.)</p>
+<p id="ct-03" data-src="bba657f1e424">c2pool — это переписанная на C++ реализация <a href="https://github.com/p2pool/p2pool">p2pool</a>, децентрализованного майнинг-пула, созданная для формата шар V36. У него нет оператора пула: майнеры запускают узлы, которые согласуют общую цепочку шар, и каждый блок, найденный узлом, платит майнерам прямо в coinbase (coinbase-транзакции) этого же блока. Исходный код: <a href="https://github.com/frstrtr/c2pool">github.com/frstrtr/c2pool</a>.</p>
+<h2 id="ct-04" data-src="79aaa1a60301">Цепи</h2>
+<p id="ct-05" data-src="b8a112b8de94">c2pool собирает по одному бинарнику на каждую родительскую цепь (<code>c2pool-&lt;coin&gt;</code>). Несколько родительских цепей также ведут в той же coinbase объединённый майнинг вспомогательных цепей AuxPoW.</p>
+<div id="ct-06" class="table-wrap" data-src="12bfe265f5b6"><table>
+ <thead><tr><th>Родительская цепь</th><th>Алгоритм</th><th>Объединённый майнинг</th><th>Статус</th></tr></thead>
+ <tbody>
+ <tr><td>Litecoin (LTC)</td><td>Scrypt</td><td>Dogecoin (встроенный узел); PEP, LKY, SHIC через внешние демоны, не протестировано; BELLS и JKC пока нет</td><td><b>Продакшен</b> (цепочка шар V36, реальные блоки LTC и DOGE)</td></tr>
+ <tr><td>Dash (DASH)</td><td>X11</td><td>нет</td><td><b>Продакшен</b>, без демона (без узла монеты)</td></tr>
+ <tr><td>Bitcoin (BTC)</td><td>SHA-256d</td><td>Namecoin, в разработке</td><td>Работает, без демона</td></tr>
+ <tr><td>DigiByte (DGB)</td><td>Scrypt</td><td>Dogecoin (встроенный узел)</td><td>Работает, без демона, только mainnet</td></tr>
+ <tr><td>Bitcoin Cash (BCH)</td><td>SHA-256d</td><td>нет</td><td>Работает, без демона</td></tr>
+ <tr><td>BIP-110 (форк Bitcoin Knots)</td><td>BLAKE2b (SHA-256d ниже высоты 961&nbsp;640)</td><td>нет</td><td><b>Экспериментально</b>, без демона</td></tr>
+ <tr><td>Monero (XMR)</td><td>RandomX</td><td>нет</td><td><b>Экспериментально</b>, не входит в пакеты выпуска</td></tr>
+ </tbody>
+</table></div>
+<p id="ct-07" data-src="c7299c9d135d">«Работает» (Live) означает, что публичный узел voidbind запускает этот бинарник без демона монеты в тракте обслуживания (serve path). Это не заявление о зрелости для продакшена: в продакшене используются только линии Litecoin и Dash. DigiByte использует свой алгоритм Scrypt как самостоятельная родительская цепь; это не вспомогательная цепь Litecoin.</p>
+<p id="ct-08" data-src="f576072cdcec">Monero, словами самого проекта: «<b>Experimental</b> (v37 lane, Path B payouts; <code>c2pool-v37-xmr</code>, can run daemonless; not built by the release workflow): regtest, stagenet and testnet run a pool; mainnet runs only <code>--follow-only</code> and needs <code>--i-understand-mainnet</code> even for that.» (перевод: «<b>Экспериментально</b> (линия v37, выплаты Path B; <code>c2pool-v37-xmr</code>, может работать без демона; не собирается workflow выпуска): в regtest, stagenet и testnet работает пул; в mainnet работает только <code>--follow-only</code>, и даже для этого нужен <code>--i-understand-mainnet</code>».) Режим пула в mainnet отключён в коде. (<a href="https://github.com/frstrtr/c2pool/blob/master/README.md#supported-chains">README, раздел Supported chains</a>)</p>
+<h2 id="ct-09" data-src="0e99c4bfe2a1">Без демона монеты</h2>
+<ul id="ct-10" data-src="4fc1206d98b7">
+ <li><b>Litecoin и Dogecoin.</b> c2pool содержит встроенные облегчённые узлы для обеих цепей. Они синхронизируют заголовки через собственные P2P-сети этих монет, ведут множество UTXO для расчёта комиссий, держат мемпул и сами строят шаблоны блоков. Ни <code>litecoind</code>, ни <code>dogecoind</code> не нужны.</li>
+ <li><b>Dash.</b> <code>c2pool-dash</code> сам работает по P2P-протоколу Dash и восстанавливает внутри узла детерминированный список мастернод, кворумы LLMQ, ChainLocks и coinbase по DIP-4. Ему не нужны ни <code>dashd</code>, ни учётные данные RPC, ни доступ к кошельку. Блоки, построенные таким образом, были приняты в mainnet Dash. Правила Dash Core 24 встроены начиная с v0.2.11.1, поэтому у пула без демона нет <code>dashd</code>, который пришлось бы обновлять ради этого хардфорка. Узел по-прежнему можно запустить с <code>dashd</code> в качестве резервного варианта.</li>
+ <li><b>Bitcoin, Bitcoin Cash, DigiByte и BIP-110</b> на публичных узлах voidbind тоже работают без демона монеты.</li>
+</ul>
+<h2 id="ct-11" data-src="d3a96c4ef694">Цепочка шар Litecoin</h2>
+<ul id="ct-12" data-src="a3f5befc5351">
+ <li>С <b>2026-11-13 00:00:00 UTC</b> каждая шара имеет <b>версию шары 3601</b>: это формат шар V36 с типом шары 3601, введённый через flag day (фиксированную дату активации) в выпуске, а не голосованием. Он изменил правило выплат при объединённом майнинге и позволяет одной шаре нести сразу несколько вспомогательных цепей.</li>
+ <li>В этой цепочке шар участвуют только c2pool v0.2.12.1 и новее. Узлов Python p2pool в ней нет.</li>
+ <li>Реализации на Python <a href="https://github.com/frstrtr/p2pool-merged-v36">p2pool-merged-v36</a> и <a href="https://github.com/frstrtr/p2pool-dash">p2pool-dash</a> больше не поддерживаются. Все обновления, включая исправления безопасности, выходят только в c2pool.</li>
+ <li>Выплаты идут по PPLNS (оплата за последние N шар) с экспоненциальным затуханием (период полураспада — четверть окна в 8640 шар). Целевой темп — одна шара каждые 15 секунд.</li>
+</ul>
+<h2 id="ct-13" data-src="3832226492a3">Публичные узлы</h2>
+<p id="ct-14" data-src="0418fce4d84d">Публичные узлы voidbind и их панели (дашборды): <a href="https://ltc.voidbind.com/">ltc.voidbind.com</a> (Litecoin + Dogecoin), <a href="https://dash.voidbind.com/">dash.voidbind.com</a>, <a href="https://btc.voidbind.com/">btc.voidbind.com</a>, <a href="https://bch.voidbind.com/">bch.voidbind.com</a>, <a href="https://dgb.voidbind.com/">dgb.voidbind.com</a> и <a href="https://bip110.voidbind.com/">bip110.voidbind.com</a>. Каждая панель показывает цепочку шар своего узла; любой, кто запускает узел, видит те же данные в своей собственной копии.</p>
+<h2 id="ct-15" data-src="72eade816b5a">Скачать и проверить</h2>
+<ul id="ct-16" data-src="c41a06c35104">
+ <li>Пакеты для каждой родительской цепи под Linux x86_64 (<code>.tar.gz</code>), Windows x86_64 (<code>.zip</code> или установщик) и macOS (один универсальный пакет для Apple Silicon и Intel, macOS 26.0 или новее) лежат на <a href="https://github.com/frstrtr/c2pool/releases">странице выпусков</a>.</li>
+ <li>Каждый выпуск содержит файл <code>SHA256SUMS</code> и, начиная с v0.2.7, отделённую подпись <code>SHA256SUMS.asc</code>. Ключ подписи опубликован на <a href="https://github.com/frstrtr.gpg">github.com/frstrtr.gpg</a>, отпечаток <code>99556F8DE6AD66057A1A10EC50AB1379285EFE76</code>.</li>
+ <li>Известные проблемы перечислены в <a href="https://github.com/frstrtr/c2pool/blob/master/KNOWN_ISSUES.md">KNOWN_ISSUES.md</a>.</li>
+</ul>
+<h2 id="ct-17" data-src="1afde71b02ce">Что дальше</h2>
+<p id="ct-18" data-src="e4539e14d599">V37, следующее направление разработки (Work Receipts (квитанции о работе) и ядро расчётов MRR), находится на стадии проектирования и прототипа и в продакшене не используется. Его статья кратко изложена на странице <a href="/ru/purple-paper/">Purple Paper</a>.</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>© 2026 technocore.one.</p>
+<p>Сведения о c2pool проверены по выпуску v0.2.12.16 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

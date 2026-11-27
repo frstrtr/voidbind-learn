@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>c2pool 现状 — P2Pool 科学基础</title>
+<meta name="description" content="c2pool 是什么，以及它目前运行的内容：各条链、无需守护进程的节点、莱特币份额链和公共节点。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/c2pool-today/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/c2pool-today/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/c2pool-today/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/c2pool-today/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/c2pool-today/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/c2pool-today/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/c2pool-today/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/c2pool-today/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/c2pool-today/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/c2pool-today/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/c2pool-today/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/c2pool-today/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/" aria-current="page">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/c2pool-today/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="c2pool 现状" data-desc="c2pool 是什么，以及它目前运行的内容：各条链、无需守护进程的节点、莱特币份额链和公共节点。">
+<h1 id="ct-01" data-src="cc5297f4642c">c2pool 现状</h1>
+<p id="ct-02" class="sub" data-src="ee20319b09b9">c2pool 在 <a href="https://github.com/frstrtr/c2pool/releases/tag/v0.2.12.16">v0.2.12.16</a> 版本（2026 年 11 月 25 日）时的状态</p>
+<p id="ct-03" data-src="bba657f1e424">c2pool 是去中心化矿池 <a href="https://github.com/p2pool/p2pool">p2pool</a> 的 C++ 重新实现，为 V36 份额格式而构建。它没有矿池运营者：矿工运行节点，这些节点就一条份额链达成一致，节点找到的每个区块都在该区块自己的 coinbase（coinbase 交易）中向矿工付款。源代码位于 <a href="https://github.com/frstrtr/c2pool">github.com/frstrtr/c2pool</a>。</p>
+<h2 id="ct-04" data-src="79aaa1a60301">链</h2>
+<p id="ct-05" data-src="b8a112b8de94">c2pool 为每条父链构建一个二进制程序（<code>c2pool-&lt;coin&gt;</code>）。有几条父链还会在同一个 coinbase 中联合挖矿 AuxPoW 子链。</p>
+<div id="ct-06" class="table-wrap" data-src="12bfe265f5b6"><table>
+ <thead><tr><th>父链</th><th>算法</th><th>联合挖矿</th><th>状态</th></tr></thead>
+ <tbody>
+ <tr><td>莱特币（LTC）</td><td>Scrypt</td><td>狗狗币（内置节点）；PEP、LKY、SHIC 通过外部守护进程，未经测试；BELLS 和 JKC 尚未支持</td><td><b>生产</b>（V36 份额链，已挖出真实的莱特币和狗狗币区块）</td></tr>
+ <tr><td>达世币（DASH）</td><td>X11</td><td>无</td><td><b>生产</b>，无需守护进程</td></tr>
+ <tr><td>比特币（BTC）</td><td>SHA-256d</td><td>Namecoin，开发中</td><td>运行中，无需守护进程</td></tr>
+ <tr><td>DigiByte（DGB）</td><td>Scrypt</td><td>狗狗币（内置）</td><td>运行中，无需守护进程，仅主网</td></tr>
+ <tr><td>比特币现金（BCH）</td><td>SHA-256d</td><td>无</td><td>运行中，无需守护进程</td></tr>
+ <tr><td>BIP-110（Bitcoin Knots 分叉）</td><td>BLAKE2b（高度 961,640 之前为 SHA-256d）</td><td>无</td><td><b>实验性</b>，无需守护进程</td></tr>
+ <tr><td>门罗币（XMR）</td><td>RandomX</td><td>无</td><td><b>实验性</b>，不在发布包中</td></tr>
+ </tbody>
+</table></div>
+<p id="ct-07" data-src="c7299c9d135d">“运行中”表示有一个公共 voidbind 节点在运行该二进制程序，并且服务路径上没有币种守护进程。这并不代表已达到生产成熟度：只有莱特币和达世币两条线处于生产使用中。DigiByte 以其 Scrypt 算法作为一条独立的父链运行；它不是莱特币的子链。</p>
+<p id="ct-08" data-src="f576072cdcec">关于门罗币，项目自己的说法是：“<b>Experimental</b> (v37 lane, Path B payouts; <code>c2pool-v37-xmr</code>, can run daemonless; not built by the release workflow): regtest, stagenet and testnet run a pool; mainnet runs only <code>--follow-only</code> and needs <code>--i-understand-mainnet</code> even for that.”（译文：“<b>实验性</b>（v37 通道，Path B 支付；<code>c2pool-v37-xmr</code>，可以无需守护进程运行；不由发布工作流构建）：regtest、stagenet 和测试网可以运行矿池；主网只能运行 <code>--follow-only</code>，即便如此也需要 <code>--i-understand-mainnet</code>。”）主网矿池模式在代码中被禁用。（<a href="https://github.com/frstrtr/c2pool/blob/master/README.md#supported-chains">README，Supported chains</a>）</p>
+<h2 id="ct-09" data-src="0e99c4bfe2a1">无需币种守护进程</h2>
+<ul id="ct-10" data-src="4fc1206d98b7">
+ <li><b>莱特币和狗狗币。</b>c2pool 为这两条链内置了轻量级节点。它们通过各币种自己的点对点网络同步区块头，维护一个 UTXO 集以计算手续费，维护内存池，并自行构建区块模板。不需要 <code>litecoind</code> 或 <code>dogecoind</code>。</li>
+ <li><b>达世币。</b><code>c2pool-dash</code> 自己实现达世币点对点协议，并在节点内部重建确定性主节点列表、LLMQ 仲裁、ChainLocks 和 DIP-4 coinbase。它不需要 <code>dashd</code>、不需要 RPC 凭据，也不需要钱包访问权限。以这种方式构建的区块已被达世币主网接受。Dash Core 24 的规则从 v0.2.11.1 起内置，因此无需守护进程的矿池在这次硬分叉中没有需要升级的 <code>dashd</code>。节点仍然可以带一个 <code>dashd</code> 作为后备来启动。</li>
+ <li><b>比特币、比特币现金、DigiByte 和 BIP-110</b> 在公共 voidbind 节点上同样无需币种守护进程运行。</li>
+</ul>
+<h2 id="ct-11" data-src="d3a96c4ef694">莱特币份额链</h2>
+<ul id="ct-12" data-src="a3f5befc5351">
+ <li>自 <b>2026-11-13 00:00:00 UTC</b> 起，每个份额都是<b>份额版本 3601</b> 的份额：即份额类型 3601 下的 V36 份额格式，由版本中的固定激活日（flag day）确定，而不是通过投票。它改变了联合挖矿的支付规则，并允许一个份额同时携带多条联合挖矿链。</li>
+ <li>只有 c2pool v0.2.12.1 及更高版本在这条份额链上。Python 版 p2pool 节点不在其上。</li>
+ <li>Python 实现 <a href="https://github.com/frstrtr/p2pool-merged-v36">p2pool-merged-v36</a> 和 <a href="https://github.com/frstrtr/p2pool-dash">p2pool-dash</a> 已不再维护。所有更新，包括安全修复，都只在 c2pool 中发布。</li>
+ <li>支付采用带指数衰减的 PPLNS（按最近 N 份额支付），半衰期为窗口（8,640 个份额）的四分之一。目标是每 15 秒产生一个份额。</li>
+</ul>
+<h2 id="ct-13" data-src="3832226492a3">公共节点</h2>
+<p id="ct-14" data-src="0418fce4d84d">公共 voidbind 节点及其仪表板：<a href="https://ltc.voidbind.com/">ltc.voidbind.com</a>（莱特币 + 狗狗币）、<a href="https://dash.voidbind.com/">dash.voidbind.com</a>、<a href="https://btc.voidbind.com/">btc.voidbind.com</a>、<a href="https://bch.voidbind.com/">bch.voidbind.com</a>、<a href="https://dgb.voidbind.com/">dgb.voidbind.com</a> 和 <a href="https://bip110.voidbind.com/">bip110.voidbind.com</a>。每个仪表板都是该节点份额链的一个视图；任何运行节点的人都能从自己的副本中看到相同的数据。</p>
+<h2 id="ct-15" data-src="72eade816b5a">下载与校验</h2>
+<ul id="ct-16" data-src="c41a06c35104">
+ <li>每条父链的安装包都在<a href="https://github.com/frstrtr/c2pool/releases">版本发布页面</a>上，提供 Linux x86_64（<code>.tar.gz</code>）、Windows x86_64（<code>.zip</code> 或安装程序）和 macOS（一个同时支持 Apple Silicon 和 Intel 的通用包，需 macOS 26.0 或更高版本）。</li>
+ <li>每个版本都附带一个 <code>SHA256SUMS</code> 文件，从 v0.2.7 起还附带分离式签名 <code>SHA256SUMS.asc</code>。签名密钥发布在 <a href="https://github.com/frstrtr.gpg">github.com/frstrtr.gpg</a>，指纹为 <code>99556F8DE6AD66057A1A10EC50AB1379285EFE76</code>。</li>
+ <li>已知问题列在 <a href="https://github.com/frstrtr/c2pool/blob/master/KNOWN_ISSUES.md">KNOWN_ISSUES.md</a> 中。</li>
+</ul>
+<h2 id="ct-17" data-src="1afde71b02ce">下一步</h2>
+<p id="ct-18" data-src="e4539e14d599">V37 是下一条设计路线（Work Receipts（工作收据）和 MRR 结算核心），目前处于设计和原型阶段，尚未在生产环境中运行。其论文的摘要见 <a href="/zh/purple-paper/">Purple Paper</a> 页面。</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

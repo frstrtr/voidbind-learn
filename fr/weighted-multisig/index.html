@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Renforcer la sécurité avec des portefeuilles multisignatures pondérés sur les blockchains PoW — Bases scientifiques de P2Pool</title>
+<meta name="description" content="Conditions de dépense multisignature pondérées sur les chaînes à preuve de travail, avec un script valide.">
+<link rel="canonical" href="https://learn.voidbind.com/fr/weighted-multisig/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/weighted-multisig/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/weighted-multisig/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/weighted-multisig/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/weighted-multisig/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<a class="brand" href="/fr/">Bases scientifiques de P2Pool</a>
+<nav class="langs" aria-label="Langue"><a class="lang" href="/en/weighted-multisig/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/weighted-multisig/" hreflang="fr" lang="fr" data-lang="fr" aria-current="true">Français</a> · <a class="lang" href="/ru/weighted-multisig/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/weighted-multisig/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/weighted-multisig/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Sommaire"><ul>
+<li><a href="/fr/">Accueil</a></li>
+<li><a href="/fr/c2pool-today/">c2pool aujourd’hui</a></li>
+<li><a href="/fr/references/">Références</a></li>
+<li><a href="/fr/making-of-c2pool/">Coulisses de c2pool</a></li>
+<li><a href="/fr/luck/">Chance</a></li>
+<li><a href="/fr/real-difficulty/">Difficulté réelle</a></li>
+<li><a href="/fr/difficulty-adjustment/">Ajustement de la difficulté</a></li>
+<li><a href="/fr/taproot-coinbase/">Coinbase Taproot</a></li>
+<li><a href="/fr/weighted-multisig/" aria-current="page">Multisignature pondérée</a></li>
+<li><a href="/fr/bitcoin-leveldb/">LevelDB de Bitcoin</a></li>
+<li><a href="/fr/purple-paper/">Purple Paper</a></li>
+<li><a href="/fr/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Traduction assistée par machine, pas encore relue par un locuteur natif. <a href="/en/weighted-multisig/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Multisignature pondérée" data-desc="Conditions de dépense multisignature pondérées sur les chaînes à preuve de travail, avec un script valide.">
+<h1 id="wm-02" data-src="425817595a2c">Renforcer la sécurité avec des portefeuilles multisignatures pondérés sur les blockchains PoW</h1>
+<p id="wm-03" class="sub" data-src="64d6fce7ce3f">L’approbation pondérée sur les chaînes à preuve de travail, avec un script qui fonctionne</p>
+<div id="wm-upd" class="update" data-src="764be6615f00"><p><b>Mis à jour en novembre 2026.</b> Le script de la première version de cette page n’était pas un script Bitcoin valide : <code>OP_CHECKMULTISIG</code> n’a aucune notion de poids. Il est remplacé ci-dessous par une construction qui fonctionne aujourd’hui sur Bitcoin. Une multisignature détermine <i>qui peut approuver</i> une dépense ; elle ne répartit pas les fonds selon les poids. Toute répartition se fait dans les sorties de la transaction de dépense.</p></div>
+<h2 id="wm-04" data-src="b605350bc002">Introduction</h2>
+<p id="wm-05" data-src="50c0fb73ec95">Dans le paysage en pleine évolution de la technologie blockchain, la sécurité et le contrôle distribué des fonds restent primordiaux. Cet article examine le concept de portefeuille multisignature pondéré, une approche innovante pour gérer et sécuriser des fonds sur des blockchains à preuve de travail (Proof of Work, PoW) comme Bitcoin. Nous verrons comment de tels portefeuilles peuvent être configurés pour exiger des approbations selon des poids de vote prédéterminés, ce qui offre une solution robuste pour les associations, la gouvernance d’entreprise et d’autres opérations financières collaboratives.</p>
+<h2 id="wm-06" data-src="88c8b3581386">Le concept de portefeuille multisignature pondéré</h2>
+<p id="wm-07" data-src="f3656c293f8f">Un portefeuille multisignature exige généralement plusieurs signatures pour approuver une transaction, ce qui ajoute une couche de sécurité par rapport aux portefeuilles traditionnels à signature unique. Dans une configuration multisignature pondérée, les différentes parties du portefeuille disposent de degrés d’influence, ou de « poids », différents dans l’approbation des transactions. Cette souplesse permet une gestion dynamique et sûre des transactions sur la blockchain.</p>
+<h2 id="wm-08" data-src="d7c5bab311cf">Exemple pratique</h2>
+<p id="wm-09" data-src="8bf8295c6241">Prenons un scénario avec trois parties prenantes, Alice, Bob et Charlie, qui ont créé une coentreprise et décidé de gérer leurs fonds au moyen d’un portefeuille multisignature. Leurs poids de vote se répartissent ainsi :</p>
+<ul id="wm-10" data-src="6da87a435f9a"><li>Alice : 50 % des voix.</li><li>Bob : 30 % des voix.</li><li>Charlie : 20 % des voix.</li></ul>
+<p id="wm-11" data-src="4aec33a34252">Pour qu’une transaction soit exécutée, la somme des poids des signatures d’approbation doit atteindre un seuil d’au moins 60 %.</p>
+<h2 id="wm-12" data-src="d65a130b5efe">Scénario de transaction</h2>
+<p id="wm-13" data-src="037fe02e65ce">Pour illustrer, supposons que le trio souhaite retirer 1000 unités de cryptomonnaie. La transaction se déroulerait ainsi : l’approbation d’Alice, qui détient 50 %, ne suffit pas à elle seule. Avec les 30 % supplémentaires de Bob, le poids combiné atteint 80 %, au-delà du seuil requis. La transaction est exécutée. Alice et Charlie ensemble (70 %) pourraient aussi approuver ; Bob et Charlie ensemble (50 %) ne le pourraient pas.</p>
+<h2 id="wm-14" data-src="1d3b6769c03f">Mettre en œuvre la multisignature pondérée sur les blockchains PoW</h2>
+<p id="wm-15" data-src="19a7aadc432e"><code>OP_CHECKMULTISIG</code> de Bitcoin et <code>OP_CHECKSIGADD</code> de Taproot comptent chaque signature pour une unité. Un seuil pondéré se construit en vérifiant chaque clé séparément et en ajoutant son poids. Avec les poids Alice&nbsp;=&nbsp;5, Bob&nbsp;=&nbsp;3, Charlie&nbsp;=&nbsp;2 et un seuil de 6 (60 % de 10), le script est :</p>
+<pre id="wm-16" data-src="370f7e7bfc01"><code>&lt;Alice_pubkey&gt;   OP_CHECKSIG  OP_IF 5 OP_ELSE 0 OP_ENDIF
+OP_SWAP &lt;Bob_pubkey&gt;     OP_CHECKSIG  OP_IF 3 OP_ADD OP_ENDIF
+OP_SWAP &lt;Charlie_pubkey&gt; OP_CHECKSIG  OP_IF 2 OP_ADD OP_ENDIF
+6 OP_GREATERTHANOREQUAL</code></pre>
+<ul id="wm-16b" data-src="a58618e110df">
+ <li>Le witness (témoin) fournit les trois signatures dans l’ordre <code>&lt;sig_Charlie&gt; &lt;sig_Bob&gt; &lt;sig_Alice&gt;</code>, celle d’Alice au sommet. Un signataire qui n’approuve pas fournit une valeur vide. <code>OP_CHECKSIG</code> empile alors false et ce poids n’est pas ajouté ; une signature non vide invalide fait échouer tout le script (une règle de consensus dans une feuille Taproot, BIP 342 ; la règle de relais standard NULLFAIL pour P2WSH).</li>
+ <li>Le script peut être le witness script d’une sortie P2WSH, ou une feuille d’un arbre Taproot (dans une feuille Taproot, les mêmes opcodes s’appliquent, avec des signatures Schnorr et des clés de 32 octets).</li>
+ <li>Avec Taproot, le cas courant peut aussi passer par le chemin de clé, moins coûteux : une clé combinée pour l’ensemble de signataires le plus probable, le script pondéré étant conservé comme une feuille qui n’est révélée que si elle est utilisée.</li>
+</ul>
+<h2 id="wm-17" data-src="89db2ad881f2">Conclusion</h2>
+<p id="wm-18" data-src="221f4ef7be72">Les portefeuilles multisignatures pondérés sur des blockchains PoW comme Bitcoin offrent un cadre de sécurité renforcé en exigeant, pour les transactions, un seuil prédéfini d’approbations pondérées. Cette approche ne se contente pas de protéger les fonds contre les accès non autorisés : elle apporte aussi souplesse et équité aux opérations financières entre plusieurs parties prenantes. À mesure que la technologie blockchain mûrit, de telles innovations dans la configuration des portefeuilles sont déterminantes pour l’adoption à grande échelle et l’utilité des cryptomonnaies dans des environnements transactionnels complexes.</p>
+<div id="wm-19" class="v37" data-src="3d930006b1c9"><span class="tag">V37</span><b>Pourquoi un pool décentralisé n’utilise <i>pas</i> de portefeuille partagé, pondéré ou non, pour les paiements.</b>
+ <p>Une multisignature pondérée est une construction <b>dépositaire (custodial)</b> : les fonds mis en commun se trouvent à une seule adresse partagée, contrôlée par un quorum de signataires. C’est précisément la forme qu’un pool décentralisé doit éviter : elle réintroduit un opérateur, un ensemble de signataires de confiance et une clé qui peut être perdue ou livrée sous la contrainte.</p>
+ <p>P2Pool et c2pool paient autrement et ne détiennent <b>aucun fonds mis en commun.</b> Les sorties de la transaction coinbase d’un bloc trouvé sont une fonction déterministe de la chaîne de shares : chaque nœud calcule des sorties identiques, chacune payant directement le script de paiement propre à un mineur. Il n’y a ni portefeuille partagé, ni quorum de signature, ni garde des fonds, et la conception V37 maintient cela. Le « poids » compte bien dans un pool, mais sous la forme d’une <b>comptabilité pondérée par le travail</b> (crédit par preuve de travail) et d’un vote de version pondéré par le travail, au niveau du consensus, et non comme un pouvoir d’approbation sur un portefeuille. Cette page est une initiation au scripting pour des cas de trésorerie et de gouvernance ; ce n’est pas ainsi qu’un pool décentralisé distribue les récompenses. Voir le <a href="/fr/purple-paper/">résumé du Purple Paper</a>, &sect;5 (Proof-of-Work as Measurement) et &sect;15 (Incentive).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Publié à l’origine par Technocore One dans « P2Pool scientific basics », mis à jour en novembre 2026. © 2026 technocore.one.</p>
+<p>Faits sur c2pool vérifiés par rapport à la version v0.2.12.16 le 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

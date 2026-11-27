@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Schwierigkeitsanpassung — Wissenschaftliche Grundlagen von P2Pool</title>
+<meta name="description" content="Wie Bitcoin, Litecoin, Dogecoin und die c2pool-Share-Chain die Schwierigkeit anpassen.">
+<link rel="canonical" href="https://learn.voidbind.com/de/difficulty-adjustment/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/difficulty-adjustment/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/difficulty-adjustment/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/difficulty-adjustment/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/difficulty-adjustment/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/difficulty-adjustment/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/difficulty-adjustment/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="top">
+<a class="brand" href="/de/">Wissenschaftliche Grundlagen von P2Pool</a>
+<nav class="langs" aria-label="Sprache"><a class="lang" href="/en/difficulty-adjustment/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/difficulty-adjustment/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/difficulty-adjustment/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/difficulty-adjustment/" hreflang="de" lang="de" data-lang="de" aria-current="true">Deutsch</a> · <a class="lang" href="/zh/difficulty-adjustment/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Inhalt"><ul>
+<li><a href="/de/">Startseite</a></li>
+<li><a href="/de/c2pool-today/">c2pool heute</a></li>
+<li><a href="/de/references/">Quellen</a></li>
+<li><a href="/de/making-of-c2pool/">Making-of c2pool</a></li>
+<li><a href="/de/luck/">Glück</a></li>
+<li><a href="/de/real-difficulty/">Echte Schwierigkeit</a></li>
+<li><a href="/de/difficulty-adjustment/" aria-current="page">Schwierigkeitsanpassung</a></li>
+<li><a href="/de/taproot-coinbase/">Taproot-Coinbase</a></li>
+<li><a href="/de/weighted-multisig/">Gewichtetes Multisig</a></li>
+<li><a href="/de/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/de/purple-paper/">Purple Paper</a></li>
+<li><a href="/de/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Maschinengestützte Übersetzung, noch nicht von Muttersprachlern geprüft. <a href="/en/difficulty-adjustment/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Schwierigkeitsanpassung" data-desc="Wie Bitcoin, Litecoin, Dogecoin und die c2pool-Share-Chain die Schwierigkeit anpassen.">
+<h1 id="da-02" data-src="f033a0116ab4">Schwierigkeitsanpassung</h1>
+<p id="da-03" class="sub" data-src="10a466e95bc4">Wie Bitcoin, Litecoin, Dogecoin und die c2pool-Share-Chain ihre Schwierigkeit festlegen</p>
+<div id="da-upd" class="update" data-src="dc42335420cc"><p><b>Aktualisiert im November 2026.</b> Die erste Fassung dieser Seite sagte, das Retarget (Neuberechnung) von Bitcoin verwende die „block mediantime“ und multipliziere die Schwierigkeit mit dem Verhältnis der Zeitspannen. Beides ist falsch: Das Retarget verwendet die Zeitstempel der Blöcke, und es ist das <i>Target</i>, das mit dem Verhältnis skaliert wird, sodass sich die Schwierigkeit in die Gegenrichtung bewegt. Die Seite ist anhand des Quellcodes von Bitcoin Core neu geschrieben, und Abschnitte zu Litecoin, Dogecoin und der c2pool-Share-Chain sind hinzugekommen.</p></div>
+<h2 id="da-10" data-src="4984920e9a8f">Das Retarget von Bitcoin</h2>
+<p id="da-11" data-src="83308a5883b4">Alle 2016 Blöcke legt Bitcoin ein neues Target fest, damit Blöcke weiterhin etwa alle 10 Minuten eintreffen (2016 Blöcke in 14 Tagen, die <i>Soll-Zeitspanne</i> (target timespan) T&nbsp;=&nbsp;1.209.600&nbsp;s). Die Schritte, wie in <code>src/pow.cpp</code> von Bitcoin Core:</p>
+<ol id="da-12" data-src="1e1243c3990e">
+ <li><b>Messen.</b> Die tatsächliche Zeitspanne ist der Zeitstempel (<code>nTime</code>) des letzten Blocks der Periode minus den Zeitstempel des ersten Blocks der Periode, 2015 Blöcke früher. Das sind die eigenen Header-Zeitstempel der Blöcke, nicht ihre Median Time Past.</li>
+ <li><b>Begrenzen.</b> Die tatsächliche Zeitspanne wird auf den Bereich [T/4, 4T] beschränkt, sodass ein Retarget das Target höchstens um den Faktor 4 in die eine oder andere Richtung verschiebt.</li>
+ <li><b>Target skalieren.</b> Neues Target = altes Target &times; tatsächliche Zeitspanne / T. Zu schnell gekommene Blöcke ergeben ein Verhältnis unter 1, ein kleineres Target und eine höhere Schwierigkeit.</li>
+ <li><b>Deckeln und kodieren.</b> Das neue Target wird auf das größte erlaubte Target der Chain begrenzt (das „Schwierigkeit 1“-Target, also die <i>niedrigste</i> Schwierigkeit) und in den folgenden Headern in der kompakten <code>nBits</code>-Form gespeichert, die es leicht rundet.</li>
+</ol>
+<p id="da-13" data-src="58b997439399">Die Schwierigkeit ist das Schwierigkeit-1-Target geteilt durch das aktuelle Target; sie ändert sich also um den Kehrwert des Zeitspannen-Verhältnisses.</p>
+<pre id="da-14" data-src="6bc5a93b55bf"><code>TARGET_TIMESPAN = 14 * 24 * 60 * 60      # 2016 blocks x 10 minutes
+POW_LIMIT = 0xffff &lt;&lt; 208                 # difficulty-1 target (nBits 0x1d00ffff)
+
+def bits_to_target(bits):
+    exponent, mantissa = bits &gt;&gt; 24, bits &amp; 0x007fffff
+    return mantissa &lt;&lt; (8 * (exponent - 3)) if exponent &gt;= 3 else mantissa &gt;&gt; (8 * (3 - exponent))
+
+def next_target(last_bits, last_time, first_time):
+    """last_time: nTime of the last block of the period.
+    first_time: nTime of the block 2015 blocks before it."""
+    actual = last_time - first_time
+    actual = max(TARGET_TIMESPAN // 4, min(actual, TARGET_TIMESPAN * 4))
+    new = bits_to_target(last_bits) * actual // TARGET_TIMESPAN
+    return min(new, POW_LIMIT)
+
+def difficulty(target):
+    return POW_LIMIT / target</code></pre>
+<p id="da-15" data-src="e9d630cc57a5">Bitcoin Core kodiert das Ergebnis anschließend wieder in <code>nBits</code> (<code>GetCompact</code>), das drei Bytes Mantisse behält. Das Fenster umfasst 2015 Intervalle statt 2016, ein bekannter Off-by-one-Fehler aus dem ersten Release, der inzwischen Konsens ist. Beispiel: Mit den Zeitstempeln der Blöcke 30.240 und 32.255 liefert die Funktion <code>nBits = 0x1d00d86a</code> für Höhe 32.256, die erste Erhöhung der Schwierigkeit bei Bitcoin (Schwierigkeit etwa 1,18).</p>
+<h2 id="da-20" data-src="e5c11677a413">Median Time Past</h2>
+<p id="da-21" data-src="ef88c45da13e">Die Median Time Past (MTP) eines Blocks ist der Median der Zeitstempel dieses Blocks und der zehn Blöcke davor. Jeder Knoten berechnet sie; sie ist kein Header-Feld. Sie ist robust gegen einen einzelnen falschen oder manipulierten Zeitstempel, und Bitcoin verwendet sie für zwei Regeln:</p>
+<ul id="da-22" data-src="f725e5d6edeb">
+ <li>Der Zeitstempel eines neuen Blocks muss später sein als die MTP seines Elternblocks (sonst „time-too-old“);</li>
+ <li>zeitbasierte Lock-Times werden mit der MTP verglichen, nicht mit dem eigenen Zeitstempel des Blocks (BIP 113).</li>
+</ul>
+<p id="da-22b" data-src="d3a4f0b25cf3">In das Retarget der Schwierigkeit geht sie nicht ein. Hier das Beispiel der ursprünglichen Seite, das die MTP der Chain-Spitze per RPC berechnet (<code>getblock</code> von Bitcoin Core liefert sie auch direkt als <code>mediantime</code>):</p>
+<pre id="da-23" data-src="35cbb7d5c494">import bitcoin.rpc
+ def calculate_mediantime():
+    proxy = bitcoin.rpc.Proxy()  # Establish connection to Bitcoin Core client
+    block_count = proxy.getblockcount()
+    if block_count &gt;= 11:
+        timestamps = []
+        for height in range(block_count, block_count - 11, -1):
+            block_hash = proxy.getblockhash(height)
+            block = proxy.getblock(block_hash)
+            timestamp = block['time']
+            timestamps.append(timestamp)
+        sorted_timestamps = sorted(timestamps)
+        mediantime = sorted_timestamps[5]  # Take the middle timestamp
+        return mediantime
+    return None  # Return None if there are not enough blocks to calculate mediantime
+ # Example usage
+ mediantime = calculate_mediantime()
+ print(mediantime)</pre>
+
+<p id="da-24" data-src="175bb26a534f">Im obigen Code-Ausschnitt stellen wir mit der Klasse bitcoin.rpc.Proxy eine Verbindung zu einem laufenden Bitcoin-Core-Client her. Die Funktion calculate_mediantime ermittelt zuerst mit getblockcount die aktuelle Blockanzahl. Gibt es mindestens 11 Blöcke in der Blockchain, fährt sie mit der Berechnung fort. Sie durchläuft die letzten 11 Blöcke, beginnend mit dem aktuellen Block, und holt mit getblock jeweils den Zeitstempel des Blocks. Die Zeitstempel werden in der Liste timestamps gespeichert. Diese Liste wird dann mit der Funktion sorted aufsteigend sortiert. Schließlich wird der mittlere Zeitstempel der sortierten Liste (an Index 5) als mediantime genommen. Die Funktion gibt mediantime zurück. Gibt es nicht genug Blöcke, um mediantime zu berechnen, wird None zurückgegeben.</p>
+
+<h2 id="da-30" data-src="eaa4e0ba3c89">Litecoin</h2>
+<p id="da-31" data-src="b1681d53e458">Litecoin behält die Regel von Bitcoin mit einem Blockabstand von 2,5 Minuten bei: 2016 Blöcke in 3,5 Tagen. Ein Unterschied: Nach der ersten Periode reicht das Fenster volle 2016 Blöcke zurück statt 2015 (eine Korrektur gegen Manipulation der Schwierigkeit, die Art Forz zugeschrieben wird). Der eingebettete Litecoin-Knoten von c2pool berechnet das nächste Target selbst aus den Headern, die er synchronisiert hat, mit derselben Begrenzung und denselben Zeitstempeln.</p>
+<h2 id="da-32" data-src="bbc8f6fd09a9">Dogecoin</h2>
+<p id="da-33" data-src="b52a959ce3f8">Dogecoin, das c2pool per Merged Mining zusammen mit Litecoin mined, hatte bis Höhe 145.000 ein Retarget-Fenster von 4 Stunden (240 Blöcke zu je einer Minute). Ab dieser Höhe verwendet es DigiShield, das bei jedem Block neu berechnet. Merged Mining (AuxPoW) begann bei Höhe 371.337. Der eingebettete Dogecoin-Knoten von c2pool folgt beiden Regeln.</p>
+<h2 id="da-40" data-src="2e3f15e1888d">Die eigene Schwierigkeit der Share-Chain</h2>
+<p id="da-41" data-src="aa53fce15723">Eine P2Pool-Share-Chain hat eine eigene Schwierigkeit, festgelegt pro Share statt pro Periode. In c2pool gilt, wie in p2pool:</p>
+<ul id="da-42" data-src="718455082253">
+ <li>Der Knoten schätzt die Rate des Pools aus den letzten Shares und berechnet das Target, das einen Share pro <i>Share-Periode</i> ergäbe: 15 Sekunden auf der Litecoin-Share-Chain, 30 Sekunden auf Bitcoin;</li>
+ <li>das Ergebnis wird auf &plusmn;10&nbsp;% um das Target des vorigen Shares begrenzt, sodass sich die Share-Schwierigkeit gleichmäßig bewegt;</li>
+ <li>ist 20 Share-Perioden lang (5 Minuten auf Litecoin) kein Share eingetroffen, lockert eine Notfall-Schwierigkeitsregel das Referenz-Target: Es verdoppelt sich je weitere 10 Share-Perioden, dazwischen linear interpoliert, bevor die Begrenzung auf &plusmn;10&nbsp;% greift. So bleibt ein Pool, der plötzlich den größten Teil seiner Hashrate verloren hat, nicht stecken.</li>
+</ul>
+<div id="da-25" class="v37" data-src="4e17b54c2ba6"><span class="tag">V37</span><b>Target vs. Schwierigkeit, und ein absoluter Zeitplan.</b>
+ <p>Schwierigkeit und Target sind zueinander invers (difficulty = max_target / target), daher multipliziert das Retarget das Target mit dem Zeitspannen-Verhältnis, und die Schwierigkeit bewegt sich in die Gegenrichtung: Schnellere Blöcke (ein kleineres Verhältnis) erhöhen die Schwierigkeit.</p>
+ <p>Für ein Retarget die Chain zurückzulaufen, ist bei langen Fenstern aufwendig. Ein absoluter Zeitplan (nach Art von ASERT) berechnet das Target in konstanter Zeit direkt aus einem Ankerblock und dem jüngsten Block. Er durchläuft kein Fenster, daher können Zeitstempel innerhalb eines Fensters das Target nicht abdriften lassen, auch wenn der eigene Zeitstempel des jüngsten Blocks weiterhin eine Rolle spielt. Bitcoin Cash verwendet einen solchen Zeitplan seit November 2020. Er ist in der V37-Designarbeit ein Kandidat für die eigene Schwierigkeit einer Share-Chain; die c2pool-Share-Chains verwenden heute die oben beschriebene Regel pro Share.</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Ursprünglich von Technocore One in „P2Pool scientific basics“ veröffentlicht, im November 2026 aktualisiert. © 2026 technocore.one.</p>
+<p>Angaben zu c2pool geprüft gegen Release v0.2.12.16 am 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

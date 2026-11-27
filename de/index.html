@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Wissenschaftliche Grundlagen von P2Pool</title>
+<meta name="description" content="Notizen zu dezentralem Mining, P2Pool und c2pool: Schwierigkeit, Glück, Coinbase-Design und der Stand von c2pool heute.">
+<link rel="canonical" href="https://learn.voidbind.com/de/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="top">
+<a class="brand" href="/de/">Wissenschaftliche Grundlagen von P2Pool</a>
+<nav class="langs" aria-label="Sprache"><a class="lang" href="/en/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/" hreflang="de" lang="de" data-lang="de" aria-current="true">Deutsch</a> · <a class="lang" href="/zh/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Inhalt"><ul>
+<li><a href="/de/" aria-current="page">Startseite</a></li>
+<li><a href="/de/c2pool-today/">c2pool heute</a></li>
+<li><a href="/de/references/">Quellen</a></li>
+<li><a href="/de/making-of-c2pool/">Making-of c2pool</a></li>
+<li><a href="/de/luck/">Glück</a></li>
+<li><a href="/de/real-difficulty/">Echte Schwierigkeit</a></li>
+<li><a href="/de/difficulty-adjustment/">Schwierigkeitsanpassung</a></li>
+<li><a href="/de/taproot-coinbase/">Taproot-Coinbase</a></li>
+<li><a href="/de/weighted-multisig/">Gewichtetes Multisig</a></li>
+<li><a href="/de/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/de/purple-paper/">Purple Paper</a></li>
+<li><a href="/de/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Maschinengestützte Übersetzung, noch nicht von Muttersprachlern geprüft. <a href="/en/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Startseite" data-desc="Notizen zu dezentralem Mining, P2Pool und c2pool: Schwierigkeit, Glück, Coinbase-Design und der Stand von c2pool heute.">
+<h1 id="hm-01" data-src="be8d09249bb9">P2Pool scientific basics</h1>
+<p id="hm-02" class="sub" data-src="9a5688e2bebb">Notizen zu dezentralem Mining, P2Pool und c2pool</p>
+<p id="hm-03" data-src="a0b68b31d780">Diese Seiten begannen als „P2Pool scientific basics“, eine von Technocore One veröffentlichte Google Site: eine Leseliste zu Weak Blocks, Merged Mining und Mining-Pools sowie eine Reihe von Artikeln über Schwierigkeit, Glück und Coinbase-Design. Sie sind hierher umgezogen, wurden mit dem heutigen c2pool abgeglichen und sind in fünf Sprachen verfügbar.</p>
+<ul id="hm-04" class="cards" data-src="b5dd5c7d5746">
+ <li><a href="/de/c2pool-today/">c2pool heute</a><p>Was c2pool im Release v0.2.12.16 betreibt: Chains, Knoten ohne Daemon, öffentliche Knoten.</p></li>
+ <li><a href="/de/making-of-c2pool/">Notizen zur Neuimplementierung von p2pool in C++</a><p>Notizen zur Neuimplementierung von p2pool in C++, geschrieben im Juni 2026, mit Aktualisierungshinweisen.</p></li>
+ <li><a href="/de/luck/">Glück – die grausame Bestie</a><p>Mining-Folklore, das Potenzgesetz dahinter und wie das Dashboard Glück misst.</p></li>
+ <li><a href="/de/real-difficulty/">Echte Schwierigkeit</a><p>Target, Schwierigkeit, erreichte Schwierigkeit und der Überschuss eines Hashes.</p></li>
+ <li><a href="/de/difficulty-adjustment/">Schwierigkeitsanpassung</a><p>Bitcoin, Litecoin, Dogecoin und die eigene Schwierigkeit der Share-Chain.</p></li>
+ <li><a href="/de/taproot-coinbase/">Taproot-Coinbase</a><p>Taproot-Outputs in einer Coinbase und was sie für einen Pool nicht lösen.</p></li>
+ <li><a href="/de/weighted-multisig/">Mehr Sicherheit mit gewichteten Multisig-Wallets auf PoW-Blockchains</a><p>Gewichtete Freigabe einer Ausgabe, mit einem Skript, das funktioniert.</p></li>
+ <li><a href="/de/bitcoin-leveldb/">Bitcoin LevelDB</a><p>Block-Index und Chainstate von Bitcoin Core von der Festplatte lesen.</p></li>
+ <li><a href="/de/purple-paper/">Purple Paper: Work Receipts</a><p>Eine Zusammenfassung des Papers zu Work Receipts (Arbeitsquittungen) und seiner Errata.</p></li>
+ <li><a href="/de/monero-ccs/">Der Monero-CCS-Antrag: eine Chronologie</a><p>Eine datierte Chronologie des Monero-Finanzierungsantrags von 2026.</p></li>
+ <li><a href="/de/references/">Quellen</a><p>Die ursprüngliche Leseliste, mit geprüften Links.</p></li>
+</ul>
+<p id="hm-05" data-src="49d394d1cc60">Ebenfalls vom selben Autor, auf Englisch: <a href="https://frstrtr.github.io/c2pool/ego-and-self-reliance.html">Ego and Self-Reliance. A Plain-Language Handbook</a> (MIT-Lizenz; nicht über Mining).</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Ursprünglich von Technocore One als Google-Site „P2Pool scientific basics“ veröffentlicht. © 2026 technocore.one.</p>
+<p>Angaben zu c2pool geprüft gegen Release v0.2.12.16 am 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

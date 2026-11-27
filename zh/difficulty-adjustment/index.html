@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>难度调整 — P2Pool 科学基础</title>
+<meta name="description" content="比特币、莱特币、狗狗币和 c2pool 份额链如何调整难度。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/difficulty-adjustment/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/difficulty-adjustment/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/difficulty-adjustment/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/difficulty-adjustment/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/difficulty-adjustment/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/difficulty-adjustment/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/difficulty-adjustment/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/difficulty-adjustment/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/difficulty-adjustment/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/difficulty-adjustment/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/difficulty-adjustment/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/difficulty-adjustment/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/" aria-current="page">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/difficulty-adjustment/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="难度调整" data-desc="比特币、莱特币、狗狗币和 c2pool 份额链如何调整难度。">
+<h1 id="da-02" data-src="f033a0116ab4">难度调整</h1>
+<p id="da-03" class="sub" data-src="10a466e95bc4">比特币、莱特币、狗狗币和 c2pool 份额链如何设定各自的难度</p>
+<div id="da-upd" class="update" data-src="dc42335420cc"><p><b>2026 年 11 月更新。</b>本页第一版称比特币的难度重定使用“区块 mediantime”，并且是把难度乘以时间跨度比值。两点都是错的：难度重定使用的是区块时间戳，而按比值缩放的是<i>目标值</i>，因此难度朝相反方向变化。本页已依据 Bitcoin Core 源代码重写，并新增了关于莱特币、狗狗币和 c2pool 份额链的章节。</p></div>
+<h2 id="da-10" data-src="4984920e9a8f">比特币的难度重定</h2>
+<p id="da-11" data-src="83308a5883b4">比特币每 2016 个区块设定一个新的目标值，使区块保持大约每 10 分钟产生一个（14 天产生 2016 个区块，即<i>目标时间跨度</i> T&nbsp;=&nbsp;1,209,600&nbsp;s）。步骤如下，与 Bitcoin Core 的 <code>src/pow.cpp</code> 一致：</p>
+<ol id="da-12" data-src="1e1243c3990e">
+ <li><b>测量。</b>实际时间跨度等于本周期最后一个区块的时间戳（<code>nTime</code>）减去本周期第一个区块（即 2015 个区块之前的那个区块）的时间戳。这里用的是区块自身区块头中的时间戳，而不是它们的过去中位时间（MTP）。</li>
+ <li><b>限幅。</b>实际时间跨度被限制在 [T/4, 4T] 范围内，因此一次难度重定最多让目标值朝任一方向变化 4 倍。</li>
+ <li><b>缩放目标值。</b>新目标值 = 旧目标值 &times; 实际时间跨度 / T。区块来得太快，比值就小于 1，目标值变小，难度变高。</li>
+ <li><b>封顶并编码。</b>新目标值不得超过该链允许的最大目标值（即“难度 1”目标值，对应<i>最低</i>难度），并以紧凑的 <code>nBits</code> 形式写入后续区块头，这会对它做轻微的舍入。</li>
+</ol>
+<p id="da-13" data-src="58b997439399">难度等于难度 1 目标值除以当前目标值，因此难度按时间跨度比值的倒数变化。</p>
+<pre id="da-14" data-src="6bc5a93b55bf"><code>TARGET_TIMESPAN = 14 * 24 * 60 * 60      # 2016 blocks x 10 minutes
+POW_LIMIT = 0xffff &lt;&lt; 208                 # difficulty-1 target (nBits 0x1d00ffff)
+
+def bits_to_target(bits):
+    exponent, mantissa = bits &gt;&gt; 24, bits &amp; 0x007fffff
+    return mantissa &lt;&lt; (8 * (exponent - 3)) if exponent &gt;= 3 else mantissa &gt;&gt; (8 * (3 - exponent))
+
+def next_target(last_bits, last_time, first_time):
+    """last_time: nTime of the last block of the period.
+    first_time: nTime of the block 2015 blocks before it."""
+    actual = last_time - first_time
+    actual = max(TARGET_TIMESPAN // 4, min(actual, TARGET_TIMESPAN * 4))
+    new = bits_to_target(last_bits) * actual // TARGET_TIMESPAN
+    return min(new, POW_LIMIT)
+
+def difficulty(target):
+    return POW_LIMIT / target</code></pre>
+<p id="da-15" data-src="e9d630cc57a5">随后 Bitcoin Core 把结果重新编码为 <code>nBits</code>（<code>GetCompact</code>），保留三个字节的尾数。窗口覆盖的是 2015 个间隔而不是 2016 个，这是第一个版本就存在的一个著名的差一错误，如今已成为共识规则。示例：用区块 30,240 和 32,255 的时间戳，该函数为高度 32,256 给出 <code>nBits = 0x1d00d86a</code>，这是比特币的第一次难度上调（难度约为 1.18）。</p>
+<h2 id="da-20" data-src="e5c11677a413">过去中位时间</h2>
+<p id="da-21" data-src="ef88c45da13e">一个区块的过去中位时间（MTP）是该区块及其之前十个区块的时间戳的中位数。它由每个节点自行计算，并不是区块头中的字段。它不受单个错误或被操纵的时间戳影响，比特币把它用于两条规则：</p>
+<ul id="da-22" data-src="f725e5d6edeb">
+ <li>新区块的时间戳必须晚于其父区块的 MTP（否则报“time-too-old”）；</li>
+ <li>基于时间的锁定时间与 MTP 比较，而不是与区块自身的时间戳比较（BIP 113）。</li>
+</ul>
+<p id="da-22b" data-src="d3a4f0b25cf3">它不参与难度重定。下面是原页面的示例，通过 RPC 计算链顶端区块的 MTP（Bitcoin Core 的 <code>getblock</code> 也会直接以 <code>mediantime</code> 返回它）：</p>
+<pre id="da-23" data-src="35cbb7d5c494">import bitcoin.rpc
+ def calculate_mediantime():
+    proxy = bitcoin.rpc.Proxy()  # Establish connection to Bitcoin Core client
+    block_count = proxy.getblockcount()
+    if block_count &gt;= 11:
+        timestamps = []
+        for height in range(block_count, block_count - 11, -1):
+            block_hash = proxy.getblockhash(height)
+            block = proxy.getblock(block_hash)
+            timestamp = block['time']
+            timestamps.append(timestamp)
+        sorted_timestamps = sorted(timestamps)
+        mediantime = sorted_timestamps[5]  # Take the middle timestamp
+        return mediantime
+    return None  # Return None if there are not enough blocks to calculate mediantime
+ # Example usage
+ mediantime = calculate_mediantime()
+ print(mediantime)</pre>
+
+<p id="da-24" data-src="175bb26a534f">在上面的代码片段中，我们使用 bitcoin.rpc.Proxy 类连接到正在运行的 Bitcoin Core 客户端。calculate_mediantime 函数首先用 getblockcount 获取当前区块数。如果区块链中至少有 11 个区块，就继续计算。它从当前区块开始，遍历之前的 11 个区块，并用 getblock 获取区块时间戳。这些时间戳存放在 timestamps 列表中。接着用 sorted 函数把 timestamps 列表按升序排序。最后，取排序后列表中间的时间戳（索引 5）作为 mediantime，由函数返回。如果区块数不足以计算 mediantime，则返回 None。</p>
+
+<h2 id="da-30" data-src="eaa4e0ba3c89">莱特币</h2>
+<p id="da-31" data-src="b1681d53e458">莱特币沿用比特币的规则，出块间隔为 2.5 分钟：3.5 天产生 2016 个区块。有一处不同：从第二个周期起，窗口回溯完整的 2016 个区块而不是 2015 个（这一修复归功于 Art Forz，用于防范难度操纵）。c2pool 的内置莱特币节点根据它已同步的区块头自行计算下一个目标值，使用相同的限幅和相同的时间戳。</p>
+<h2 id="da-32" data-src="bbc8f6fd09a9">狗狗币</h2>
+<p id="da-33" data-src="b52a959ce3f8">狗狗币由 c2pool 与莱特币联合挖矿。在高度 145,000 之前，它的难度重定窗口为 4 小时（240 个一分钟区块）。从该高度起，它使用 DigiShield，每个区块都进行难度重定。联合挖矿（AuxPoW）从高度 371,337 开始。c2pool 的内置狗狗币节点遵循这两套规则。</p>
+<h2 id="da-40" data-src="2e3f15e1888d">份额链自身的难度</h2>
+<p id="da-41" data-src="aa53fce15723">P2Pool 份额链有它自己的难度，按份额逐个设定，而不是按周期设定。在 c2pool 中（与 p2pool 相同）：</p>
+<ul id="da-42" data-src="718455082253">
+ <li>节点根据最近的份额估算矿池的算力，并计算出能使每个<i>份额周期</i>产生一个份额的目标值：莱特币份额链为 15 秒，比特币为 30 秒；</li>
+ <li>结果被限制在前一个份额目标值的 &plusmn;10% 以内，因此份额难度平滑变化；</li>
+ <li>当连续 20 个份额周期（莱特币上为 5 分钟）没有新份额到达时，紧急难度规则会放宽参考目标值：此后每再过 10 个份额周期，参考目标值翻一倍，中间按线性插值，然后再应用 &plusmn;10% 的限幅。这可以防止突然失去大部分算力的矿池停滞。</li>
+</ul>
+<div id="da-25" class="v37" data-src="4e17b54c2ba6"><span class="tag">V37</span><b>目标值与难度，以及绝对调度。</b>
+ <p>难度与目标值互为倒数（difficulty = max_target / target），因此难度重定把目标值乘以时间跨度比值，难度则朝相反方向变化：区块更快（比值更小）会提高难度。</p>
+ <p>在较长的窗口上沿链回溯来做难度重定，开销很大。绝对调度（ASERT 式）以常数时间直接根据一个锚定区块和最新区块计算目标值。它不遍历任何窗口，因此窗口内的时间戳无法使目标值漂移，不过最新区块自身的时间戳仍然有影响。比特币现金自 2020 年 11 月起就在使用这种调度。在 V37 设计工作中，它是份额链自身难度的候选方案；目前 c2pool 的份额链使用的是上面那种按份额调整的规则。</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>最初由 Technocore One 发布于“P2Pool scientific basics”，2026 年 11 月更新。© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

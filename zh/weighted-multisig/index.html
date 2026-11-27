@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>在 PoW 区块链上用加权多重签名钱包提升安全性 — P2Pool 科学基础</title>
+<meta name="description" content="工作量证明链上的加权多重签名支出条件，附一段有效的脚本。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/weighted-multisig/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/weighted-multisig/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/weighted-multisig/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/weighted-multisig/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/weighted-multisig/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/weighted-multisig/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/weighted-multisig/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/weighted-multisig/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/weighted-multisig/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/weighted-multisig/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/" aria-current="page">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/weighted-multisig/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="加权多重签名" data-desc="工作量证明链上的加权多重签名支出条件，附一段有效的脚本。">
+<h1 id="wm-02" data-src="425817595a2c">在 PoW 区块链上用加权多重签名钱包提升安全性</h1>
+<p id="wm-03" class="sub" data-src="64d6fce7ce3f">工作量证明链上的加权批准，附一段可用的脚本</p>
+<div id="wm-upd" class="update" data-src="764be6615f00"><p><b>2026 年 11 月更新。</b>本页第一版中的脚本不是有效的比特币脚本：<code>OP_CHECKMULTISIG</code> 没有权重的概念。下面已替换为一种如今就能在比特币上运行的构造。多重签名决定的是<i>谁可以批准</i>一笔支出；它不会按权重拆分资金。任何拆分都体现在该支出交易的输出中。</p></div>
+<h2 id="wm-04" data-src="b605350bc002">引言</h2>
+<p id="wm-05" data-src="50c0fb73ec95">在不断演进的区块链技术领域，安全性和对资金的分布式控制始终至关重要。本文深入探讨加权多重签名（multi-signature）钱包的概念，这是一种在比特币等工作量证明（PoW）区块链上管理和保护资金的创新方法。我们将探讨如何配置这类钱包，使其按预先确定的投票权重进行批准，为合伙经营、公司治理以及其他协作式财务运作提供稳健的解决方案。</p>
+<h2 id="wm-06" data-src="88c8b3581386">加权多重签名钱包的概念</h2>
+<p id="wm-07" data-src="f3656c293f8f">多重签名钱包通常需要多个签名才能批准一笔交易，从而在传统单签名钱包之上增加一层安全保障。在加权多重签名设置中，参与钱包的各方在批准交易时拥有不同程度的影响力，即“权重”。这种灵活性使区块链交易能够得到动态而安全的管理。</p>
+<h2 id="wm-08" data-src="d7c5bab311cf">实例</h2>
+<p id="wm-09" data-src="8bf8295c6241">设想这样一个场景：Alice、Bob 和 Charlie 三位利益相关方组建了一家合资企业，并决定通过一个多重签名钱包管理资金。他们的投票权重分配如下：</p>
+<ul id="wm-10" data-src="6da87a435f9a"><li>Alice：50% 的投票权。</li><li>Bob：30% 的投票权。</li><li>Charlie：20% 的投票权。</li></ul>
+<p id="wm-11" data-src="4aec33a34252">要执行交易，批准签名的合计权重必须至少达到 60% 的阈值。</p>
+<h2 id="wm-12" data-src="d65a130b5efe">交易场景</h2>
+<p id="wm-13" data-src="037fe02e65ce">举例来说，假设三人希望提取 1000 个单位的加密货币。交易过程如下：Alice 持有 50%，仅凭她一人的批准不够。加上 Bob 的 30%，合计权重达到 80%，超过所需阈值，交易得以执行。Alice 和 Charlie 一起（70%）也可以批准；Bob 和 Charlie 一起（50%）则不行。</p>
+<h2 id="wm-14" data-src="1d3b6769c03f">在 PoW 区块链中实现加权多重签名</h2>
+<p id="wm-15" data-src="19a7aadc432e">比特币的 <code>OP_CHECKMULTISIG</code> 和 Taproot 的 <code>OP_CHECKSIGADD</code> 对每个签名都只计为一个。要构建加权阈值，需要逐个检查每个密钥并累加其权重。设权重为 Alice&nbsp;=&nbsp;5、Bob&nbsp;=&nbsp;3、Charlie&nbsp;=&nbsp;2，阈值为 6（10 的 60%），脚本如下：</p>
+<pre id="wm-16" data-src="370f7e7bfc01"><code>&lt;Alice_pubkey&gt;   OP_CHECKSIG  OP_IF 5 OP_ELSE 0 OP_ENDIF
+OP_SWAP &lt;Bob_pubkey&gt;     OP_CHECKSIG  OP_IF 3 OP_ADD OP_ENDIF
+OP_SWAP &lt;Charlie_pubkey&gt; OP_CHECKSIG  OP_IF 2 OP_ADD OP_ENDIF
+6 OP_GREATERTHANOREQUAL</code></pre>
+<ul id="wm-16b" data-src="a58618e110df">
+ <li>见证（witness）按 <code>&lt;sig_Charlie&gt; &lt;sig_Bob&gt; &lt;sig_Alice&gt;</code> 的顺序提供三个签名，Alice 的签名位于栈顶。不批准的签名者提供一个空值。此时 <code>OP_CHECKSIG</code> 压入 false，该权重不会被累加；而无效的非空签名会使整个脚本失败（在 Taproot 叶子中这是共识规则，见 BIP 342；对于 P2WSH 则是标准中继策略 NULLFAIL）。</li>
+ <li>该脚本可以作为 P2WSH 输出的见证脚本，也可以作为 Taproot 树中的一个叶子（在 Taproot 叶子中适用相同的操作码，但使用 Schnorr 签名和 32 字节密钥）。</li>
+ <li>使用 Taproot 时，常见情况还可以走低成本的密钥路径：为最可能的签名者组合使用一个聚合密钥，而加权脚本作为叶子保留，只有在被使用时才会公开。</li>
+</ul>
+<h2 id="wm-17" data-src="89db2ad881f2">结论</h2>
+<p id="wm-18" data-src="221f4ef7be72">比特币等 PoW 区块链上的加权多重签名钱包要求交易达到预先设定的加权批准阈值，从而提供了更强的安全框架。这种方法不仅能保护资金免遭未经授权的访问，还为多个利益相关方之间的财务运作带来灵活性与公平性。随着区块链技术不断成熟，这类钱包配置上的创新对于加密货币在复杂交易环境中的广泛采用和实际效用至关重要。</p>
+<div id="wm-19" class="v37" data-src="3d930006b1c9"><span class="tag">V37</span><b>为什么去中心化矿池<i>不</i>使用加权（或任何形式的）共享钱包进行支付。</b>
+ <p>加权多重签名是一种<b>托管式</b>结构：汇集的资金存放在一个由法定数量签名者控制的共享地址中。这恰恰是去中心化矿池必须避免的形态：它会重新引入运营者、一组受信任的签名者，以及一个可能丢失或被胁迫交出的密钥。</p>
+ <p>P2Pool 和 c2pool 采用不同的支付方式，<b>根本不持有任何汇集资金。</b>所找到区块的 coinbase（coinbase 交易）输出是份额链的确定性函数：每个节点都计算出完全相同的输出，每个输出都直接支付到矿工自己的收款脚本。没有共享钱包，没有签名法定人数，也没有托管，V37 设计同样保持这一点。“权重”在矿池中确实重要，但它体现为共识中的<b>按工作量加权的记账</b>（按工作量证明记入贡献）和按工作量加权的版本投票，而不是对钱包的批准权。本页是面向资金库和治理场景的脚本入门；它并不是去中心化矿池分配奖励的方式。参见<a href="/zh/purple-paper/">Purple Paper 摘要</a>，&sect;5（Proof-of-Work as Measurement，作为度量的工作量证明）和 &sect;15（Incentive，激励）。</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>最初由 Technocore One 发布于“P2Pool scientific basics”，2026 年 11 月更新。© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

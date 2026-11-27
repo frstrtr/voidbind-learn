@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Monero CCS 提案：时间线 — P2Pool 科学基础</title>
+<meta name="description" content="2026 年 c2pool 向 Monero CCS 提交的资助提案、外部支付审查以及欠付余额模型撤回的带日期时间线。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/monero-ccs/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/monero-ccs/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/monero-ccs/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/monero-ccs/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/monero-ccs/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/monero-ccs/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/monero-ccs/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/monero-ccs/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/monero-ccs/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/monero-ccs/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/monero-ccs/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/monero-ccs/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/" aria-current="page">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/monero-ccs/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Monero CCS" data-desc="2026 年 c2pool 向 Monero CCS 提交的资助提案、外部支付审查以及欠付余额模型撤回的带日期时间线。">
+<h1 id="mc-01" data-src="ce195c119e99">Monero CCS 提案：时间线</h1>
+<p id="mc-02" class="sub" data-src="d64f6cd2d8ec">2026 年 9 月至 10 月，依据公开记录</p>
+<p id="mc-03" data-src="1a5881305d51">2026 年 9 月，c2pool 向门罗币社区众筹系统（Monero Community Crowdfunding System，CCS）申请资助一个无需守护进程的门罗币矿池。本页按时间顺序并附链接，列出该提案的公开记录，以及同期发布的一份关于 c2pool 支付模型的审查。引文简短并注明出处。时间均为 UTC。</p>
+<h2 id="mc-10" data-src="9dcff98e275f">时间线</h2>
+<ul id="mc-11" data-src="22abc0988d58">
+ <li><b>2026-09-19 19:25。</b>门罗币 P2Pool 的作者 SChernykh 发布了一份对 c2pool 支付代码的审查（<code>frstrtr/c2pool</code> master 分支，V37 结算阶段和 coinbase（coinbase 交易）阶段）：<a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba">&ldquo;Fairness gaps in the c2pool payout ledger&rdquo;</a>（译文：“c2pool 支付账本中的公平性缺口”）。其摘要为：&ldquo;Eight ways the <i>Work Receipts</i> owed-ledger and coinbase selection can pay the wrong miner &mdash; several of them with every participant behaving honestly.&rdquo;（译文：“<i>Work Receipts</i>（工作收据）欠付账本和 coinbase 选择可能把钱付给错误矿工的八种方式——其中有几种发生在所有参与者都诚实行事的情况下。”）</li>
+ <li><b>2026-09-25 06:30。</b>CCS 仓库中开启了<a href="https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/699">合并请求 !699</a>：&ldquo;c2pool: a Monero pool with no operator and no daemon (mainnet milestone, 25 XMR)&rdquo;（译文：“c2pool：一个没有运营者、无需守护进程的门罗币矿池（主网里程碑，25 XMR）”）。</li>
+ <li><b>2026-09-28 17:24。</b>frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6394929#gistcomment-6394929">在审查下回复</a>：&ldquo;Thanks for the review, will check and revert.&rdquo;（译文：“感谢审查，会核实后回复。”）</li>
+ <li><b>2026-10-02 10:32。</b>frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6402841#gistcomment-6402841">发布逐条回复</a>：&ldquo;We re-checked every finding against the code and reproduced most of them.&rdquo;（译文：“我们对照代码重新核查了每一项发现，并复现了其中大部分。”）</li>
+ <li><b>2026-10-03。</b>该提案在 <a href="https://libera.monerologs.net/monero-community/20261003">#monero-community 频道</a>（公开日志）中被讨论。20:07，frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6405381#gistcomment-6405381">在审查下发帖</a>，回答 SChernykh（sech1）在频道中提出的问题：&ldquo;if a full reward must be paid out, and &lsquo;owed&rsquo; wallets are not owed enough to cover the full reward, what do you do?&rdquo;（译文：“如果必须支付全部奖励，而‘被欠付’的钱包所欠金额不足以覆盖全部奖励，你怎么办？”）</li>
+ <li><b>2026-10-04 09:11。</b>SChernykh <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6406006#gistcomment-6406006">用数字作答</a>：&ldquo;owed balances can&rsquo;t be fair.&rdquo;（译文：“欠付余额不可能公平。”）在他的示例中，c2pool 自己的分配器给一个贡献了 20% 工作量的矿工 &ldquo;0.47 XMR of each 0.6 XMR block instead of 0.12, which is 3.94&times; its share&rdquo;（译文：“每个 0.6 XMR 的区块中分到 0.47 XMR，而不是 0.12，即其应得份额的 3.94 倍”）。他还表明，在 c2pool 自己的脉冲测试中，如果区块按 61 个高度之前就已固定的窗口支付，一个把握好时机的跳池者会得到 1.312，而公平支付应为 1.000。</li>
+ <li><b>2026-10-04 11:46 和 12:18。</b>frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6406115#gistcomment-6406115">回复</a>（&ldquo;refuted and recreating the canonical Work Receipts design&rdquo;（译文：“已被驳倒，正在重新构建规范的 Work Receipts 设计”）），并<a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6406130#gistcomment-6406130">解释了改动</a>：&ldquo;You&rsquo;re right, and your numbers leave little room to argue.&rdquo;（译文：“你是对的，你的数字几乎没有留下争辩的余地。”）以及 &ldquo;So the ledger goes. Each pool block pays its own window in full, in its own coinbase, from state fixed before the block.&rdquo;（译文：“所以账本要去掉。每个矿池区块都在自己的 coinbase 中，依据该区块之前就已固定的状态，全额支付自己的窗口。”）</li>
+ <li><b>2026-10-04 13:37。</b>frstrtr <a href="https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/699">关闭了合并请求 !699</a>，并留言：&ldquo;Closing this. The payout model needs to change first; I&rsquo;ll come back with working code and numbers.&rdquo;（译文：“先关闭。支付模型需要先改；我会带着可运行的代码和数字回来。”）</li>
+ <li><b>2026-10-04。</b><a href="/zh/purple-paper/">Work Receipts 论文</a>发布勘误：第 9 节（从欠付余额中支付）以及论文中依赖欠付余额的部分均已撤回。</li>
+</ul>
+<h2 id="mc-20" data-src="b55f380c6901">现状</h2>
+<p id="mc-21" data-src="a15afb05c1be">Monero CCS: the funding proposal (MR !699) was withdrawn by its author on 2026-10-04 while the payout model is replaced by Work Receipts (Path B). No funding application is open.（译文：“Monero CCS：该资助提案（MR !699）已于 2026-10-04 由其作者撤回，在此期间支付模型将由 Work Receipts（Path B）取代。目前没有进行中的资助申请。”）</p>
+<p id="mc-22" data-src="58c665bd3dde">c2pool 中的门罗币通道，用项目 <a href="https://github.com/frstrtr/c2pool/blob/master/README.md#supported-chains">README</a> 中的原话来说：&ldquo;<b>Experimental</b> (v37 lane, Path B payouts; <code>c2pool-v37-xmr</code>, can run daemonless; not built by the release workflow): regtest, stagenet and testnet run a pool; mainnet runs only <code>--follow-only</code> and needs <code>--i-understand-mainnet</code> even for that.&rdquo;（译文：“<b>实验性</b>（v37 通道，Path B 支付；<code>c2pool-v37-xmr</code>，可无需守护进程运行；不由发布工作流构建）：regtest、stagenet 和测试网可运行矿池；主网只运行 <code>--follow-only</code>，即便如此也需要 <code>--i-understand-mainnet</code>。”）另外：&ldquo;Mainnet pool mode is disabled in code.&rdquo;（译文：“主网矿池模式已在代码中禁用。”）</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

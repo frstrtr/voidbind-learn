@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Purple Paper: Work Receipts — Научные основы P2Pool</title>
+<meta name="description" content="Краткое изложение статьи о Work Receipts с исправлениями от 4 октября 2026 г. и ссылкой на каноническую копию.">
+<link rel="canonical" href="https://learn.voidbind.com/ru/purple-paper/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/purple-paper/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/purple-paper/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/purple-paper/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/purple-paper/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/purple-paper/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/purple-paper/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Перейти к содержанию</a>
+<header class="top">
+<a class="brand" href="/ru/">Научные основы P2Pool</a>
+<nav class="langs" aria-label="Язык"><a class="lang" href="/en/purple-paper/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/purple-paper/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/purple-paper/" hreflang="ru" lang="ru" data-lang="ru" aria-current="true">Русский</a> · <a class="lang" href="/de/purple-paper/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/purple-paper/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Содержание"><ul>
+<li><a href="/ru/">Главная</a></li>
+<li><a href="/ru/c2pool-today/">c2pool сегодня</a></li>
+<li><a href="/ru/references/">Источники</a></li>
+<li><a href="/ru/making-of-c2pool/">Как создавался c2pool</a></li>
+<li><a href="/ru/luck/">Удача</a></li>
+<li><a href="/ru/real-difficulty/">Реальная сложность</a></li>
+<li><a href="/ru/difficulty-adjustment/">Корректировка сложности</a></li>
+<li><a href="/ru/taproot-coinbase/">Taproot в coinbase</a></li>
+<li><a href="/ru/weighted-multisig/">Взвешенная мультиподпись</a></li>
+<li><a href="/ru/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/ru/purple-paper/" aria-current="page">Purple Paper</a></li>
+<li><a href="/ru/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Этот перевод ещё не проверен. <a href="/en/purple-paper/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Purple Paper" data-desc="Краткое изложение статьи о Work Receipts с исправлениями от 4 октября 2026 г. и ссылкой на каноническую копию.">
+<h1 id="pp-01" data-src="163732f69eb0">Purple Paper: Work Receipts</h1>
+<p id="pp-02" class="sub" data-src="779b5b072f54">Краткое изложение статьи «Work Receipts: A Peer-to-Peer Mining-Reward Accounting System» (перевод: «Квитанции о работе: одноранговая система учёта вознаграждений за майнинг») (frstrtr, 2026)</p>
+<p id="pp-03" data-src="78c4302fc405">Статья опубликована на <a href="https://frstrtr.github.io/c2pool/">frstrtr.github.io/c2pool</a> под лицензией MIT. Эталоном служит именно эта копия вместе с её исправлениями (errata). Эта страница лишь пересказывает статью по разделам, чтобы другие материалы сайта могли на неё ссылаться. Там, где этот пересказ расходится со статьёй, права статья.</p>
+<div id="pp-04" class="update" data-src="e07dd9906482"><p><b>Исправления от 4 октября 2026 г. (из статьи).</b> Раздел 9, а также те части аннотации и разделов 10 и 14, которые опираются на задолженность (owed balance), отозваны. Независимая проверка показала, что пул без кастодиана не может оставаться должен одним майнерам, не переплачивая другим, а переплата никогда не возвращается. В статье сказано, что пересмотренный раздел 9 опишет выплату окна каждого блока полностью, в этом же блоке; эта редакция пока не опубликована. Раздел 3 сужен: работа, выполненная на вершине базовой цепи, которую цепь к тому моменту уже миновала, ничего не приносит.</p></div>
+<p id="pp-05" data-src="36765c1be46a"><b>Статус.</b> Статья описывает проект. Это не описание работающей сети: V37, направление разработки c2pool, основанное на этой статье, находится на стадии проектирования и прототипа и в продакшене не используется. В частности, окно с разбиением по времени из разделов 4 и 6 — это не то, что сегодня работает в экспериментальной линии Monero.</p>
+<h2 id="pp-10" data-src="2599e87b4740">Идея</h2>
+<p id="pp-11" data-src="ab27eead5226">Шара в P2Pool выполняет две задачи: она доказывает работу и занимает место в порядке. Шара, проигравшая гонку за своё место, отбрасывается вместе со своим доказательством, а работа ниже сложности шары не учитывается вовсе. Статья разделяет эти две задачи. Цепочка шар упорядочивает только <i>носители</i> (обычные шары). Работа учитывается по <i>квитанциям</i>, которые носители встраивают в себя: это доказательства работы, привязанные к пулу, к воркеру, которому причитается выплата, и к окончательно подтверждённому блоку базовой цепи.</p>
+<h2 id="pp-20" data-src="9bae918add9a">Разделы</h2>
+<ul id="pp-21" data-src="37ef18357150">
+ <li id="pp-s2"><b>§2 Квитанции.</b> Квитанцию нельзя подделать, передать, воспроизвести повторно или датировать задним числом, и она не зависит ни от какой предшествующей. Шара, ставшая устаревшей (stale), — это квитанция, работа которой удовлетворила цели (target) шары; она переносится в следующей шаре воркера и засчитывается полностью (с учётом суженного в исправлениях раздела 3).</li>
+ <li><b>§3 Время.</b> Каждая квитанция фиксирует блок базовой цепи, который служит часами, неподвластными никому. Работа размещается во времени по моменту её выполнения, как только этот блок уйдёт достаточно глубоко, чтобы исключить реорганизацию.</li>
+ <li><b>§4 Гибридная оценка времени.</b> Время разбивается на интервалы (bins): открытое настоящее, окончательно установленное прошлое, которое по мере старения хранится всё грубее, и зарезервированное будущее. Статья отмечает, что линия Monero в том виде, в каком она вышла впервые, является исключением.</li>
+ <li id="pp-s5"><b>§5 Доказательство работы как измерение.</b> Единица работы засчитывается по цели, которой она должна была удовлетворить, и никогда — по тому, насколько ниже цели оказался её хеш. Превышение (overshoot) позволило бы одному удачному хешу забрать всё вознаграждение. См. <a href="/ru/real-difficulty/">Реальная сложность</a> и <a href="/ru/luck/">Удача</a>.</li>
+ <li><b>§6 Учёт.</b> Работа учитывается в окне из недавних единиц с затуханием по возрасту, в целочисленной арифметике с фиксированной точкой, поэтому каждый узел получает один и тот же результат. Окно — это фиксированное число единиц при одной цели, поэтому пульсирующий майнинг, хоппинг и утаивание (withholding) в математическом ожидании ничего не дают. Окно, измеряемое во времени, принимается только вместе с правилом, устраняющим смещение, которое описывает статья.</li>
+ <li><b>§7 Несколько цепей.</b> Один учёт обслуживает несколько базовых цепей как линии (lanes) с общим набором воркеров.</li>
+ <li id="pp-s8"><b>§8 Учёт работы ниже уровня упорядочивания.</b> Хеши, удовлетворяющие более лёгкой (численно большей) цели, переносятся как квитанции и засчитываются как работа этой более лёгкой цели — точно в математическом ожидании и одинаково как под одной идентичностью, так и под многими.</li>
+ <li><b>§9 Выплаты многим из небольшой coinbase (coinbase-транзакции).</b> <i>Отозван 4 октября 2026 г.</i> (см. исправления выше).</li>
+ <li><b>§10 Расчёты за пределами coinbase</b> и <b>§11 Другие применения.</b> Выполненная работа как величина, которую может проверить любой; части, опирающиеся на задолженность, отозваны.</li>
+ <li><b>§12 Освобождение места.</b> Старая работа сводится в уровни, так что вся история умещается в несколько мегабайт, а точное вознаграждение за любой прошлый отрезок остаётся восстановимым.</li>
+ <li id="pp-s13"><b>§13 Проверка выплаты.</b> Зафиксированное состояние — это корень Меркла в coinbase. Устройство, хранящее только заголовки, может проверить его доказательством логарифмического размера, а каждый узел заново вычисляет coinbase, которую должен содержать блок.</li>
+ <li><b>§14 Сеть</b> и <b>§16 Заключение.</b> Узлы и воркеры приходят и уходят без чьего-либо разрешения; части, опирающиеся на задолженность, отозваны.</li>
+ <li id="pp-s15"><b>§15 Стимулы.</b> Честная стратегия — работать непрерывно и отправлять свои квитанции — приносит больше всего.</li>
+</ul>
+<p id="pp-30" data-src="5a2abe3d117e">Читать статью: <a href="https://frstrtr.github.io/c2pool/">Work Receipts: A Peer-to-Peer Mining-Reward Accounting System</a> (на английском).</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Краткое изложение © 2026 technocore.one. Сама статья © 2026 frstrtr, лицензия MIT.</p>
+<p>Сведения о c2pool проверены по выпуску v0.2.12.16 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

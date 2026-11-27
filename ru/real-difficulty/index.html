@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Реальная сложность — Научные основы P2Pool</title>
+<meta name="description" content="Цель (target), достигнутая сложность и что означает отношение target/hash.">
+<link rel="canonical" href="https://learn.voidbind.com/ru/real-difficulty/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/real-difficulty/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/real-difficulty/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/real-difficulty/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/real-difficulty/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Перейти к содержанию</a>
+<header class="top">
+<a class="brand" href="/ru/">Научные основы P2Pool</a>
+<nav class="langs" aria-label="Язык"><a class="lang" href="/en/real-difficulty/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/real-difficulty/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/real-difficulty/" hreflang="ru" lang="ru" data-lang="ru" aria-current="true">Русский</a> · <a class="lang" href="/de/real-difficulty/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/real-difficulty/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Содержание"><ul>
+<li><a href="/ru/">Главная</a></li>
+<li><a href="/ru/c2pool-today/">c2pool сегодня</a></li>
+<li><a href="/ru/references/">Источники</a></li>
+<li><a href="/ru/making-of-c2pool/">Как создавался c2pool</a></li>
+<li><a href="/ru/luck/">Удача</a></li>
+<li><a href="/ru/real-difficulty/" aria-current="page">Реальная сложность</a></li>
+<li><a href="/ru/difficulty-adjustment/">Корректировка сложности</a></li>
+<li><a href="/ru/taproot-coinbase/">Taproot в coinbase</a></li>
+<li><a href="/ru/weighted-multisig/">Взвешенная мультиподпись</a></li>
+<li><a href="/ru/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/ru/purple-paper/">Purple Paper</a></li>
+<li><a href="/ru/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Этот перевод ещё не проверен. <a href="/en/real-difficulty/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Реальная сложность" data-desc="Цель (target), достигнутая сложность и что означает отношение target/hash.">
+<h1 id="rd-02" data-src="7e4f901aecb4">Реальная сложность</h1>
+<p id="rd-03" class="sub" data-src="4e6bfc614a92">Цель, хеш и достигнутая сложность</p>
+<div id="rd-upd" class="update" data-src="ad913b22edfb"><p><b>Обновлено в ноябре 2026 г.</b> Определения цели (target), «реальной цели» (real target) и отношения target/hash в первой версии этой страницы местами противоречили друг другу, а структура поля «bits» была описана неверно. Эти абзацы ниже переписаны. Графики не изменились.</p></div>
+<p id="rd-04" data-src="83ab1a28f5ef">Блок действителен, если его хеш доказательства работы, прочитанный как 256-битное число, не превышает цель, которую требует цепь. Цель, сложность и хеш — три взгляда на одно и то же сравнение.</p>
+<h2 id="rd-05" data-src="978354db0c00">Цель</h2>
+<p id="rd-06" data-src="427db2c8a37e">Цель — это 256-битное число. Заголовок не хранит её целиком: 4-байтовое поле <code>nBits</code> («bits») кодирует её в компактной форме. Первый байт — экспонента <i>e</i>, оставшиеся три байта — мантисса <i>m</i>:</p>
+<pre id="rd-07" data-src="cda5e12b685f">target = m &times; 2^(8 &times; (e &minus; 3))</pre>
+<p id="rd-08" data-src="fe6fb57eaf5e">Например, у генезис-блока Bitcoin <code>nBits = 0x1d00ffff</code>: <i>e</i>&nbsp;=&nbsp;0x1d, <i>m</i>&nbsp;=&nbsp;0x00ffff, поэтому цель&nbsp;=&nbsp;0xffff&nbsp;&times;&nbsp;2<sup>208</sup>. Это наибольшая цель, которую допускает Bitcoin, — цель «сложности&nbsp;1».</p>
+<h2 id="rd-09" data-src="be44133ed57f">Сложность</h2>
+<p id="rd-10" data-src="bf0cd4ae0641">Сложность — это цель сложности 1, делённая на текущую цель: <code>difficulty = target<sub>max</sub> / target</code>. <b>Меньшая</b> цель означает <b>более высокую</b> сложность и больше работы на блок. В цепях типа Bitcoin на блок сложности <i>D</i> уходит в среднем около <i>D</i>&nbsp;&times;&nbsp;2<sup>32</sup> хешей.</p>
+<p id="rd-11" data-src="4d6b741fab3e">Цель периодически корректируется (в Bitcoin — каждые 2016 блоков), чтобы блоки по-прежнему появлялись примерно с заданным интервалом; см. <a href="/ru/difficulty-adjustment/">Корректировка сложности</a>.</p>
+<h2 id="rd-12" data-src="748a92ffe045">Хеш доказательства работы</h2>
+<p id="rd-13" data-src="5f304adc648c">Майнеры меняют nonce (и другие поля заголовка) и снова хешируют заголовок, пока результат не окажется равен цели или ниже неё. Каждая попытка успешна с вероятностью около target&nbsp;/&nbsp;2<sup>256</sup>, независимо от предыдущих попыток.</p>
+<p id="rd-14" data-src="1ddd452919f5">В Bitcoin хеш доказательства работы — это двойной SHA-256 от 80-байтового заголовка, он же служит идентификатором блока. Цепи, которые майнит c2pool, используют разные функции доказательства работы. В Litecoin и Dogecoin блок по-прежнему именуется своим хешем SHA-256d, а его доказательство работы проверяется через Scrypt; в Dash обе функции — X11:</p>
+<div id="rd-15" class="table-wrap" data-src="b0b2f459a0a0"><table>
+ <thead><tr><th>Цепь</th><th>Функция доказательства работы</th></tr></thead>
+ <tbody>
+ <tr><td>Bitcoin (BTC), Bitcoin Cash (BCH)</td><td>SHA-256d</td></tr>
+ <tr><td>Litecoin (LTC), Dogecoin (DOGE, объединённый майнинг), DigiByte (DGB, в том виде, как его майнит c2pool)</td><td>Scrypt</td></tr>
+ <tr><td>Dash (DASH)</td><td>X11</td></tr>
+ <tr><td>Форк BIP-110</td><td>SHA-256d ниже высоты 961&nbsp;640, BLAKE2b начиная с этой высоты</td></tr>
+ <tr><td>Monero (XMR, экспериментально в c2pool)</td><td>RandomX</td></tr>
+ </tbody>
+</table></div>
+<h2 id="rd-16" data-src="ad96e32ee007">Достигнутая сложность и превышение</h2>
+<p id="rd-17" data-src="1cb0697f7a28">В первой версии этой страницы термином «реальная цель» (real target) называлось значение, которому фактически найденный майнером хеш всё ещё удовлетворял бы. Полезны два отношения, и смешивать их не следует:</p>
+<ul id="rd-18" data-src="bbd1c696c9b4">
+ <li><b>Достигнутая сложность</b> = target<sub>max</sub>&nbsp;/&nbsp;hash. Это сложность, при которой именно этот хеш всё ещё был бы действителен. «Лучшая шара» (best share) на панели (дашборде) — величина именно этого рода.</li>
+ <li><b>Превышение</b> (overshoot) R = target&nbsp;/&nbsp;hash = достигнутая сложность&nbsp;/&nbsp;сложность. У действительного блока R&nbsp;&ge;&nbsp;1. R показывает, насколько ниже своей цели случайно оказался этот хеш.</li>
+</ul>
+<p id="rd-19" data-src="65eca43dc797">Превышение измеряет удачу, а не приложенные усилия. Каждый действительный блок данной сложности потребовал одной и той же ожидаемой работы, каким бы ни было его R. При условии, что хеш удовлетворяет цели, R подчиняется закону <code>Pr[R &ge; r] = 1/r</code>: у половины всех блоков R меньше 2, у одного из тысячи R больше 1000, а среднего значения не существует.</p>
+<figure id="rd-29" data-src="af12333ee29e">
+ <img src="/assets/img/real-diff-epochs.png" alt="исходный график коэффициента">
+ <figcaption>Исходный график (в опубликованном виде): target/real_target для каждого блока в epoch_0 (0&ndash;2015) и epoch_1 (2016&ndash;4031) блокчейна Bitcoin. Сохранён здесь для справки.</figcaption>
+ </figure>
+
+<figure id="rd-30" data-src="8103ad98238f">
+ <img src="/assets/img/real-diff-real.png" alt="достигнутая сложность по блокам, реальные данные BTC">
+ <figcaption>Те же данные, пересчитанные по всем 4032 блокам (R = target/hash; сложность на протяжении обеих эпох равна 1, поэтому R — собственное превышение блока). Цепь требует лишь R &ge; 1; редкие пики — чистая удача. Медиана R &asymp; 2.</figcaption>
+ </figure>
+
+<p id="rd-20" data-src="6c161e351884">На втором графике сложность на протяжении обеих эпох равна 1, поэтому R — это достигнутая сложность каждого блока. Медиана около 2 — ровно то, что предсказывает <code>Pr[R &ge; r] = 1/r</code>.</p>
+<div id="rd-45" class="v37" data-src="10f52b7da85f"><span class="tag">V37</span><b>Для чего используется — и для чего не используется — достигнутая («реальная») сложность.</b>
+ <p><b>Достигнутая</b> сложность хеша («реальная цель» в первой версии этой страницы) показывает, насколько ниже своей цели этот хеш случайно оказался. Возникает соблазн платить майнерам пропорционально ей: «нашёл более редкий хеш — заработал больше». <b>Это неверно, и это доказуемо.</b></p>
+ <p>Достигнутая сложность — это <b>чистая удача</b>. При условии, что цель достигнута, превышение <code>R = target/hash</code> подчиняется степенному закону <code>Pr[R &ge; r] = 1/r</code>, среднее которого не сходится: один удачный хеш может превзойти сумму всех остальных в число раз порядка размера всего пространства хешей. Оплата по достигнутой сложности позволила бы одной удачной шаре забрать целое окно выплат — то есть вернуть в пул ровно ту дисперсию, ради устранения которой пулы и существуют.</p>
+ <p><b>Поэтому работа засчитывается по <i>цели</i>, которой шара должна была удовлетворить, и никогда — по значению, которого случайно достиг её хеш.</b> Две шары, удовлетворяющие одной и той же цели, оплачиваются одинаково — учёт остаётся <i>нейтральным к удаче</i>.</p>
+ <p>Работа ниже цели шары учитывается по тому же правилу. Хеш, удовлетворивший более лёгкой (численно большей) цели, сам является единицей работы при этой более лёгкой цели, поэтому воркеру, слишком слабому, чтобы часто находить шары, всё равно можно зачесть выполненную работу, считая его хеши при этой более лёгкой цели. Превышение для этого не нужно. <b>Измерение, а не оплата.</b> Именно так учитывает работу статья о Work Receipts (квитанциях о работе); см. <a href="/ru/purple-paper/">краткое изложение Purple Paper</a>, §5 (Доказательство работы как измерение) и §8 (Учёт работы ниже уровня упорядочивания).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Впервые опубликовано Technocore One в «P2Pool scientific basics», обновлено в ноябре 2026 года. © 2026 technocore.one.</p>
+<p>Сведения о c2pool проверены по выпуску v0.2.12.16 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

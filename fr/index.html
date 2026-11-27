@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Bases scientifiques de P2Pool</title>
+<meta name="description" content="Notes sur le minage décentralisé, P2Pool et c2pool : difficulté, chance, conception de la coinbase et état actuel de c2pool.">
+<link rel="canonical" href="https://learn.voidbind.com/fr/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<a class="brand" href="/fr/">Bases scientifiques de P2Pool</a>
+<nav class="langs" aria-label="Langue"><a class="lang" href="/en/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/" hreflang="fr" lang="fr" data-lang="fr" aria-current="true">Français</a> · <a class="lang" href="/ru/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Sommaire"><ul>
+<li><a href="/fr/" aria-current="page">Accueil</a></li>
+<li><a href="/fr/c2pool-today/">c2pool aujourd’hui</a></li>
+<li><a href="/fr/references/">Références</a></li>
+<li><a href="/fr/making-of-c2pool/">Coulisses de c2pool</a></li>
+<li><a href="/fr/luck/">Chance</a></li>
+<li><a href="/fr/real-difficulty/">Difficulté réelle</a></li>
+<li><a href="/fr/difficulty-adjustment/">Ajustement de la difficulté</a></li>
+<li><a href="/fr/taproot-coinbase/">Coinbase Taproot</a></li>
+<li><a href="/fr/weighted-multisig/">Multisignature pondérée</a></li>
+<li><a href="/fr/bitcoin-leveldb/">LevelDB de Bitcoin</a></li>
+<li><a href="/fr/purple-paper/">Purple Paper</a></li>
+<li><a href="/fr/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Traduction assistée par machine, pas encore relue par un locuteur natif. <a href="/en/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Accueil" data-desc="Notes sur le minage décentralisé, P2Pool et c2pool : difficulté, chance, conception de la coinbase et état actuel de c2pool.">
+<h1 id="hm-01" data-src="be8d09249bb9">P2Pool scientific basics</h1>
+<p id="hm-02" class="sub" data-src="9a5688e2bebb">Notes sur le minage décentralisé, P2Pool et c2pool</p>
+<p id="hm-03" data-src="a0b68b31d780">Ces pages sont nées sous le nom « P2Pool scientific basics » (les bases scientifiques de P2Pool), un site Google publié par Technocore One : une liste de lectures sur les blocs faibles (weak blocks), le minage fusionné et les pools de minage, et une série d’articles sur la difficulté, la chance et la conception de la transaction coinbase. Elles ont été déplacées ici, vérifiées par rapport au c2pool d’aujourd’hui, et sont disponibles en cinq langues.</p>
+<ul id="hm-04" class="cards" data-src="b5dd5c7d5746">
+ <li><a href="/fr/c2pool-today/">c2pool aujourd’hui</a><p>Ce que fait tourner c2pool dans la version v0.2.12.16 : chaînes, nœuds sans démon, nœuds publics.</p></li>
+ <li><a href="/fr/making-of-c2pool/">Notes sur la réimplémentation de p2pool en C++</a><p>Notes sur la réimplémentation de p2pool en C++, écrites en juin 2026, avec des notes de mise à jour.</p></li>
+ <li><a href="/fr/luck/">La chance &mdash; cette bête cruelle</a><p>Le folklore du minage, la loi de puissance qui le sous-tend, et la façon dont le tableau de bord mesure la chance.</p></li>
+ <li><a href="/fr/real-difficulty/">Difficulté réelle</a><p>Cible, difficulté, difficulté atteinte et dépassement d’un hash.</p></li>
+ <li><a href="/fr/difficulty-adjustment/">Ajustement de la difficulté</a><p>Bitcoin, Litecoin, Dogecoin et la difficulté propre à la chaîne de shares.</p></li>
+ <li><a href="/fr/taproot-coinbase/">Coinbase Taproot</a><p>Des sorties Taproot dans une coinbase, et ce qu’elles ne résolvent pas pour un pool.</p></li>
+ <li><a href="/fr/weighted-multisig/">Renforcer la sécurité avec des portefeuilles multisignatures pondérés sur les blockchains PoW</a><p>L’approbation pondérée d’une dépense, avec un script qui fonctionne.</p></li>
+ <li><a href="/fr/bitcoin-leveldb/">LevelDB de Bitcoin</a><p>Lire sur le disque l’index des blocs et le chainstate de Bitcoin Core.</p></li>
+ <li><a href="/fr/purple-paper/">Purple Paper : Work Receipts</a><p>Un résumé de l’article Work Receipts (reçus de travail) et de ses errata.</p></li>
+ <li><a href="/fr/monero-ccs/">La proposition au CCS de Monero : une chronologie</a><p>Une chronologie datée de la proposition de financement Monero de 2026.</p></li>
+ <li><a href="/fr/references/">Références</a><p>La liste de lectures d’origine, liens vérifiés.</p></li>
+</ul>
+<p id="hm-05" data-src="49d394d1cc60">Du même auteur, en anglais : <a href="https://frstrtr.github.io/c2pool/ego-and-self-reliance.html">Ego and Self-Reliance. A Plain-Language Handbook</a> (licence MIT ; sans rapport avec le minage).</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Publié à l’origine par Technocore One sur le site Google « P2Pool scientific basics ». © 2026 technocore.one.</p>
+<p>Faits sur c2pool vérifiés par rapport à la version v0.2.12.16 le 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

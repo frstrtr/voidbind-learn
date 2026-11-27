@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Источники — Научные основы P2Pool</title>
+<meta name="description" content="Список литературы «P2Pool scientific basics» о слабых блоках, объединённом майнинге и майнинговых пулах; ссылки проверены в ноябре 2026 года.">
+<link rel="canonical" href="https://learn.voidbind.com/ru/references/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/references/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/references/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/references/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/references/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/references/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/references/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Перейти к содержанию</a>
+<header class="top">
+<a class="brand" href="/ru/">Научные основы P2Pool</a>
+<nav class="langs" aria-label="Язык"><a class="lang" href="/en/references/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/references/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/references/" hreflang="ru" lang="ru" data-lang="ru" aria-current="true">Русский</a> · <a class="lang" href="/de/references/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/references/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Содержание"><ul>
+<li><a href="/ru/">Главная</a></li>
+<li><a href="/ru/c2pool-today/">c2pool сегодня</a></li>
+<li><a href="/ru/references/" aria-current="page">Источники</a></li>
+<li><a href="/ru/making-of-c2pool/">Как создавался c2pool</a></li>
+<li><a href="/ru/luck/">Удача</a></li>
+<li><a href="/ru/real-difficulty/">Реальная сложность</a></li>
+<li><a href="/ru/difficulty-adjustment/">Корректировка сложности</a></li>
+<li><a href="/ru/taproot-coinbase/">Taproot в coinbase</a></li>
+<li><a href="/ru/weighted-multisig/">Взвешенная мультиподпись</a></li>
+<li><a href="/ru/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/ru/purple-paper/">Purple Paper</a></li>
+<li><a href="/ru/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Этот перевод ещё не проверен. <a href="/en/references/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Источники" data-desc="Список литературы «P2Pool scientific basics» о слабых блоках, объединённом майнинге и майнинговых пулах; ссылки проверены в ноябре 2026 года.">
+<h1 id="rf-01" data-src="69824d3b0e70">Источники</h1>
+<p id="rf-02" class="sub" data-src="4ddd0eb19b4d">Список литературы «P2Pool scientific basics», проверенный в ноябре 2026 года</p>
+<p id="rf-03" data-src="2066157748c0">Это список «Theory» («Теория») с исходного сайта; к каждому источнику добавлена строка о том, что он собой представляет. Все ссылки проверены 2026-11-27. Мёртвые ссылки помечены, а не удалены втихую. Несколько сайтов отклоняют автоматические проверки; такие ссылки оставлены как есть.</p>
+<h2 id="rf-10" data-src="cef754985699">Слабые блоки</h2>
+<ol id="rf-11" data-src="451916517c46">
+ <li><a href="https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-September/011157.html">[bitcoin-dev] Weak block thoughts&hellip;</a>: сообщение в рассылке, сентябрь 2015 года.</li>
+ <li><a href="https://popeller.io/index.php/2016/01/19/weak-blocks-the-good-and-the-bad/">Weak Blocks &ndash; The Good And The Bad</a>: запись в блоге, январь 2016 года. <span class="ref-dead">(ссылка мертва на 2026-11-27: сервер ответил 503)</span></li>
+ <li><a href="https://medium.com/@alexeiZamyatin/a-quick-glance-at-weak-blocks-and-subchains-64ca705bd382">A Quick Glance at Weak Blocks and Subchains</a>: статья Алексея Замятина.</li>
+ <li><a href="https://www.ledgerjournal.org/ojs/index.php/ledger/article/view/40">Subchains: A Technique to Scale Bitcoin and Improve the User Experience</a>: научная статья в журнале <i>Ledger</i>.</li>
+</ol>
+<h2 id="rf-20" data-src="926211f99714">Объединённый майнинг</h2>
+<ol id="rf-21" start="5" data-src="4b3c058ae960">
+ <li>Merged Mining: Analysis of Effects and Implications, Алексей Замятин, выпускная работа (thesis), TU Wien, 2017. <span class="ref-dead">(ссылка мертва на 2026-11-27: старый URL работы на ifs.tuwien.ac.at отвечает 404)</span></li>
+ <li><a href="https://medium.com/@alexeiZamyatin/a-technical-deep-dive-into-merged-mining-5b67706e1a19">Taking a Deep-Dive into Merged Mining</a>: статья Алексея Замятина.</li>
+</ol>
+<h2 id="rf-30" data-src="ca19a87913a1">Майнинговые пулы и P2Pool</h2>
+<ol id="rf-31" start="7" data-src="0e436450adce">
+ <li><a href="https://arxiv.org/abs/1905.05999">A Deep Dive into Bitcoin Mining Pools: An Empirical Analysis of Mining Shares</a>: научная статья на arXiv (1905.05999).</li>
+ <li><a href="https://weis2019.econinfosec.org/wp-content/uploads/sites/6/2019/05/WEIS_2019_paper_40.pdf">Diversification Across Mining Pools: Optimal Mining Strategies under PoW</a>: доклад на конференции WEIS 2019.</li>
+ <li><a href="https://medium.com/@alexeiZamyatin/p2pool-proof-of-work-reusing-for-trustless-share-validation-8650d0235407">P2Pool at a Glance: Proof-of-Work Reusing for Trustless Share Validation</a>: статья Алексея Замятина.</li>
+</ol>
+<h2 id="rf-40" data-src="1ce3dc66b714">Другие предложения и упоминания «слабых блоков» (weak blocks) и «почти-блоков» (near blocks)</h2>
+<ul id="rf-41" data-src="fa6eec12755c">
+ <li><a href="https://bitcointalk.org/index.php?topic=179598.0">bitcointalk.org, тема 179598</a>: ветка форума.</li>
+ <li><a href="http://lists.linuxfoundation.org/pipermail/bitcoin-dev/2013-July/002976.html">bitcoin-dev, июль 2013 года</a> и <a href="http://lists.linuxfoundation.org/pipermail/bitcoin-dev/2013-September/003275.html">bitcoin-dev, сентябрь 2013 года</a>: сообщения в рассылке.</li>
+ <li><a href="https://bitcointalk.org/index.php?topic=673415.msg7658481#msg7658481">bitcointalk.org, тема 673415</a>: сообщение на форуме.</li>
+ <li>Логи IRC-канала #bitcoin-wizards за 2015-08-20 и 2015-09-20 на gnusha.org. <span class="ref-dead">(ссылка мертва на 2026-11-27: старые URL логов теперь перенаправляют на главную страницу сайта)</span></li>
+ <li>Расшифровки докладов Scaling Bitcoin: <a href="http://diyhpl.us/wiki/transcripts/scalingbitcoin/roundgroup-roundup-1/">roundgroup roundup 1</a> и <a href="http://diyhpl.us/wiki/transcripts/scalingbitcoin/bitcoin-block-propagation-iblt-rusty-russell/">block propagation with IBLT (Rusty Russell)</a>.</li>
+</ul>
+<h2 id="rf-50" data-src="b26274898d96">Практика</h2>
+<ul id="rf-51" data-src="1c439ac33cc2">
+ <li><a href="https://bitcointalk.org/index.php?topic=457574.0">P2Pool Detailed Settings for Altcoins</a>: ветка форума, историческая, для Python-версии p2pool.</li>
+ <li><a href="https://github.com/bitcoinops/taproot-workshop">Taproot workshop</a>: практикум по Taproot от Bitcoin Optech.</li>
+ <li><a href="https://pybtc.readthedocs.io/en/master/">pybtc</a>: библиотека для работы с Bitcoin на Python.</li>
+ <li><a href="https://www.tutorialspoint.com/python_blockchain/index.htm">Python blockchain tutorial</a>: общее введение.</li>
+</ul>
+<h2 id="rf-60" data-src="4c1fb999a3af">«To be implemented: SegWit, Taproot, MimbleWimble» (перевод: «Предстоит реализовать: SegWit, Taproot, MimbleWimble»): что из этого есть в c2pool</h2>
+<div id="rf-61" class="table-wrap" data-src="41624354e4bf"><table>
+ <thead><tr><th>Пункт</th><th>Статус в c2pool (узел Litecoin, v0.2.12.16)</th></tr></thead>
+ <tbody>
+ <tr><td>SegWit</td><td><b>Сделано.</b> Узел требует софтфорка SegWit, строит шаблоны блоков с SegWit и платит на адреса майнеров P2WPKH и P2SH.</td></tr>
+ <tr><td>Taproot</td><td><b>Частично.</b> Узел требует софтфорка Taproot. Адрес выплаты Taproot (P2TR) в цепочке шар Litecoin не поддерживается: шара V36 несёт 20-байтовый хеш выплаты, поэтому выплата такого майнера перераспределяется. См. <a href="/ru/taproot-coinbase/#tr-c2">Taproot в c2pool сегодня</a>.</td></tr>
+ <tr><td>MimbleWimble (Litecoin MWEB)</td><td><b>Частично.</b> Узел переносит состояние MWEB от блока к блоку и строит валидный пустой блок расширения MWEB. Сами MWEB-транзакции в его блоки не включаются.</td></tr>
+ </tbody>
+</table></div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Впервые опубликовано Technocore One в «P2Pool scientific basics», обновлено в ноябре 2026 года. © 2026 technocore.one.</p>
+<p>Сведения о c2pool проверены по выпуску v0.2.12.16 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

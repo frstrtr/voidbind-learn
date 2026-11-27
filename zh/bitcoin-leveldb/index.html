@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Bitcoin LevelDB — P2Pool 科学基础</title>
+<meta name="description" content="直接读取 Bitcoin Core 的区块索引和 chainstate 数据库。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/bitcoin-leveldb/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/bitcoin-leveldb/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/bitcoin-leveldb/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/bitcoin-leveldb/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/bitcoin-leveldb/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/bitcoin-leveldb/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/bitcoin-leveldb/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/bitcoin-leveldb/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/bitcoin-leveldb/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/bitcoin-leveldb/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/bitcoin-leveldb/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/bitcoin-leveldb/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/" aria-current="page">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/bitcoin-leveldb/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Bitcoin LevelDB" data-desc="直接读取 Bitcoin Core 的区块索引和 chainstate 数据库。">
+<h1 id="ld-02" data-src="90115a9224a1">Bitcoin LevelDB</h1>
+<p id="ld-03" class="sub" data-src="37e612bf5cb1">直接从磁盘读取 Bitcoin Core 的区块索引和 chainstate</p>
+<div id="ld-upd" class="update" data-src="9baacdb201c2"><p><b>2026 年 11 月更新。</b>本页第一版未注明出处地转载了 Pieter Wuille 在 Bitcoin Stack Exchange 上的一个回答，以及同一问题下发布的一个解析器。两者在该网站上均以 CC&nbsp;BY-SA&nbsp;4.0 发布。本版依据 Bitcoin Core 源代码（v28.1 版本）用我们自己的话重写，并改为链接到这些回答。本版还更正了记录布局和 varint 编码器，并补充了 Bitcoin Core 28.0 的区块文件 XOR 密钥。</p></div>
+<p id="ld-04" data-src="cf297e119568">延伸阅读：<a href="https://bitcoin.stackexchange.com/a/29418">Pieter Wuille 的回答</a>（问题为“What are the keys used in the blockchain levelDB?”（译文：“区块链 levelDB 中使用了哪些键？”）），以及<a href="https://bitcoin.stackexchange.com/questions/28168">该问题下的其他回答</a>（Bitcoin Stack Exchange，CC&nbsp;BY-SA&nbsp;4.0）。</p>
+<h2 id="ld-05" data-src="2241a2bd3c9e">两个数据库和一堆文件</h2>
+<p id="ld-06" data-src="da181976f0ba">Bitcoin Core 在原始区块文件旁边维护两个 LevelDB 键值数据库：</p>
+<ul id="ld-07" data-src="dc8ac7b54fed">
+ <li><code>blocks/index/</code>，即<b>区块索引</b>：每个已知区块头对应一条记录，说明该区块及其撤销数据在磁盘上的位置；</li>
+ <li><code>chainstate/</code>，即当前最佳链的 <b>UTXO 集</b>；</li>
+ <li><code>blocks/blkNNNNN.dat</code> 和 <code>blocks/revNNNNN.dat</code>：区块本身（网络格式）及其撤销数据，依次追加写入。这些是普通文件，不是数据库。</li>
+</ul>
+<p id="ld-08" data-src="e8fc194eb6c1">可选的交易索引自 Bitcoin Core 0.17 起存放在单独的数据库 <code>indexes/txindex/</code> 中。LevelDB 不允许两个程序同时打开同一个数据库，所以读取之前要先复制它，或者先停止节点。对大多数问题来说，使用 RPC 调用 <code>getblock</code>、<code>gettxout</code> 和 <code>gettxoutsetinfo</code> 更简单。</p>
+<h2 id="ld-09" data-src="932c5203543e">区块索引中的键</h2>
+<div id="ld-10" class="table-wrap" data-src="c6573705b883"><table>
+ <thead><tr><th>键</th><th>值</th></tr></thead>
+ <tbody>
+ <tr><td><code>'b'</code> + 32 字节区块哈希</td><td>区块索引记录（见下文）</td></tr>
+ <tr><td><code>'f'</code> + 4 字节文件编号</td><td>一个区块文件的统计信息：区块数、文件大小、最低和最高的高度与时间</td></tr>
+ <tr><td><code>'l'</code></td><td>最后使用的区块文件编号</td></tr>
+ <tr><td><code>'R'</code></td><td>重建索引（reindex）进行期间设置</td></tr>
+ <tr><td><code>'F'</code> + 标志名</td><td>一个具名的布尔标志</td></tr>
+ </tbody>
+</table></div>
+<h2 id="ld-11" data-src="c6cc1c529a9f">chainstate 中的键</h2>
+<div id="ld-12" class="table-wrap" data-src="207f2ac46772"><table>
+ <thead><tr><th>键</th><th>值</th></tr></thead>
+ <tbody>
+ <tr><td><code>'C'</code> + txid + 输出索引（varint）</td><td>一个未花费输出：高度、是否为 coinbase 输出、金额和脚本（自 Bitcoin Core 0.15 起）</td></tr>
+ <tr><td><code>'c'</code> + txid</td><td>旧的按交易存储的格式（0.15 之前）；只在升级旧数据库时才会遇到</td></tr>
+ <tr><td><code>'B'</code></td><td>UTXO 集已完整对应到的那个区块的哈希</td></tr>
+ <tr><td><code>'H'</code></td><td>刷写被中断时的头部区块</td></tr>
+ </tbody>
+</table></div>
+<p id="ld-13" data-src="f2720ee036ac">chainstate 的值经过 XOR 混淆，密钥存放在同一个数据库中（键为 <code>0x0e 0x00 "obfuscate_key"</code>）。解码之前，先把每个值与重复排列的密钥做 XOR。</p>
+<h2 id="ld-14" data-src="3a12dee8565c">区块索引记录</h2>
+<p id="ld-15" data-src="585b2d8806db">一条 <code>'b'</code> 记录由一串 varint 加上 80 字节的区块头组成：客户端版本、高度、状态标志、交易数；然后，仅当状态表明数据存在时，才有文件编号以及区块和撤销数据的字节偏移量；最后是区块头（版本、前一区块哈希、默克尔根、时间、bits、nonce）。Bitcoin Core 的 varint 不是常见的 LEB128：它是大端序的 128 进制，并且每个后续字节还会额外加一，因此每个数都只有唯一一种编码。</p>
+<pre id="ld-16" data-src="4b8e7c2713af"><code>import hashlib
+
+def read_varint(buf, i):
+    &quot;&quot;&quot;Bitcoin Core VARINT (serialize.h ReadVarInt): MSB base-128 with an offset.&quot;&quot;&quot;
+    n = 0
+    while True:
+        b = buf[i]; i += 1
+        n = (n &lt;&lt; 7) | (b &amp; 0x7F)
+        if b &amp; 0x80:
+            n += 1
+        else:
+            return n, i
+
+def write_varint(n):
+    &quot;&quot;&quot;Inverse of read_varint (serialize.h WriteVarInt).&quot;&quot;&quot;
+    out = [n &amp; 0x7F]
+    while n &gt; 0x7F:
+        n = (n &gt;&gt; 7) - 1
+        out.append((n &amp; 0x7F) | 0x80)
+    return bytes(reversed(out))
+
+BLOCK_HAVE_DATA, BLOCK_HAVE_UNDO = 8, 16
+
+def parse_block_index_value(value):
+    &quot;&quot;&quot;Value of a &#x27;b&#x27; + block-hash key in blocks/index (chain.h CDiskBlockIndex).&quot;&quot;&quot;
+    i, rec = 0, {}
+    for field in (&#x27;client_version&#x27;, &#x27;height&#x27;, &#x27;status&#x27;, &#x27;tx_count&#x27;):
+        rec[field], i = read_varint(value, i)
+    if rec[&#x27;status&#x27;] &amp; (BLOCK_HAVE_DATA | BLOCK_HAVE_UNDO):
+        rec[&#x27;file&#x27;], i = read_varint(value, i)
+    if rec[&#x27;status&#x27;] &amp; BLOCK_HAVE_DATA:
+        rec[&#x27;data_pos&#x27;], i = read_varint(value, i)
+    if rec[&#x27;status&#x27;] &amp; BLOCK_HAVE_UNDO:
+        rec[&#x27;undo_pos&#x27;], i = read_varint(value, i)
+    header = value[i:i + 80]
+    rec[&#x27;version&#x27;] = int.from_bytes(header[0:4], &#x27;little&#x27;)
+    rec[&#x27;prev_hash&#x27;] = header[4:36][::-1].hex()
+    rec[&#x27;merkle_root&#x27;] = header[36:68][::-1].hex()
+    rec[&#x27;time&#x27;] = int.from_bytes(header[68:72], &#x27;little&#x27;)
+    rec[&#x27;bits&#x27;] = hex(int.from_bytes(header[72:76], &#x27;little&#x27;))
+    rec[&#x27;nonce&#x27;] = int.from_bytes(header[76:80], &#x27;little&#x27;)
+    rec[&#x27;block_hash&#x27;] = hashlib.sha256(hashlib.sha256(header).digest()).digest()[::-1].hex()
+    return rec</code></pre>
+<p id="ld-17" data-src="5ae42dd747a3">把区块 80,000 的记录值传给 <code>parse_block_index_value</code>，它返回高度 80000、两笔交易、文件 0、<code>bits = 0x1b5bede6</code>，以及它根据区块头重新计算出的区块哈希 <code>000000000043a8c0fd1d6f726790caa2a406010d19efd2780db27bdbbd93baf6</code>。哈希以小端字节序存储，因此显示时要反转字节顺序。</p>
+<h2 id="ld-18" data-src="ff41a17c89a7">直接读取区块文件</h2>
+<p id="ld-19" data-src="b621b34522cd"><code>blk*.dat</code> 文件中的每个区块依次存储为：网络魔数（4 字节）、区块大小（4 字节，小端序），然后是区块本身。自 <b>Bitcoin Core 28.0</b> 起，如果节点的 blocks 目录是新建的，这些文件会用一个 8 字节的随机密钥做 XOR，密钥保存在 <code>blocks/xor.dat</code> 中（选项 <code>-blocksxor</code>）。旧软件在应用该密钥之前无法读取这类文件。由更早版本创建的 blocks 目录保持全零密钥。</p>
+<div id="ld-24" class="v37" data-src="8b9256361203"><span class="tag">V37</span><b>这种方法的实际应用。</b>
+ <p>区块索引只存放区块头和文件位置；区块本身是只追加写入的普通文件。正因如此，才能直接读取而无需守护进程。本站的<a href="/zh/real-difficulty/">真实难度</a>图表就是这样制作的：我们从一个全节点的磁盘上读取 <code>blocks/blk00000.dat</code>，按顺序解析前 4,032 个区块的 80 字节区块头（魔数、大小、区块头，然后是 <code>nBits</code> 和两次 SHA-256 得到的区块哈希），没有使用 RPC。对于用 Bitcoin Core 28.0 或更高版本建立的节点，要先应用 <code>blocks/xor.dat</code> 中的密钥。V37 设计工作也基于同样的特性：节点可以从紧凑的磁盘记录中重建已承诺的状态，并用对数大小的默克尔证明来证明它；参见 <a href="/zh/purple-paper/">Purple Paper 摘要</a>第 13 节（验证支付）。</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>最初由 Technocore One 发布于“P2Pool scientific basics”，2026 年 11 月更新。© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

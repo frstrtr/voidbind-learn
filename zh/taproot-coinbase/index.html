@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Taproot coinbase — P2Pool 科学基础</title>
+<meta name="description" content="coinbase 交易中的 Taproot 输出，以及它们能为去中心化矿池做什么、不能做什么。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/taproot-coinbase/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/taproot-coinbase/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/taproot-coinbase/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/taproot-coinbase/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/taproot-coinbase/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/taproot-coinbase/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/taproot-coinbase/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/taproot-coinbase/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/taproot-coinbase/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/taproot-coinbase/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/taproot-coinbase/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/taproot-coinbase/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/" aria-current="page">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/taproot-coinbase/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Taproot coinbase" data-desc="coinbase 交易中的 Taproot 输出，以及它们能为去中心化矿池做什么、不能做什么。">
+<h1 id="tr-02" data-src="29d2a7e91599">Taproot coinbase</h1>
+<p id="tr-03" class="sub" data-src="5f8688fcd91b">coinbase 交易中的 Taproot 输出，以及它们能为去中心化矿池做什么、不能做什么</p>
+<p id="tr-04" data-src="42b9b70d8e2b">在 coinbase（coinbase 交易）中使用 Taproot 地址来表示多个输出或促成多笔交易，在技术上是可行的，并且在效率和隐私方面有若干好处。</p>
+<h2 id="tr-05" data-src="98424e34c596">一个 Taproot 地址承载多个输出</h2>
+<p id="tr-06" data-src="e5aa496fe160">Taproot 地址由 Schnorr 公钥与 MAST（Merkelized Abstract Syntax Trees，默克尔化抽象语法树）结合而成，可以把复杂的花费条件隐藏在一个地址之下。这意味着，通过把不同条件编码进该输出的脚本路径花费，理论上可以用一个 Taproot 输出向多方付款。不过，每一方都必须满足各自的特定条件才能花费自己的那一部分，而这些条件由脚本逻辑本身划定。</p>
+<h2 id="tr-07" data-src="5a1f89027110">coinbase 中的多个 Taproot 地址</h2>
+<p id="tr-08" data-src="ba0fda88d0eb">也可以在 coinbase 交易的输出中直接使用多个 Taproot 地址，与使用多个传统地址或 SegWit 地址类似。每个输出可以指向不同的 Taproot 地址，使交易能够把区块奖励分配给多个实体或地址，而每个地址都可以通过 Taproot 编码各自的一套复杂花费条件。</p>
+<h2 id="tr-09" data-src="3392adf56de6">优点</h2>
+<ul id="tr-10" data-src="1ac74157172a"><li><b>隐私：</b>Taproot 地址可以提供更好的隐私，因为币被花费的条件在变得相关之前（即在交易中实际使用之前）都可以保持隐藏。</li>
+ <li><b>效率：</b>Taproot 可以使用 Schnorr 签名；与传统比特币交易使用的 ECDSA 签名相比，Schnorr 签名在占用空间和验证时间上更高效。</li></ul>
+<h2 id="tr-11" data-src="64375db4404f">使用注意事项</h2>
+<p id="tr-12" data-src="6ac91e5dd400">用一个 Taproot 地址编码多种支付条件时，关键在于条件的组织方式不能给资金的花费带来不必要的复杂性。核心思路是：在利用 Taproot 简化复杂交易这一能力的同时，保持交易的效率。</p>
+<p id="tr-13" data-src="7f047427cf39">总结一下，在 coinbase 交易中可以用一个或两个 Taproot 地址：要么让多个输出分别指向不同的 Taproot 地址，要么用一个 Taproot 地址在单个输出内覆盖多种花费条件。对于希望简化支付流程、增强交易隐私和安全性的矿池来说，这种设置可能特别有用。</p>
+<p id="tr-14" data-src="188dd671fe53">Taproot 地址本身是一种比特币地址，以“bc1p”开头，采用 Bech32m 格式编码。与传统地址不同，Taproot 地址结合使用 Schnorr 签名和 MAST，能以更节省空间、更保护隐私的方式表示更复杂的脚本。</p>
+<h2 id="tr-15" data-src="440c5eac03a0">Taproot 交易结构示例</h2>
+<h3 id="tr-16" data-src="7abc49dfa87b">输入</h3>
+<ul id="tr-17" data-src="1c83e1c8fc78"><li><b>输入 1：</b>Txid（前一笔交易的交易 ID）；Vout（前一笔交易中的输出索引）；ScriptSig：为空（Taproot 花费的数据放在见证（witness）中）；Witness：包含 Schnorr 签名，若使用脚本路径花费，还可能包含其他部分。</li>
+ <li><b>输入 2：</b>格式相同的另一个输入。</li></ul>
+<h3 id="tr-18" data-src="e7ce99764a2d">输出</h3>
+<ul id="tr-19" data-src="4c28ca59352a"><li><b>输出 1：</b>Value（要发送的比特币数量）；ScriptPubKey：<code>OP_1 &lt;32-byte x-only output key&gt;</code>（34 字节：<code>51 20 &hellip;</code>），这是 Taproot 输出脚本的格式，只有在触发脚本路径花费时才会变得复杂。</li>
+ <li><b>输出 2：</b>另一个输出，带有其金额和 Taproot 脚本。</li></ul>
+<h3 id="tr-20" data-src="87ade4b5a529">逐项说明</h3>
+<p id="tr-21" data-src="b15336f20a78"><b>Txid 和 Vout：</b>每个输入都引用前一笔交易的某个输出。这些输出由新交易中的输入花费。</p>
+<p id="tr-22" data-src="d830b64d23a4"><b>ScriptSig：</b>Taproot 交易的 ScriptSig 通常为空，因为脚本验证依赖交易的见证部分。</p>
+<p id="tr-23" data-src="dec77a79634f"><b>Witness：</b>包含证明拥有 Taproot 公钥的 Schnorr 签名。若使用复杂条件（脚本路径花费），相关脚本和签名也放在这里。</p>
+<p id="tr-24" data-src="fc76b9cb39f5"><b>输出：</b>每个输出指定发送多少比特币、发往哪个地址（以 Taproot 公钥表示）。Taproot 输出的 ScriptPubKey 简化为 <code>OP_1 &lt;Taproot public key&gt;</code>，若启用脚本路径花费，可能存在的复杂条件就在见证数据中处理。</p>
+<p id="tr-25" data-src="6b1d90cfb642">这种结构允许在输出中嵌入复杂条件，这些条件在被专门触发之前（例如退款、多方协议等情形）是不可见的，从而增强隐私和灵活性。Taproot 真正的威力在于：除非交易受到争议或条件复杂，否则只需公开密钥路径花费（即单个签名），其他可能的条件保持隐藏，交易看起来与普通的单签名交易无异。这只是一个概念性示例。实际创建交易时，需要遵循支持 Taproot 的具体软件钱包或硬件钱包的实现。</p>
+<h2 id="tr-26" data-src="ca5a2490f7c1">把 coinbase 奖励发送到 Taproot 地址</h2>
+<p id="tr-27" data-src="0524c2b1eb70">在矿工找到的区块中，完全可以让交易 0（即 coinbase 交易）把奖励发送到 Taproot 地址。Taproot 增强了交易的灵活性和隐私，可以用于任何类型的输出，包括 coinbase 交易中的输出。</p>
+<ul id="tr-28" data-src="f0f47e27368f"><li><b>生成 Taproot 地址：</b>由矿工（更常见的是矿池）生成一个 Taproot 地址。这需要创建一个 Schnorr 公钥，并可选择加入额外的脚本条件，以支持更复杂的花费场景。</li>
+ <li><b>创建 coinbase 交易：</b>在 coinbase 交易中，把输出设为该 Taproot 地址。该输出的 scriptPubKey 字段大致形如 <code>OP_1 &lt;Taproot public key&gt;</code>。</li>
+ <li><b>挖出区块：</b>区块成功挖出后，coinbase 交易连同其发往 Taproot 地址的输出就在区块链上得到确认。</li>
+ <li><b>区块奖励成熟期：</b>与所有 coinbase 交易一样，由于比特币协议的成熟期要求，奖励的比特币要到 100 个区块之后才能花费。</li>
+ <li><b>从 Taproot 地址花费：</b>成熟之后，即可从 Taproot 地址花费这些比特币：简单的单签名交易走密钥路径；如果设置了更复杂的条件，则走脚本路径。</li></ul>
+<h2 id="tr-29" data-src="4ba37162a9fa">示例：矿池中的 Alice、Bob 和其他人</h2>
+<p id="tr-30" data-src="0462a2cf5b53">本示例同时使用 Taproot 的密钥路径和脚本路径，按一定条件分配奖励。</p>
+<p id="tr-31" data-src="d316346f0b8e"><b>第 1 步——生成 Taproot 地址。</b>Alice、Bob 和其他人约定一组条件，据此领取各自应得的挖矿奖励。他们创建一个 Taproot 地址，把他们的公钥以及更复杂的分配所需的脚本组合在一起。</p>
+<p id="tr-32" data-src="97be13b46580"><b>第 2 步——设置 coinbase 交易。</b>输出 1 支付到一个 Taproot 地址，其中包括：一条<b>密钥路径</b>（由一个主密钥给出单个签名，该密钥可能由矿池运营者持有，在各方一致同意时用于简单分配）和一条<b>脚本路径</b>（用于不同分配方式的脚本，例如 Alice 得 40%，Bob 得 30%，其他人按约定条款分享剩余的 30%）。</p>
+<p id="tr-33" data-src="77bd3b44e71d"><b>交易脚本示例：</b></p>
+<pre id="tr-34" data-src="c35631a1a0e7">Key-path output:    OP_1 &lt;combined Schnorr public key&gt;
+ Script-path output: Uses MAST to hide individual conditions where:
+  - Alice's condition could be based on time or block height for her shares.
+  - Bob's condition might involve his active participation in mining over a period.
+  - Others have their script based on other criteria like electricity contributions.</pre>
+<p id="tr-35" data-src="954ed2861bef"><b>第 3 步——挖出区块。</b>区块挖出后，具有上述结构的 coinbase 交易得到确认，区块被加入区块链。</p>
+<p id="tr-36" data-src="00066f32da28"><b>第 4 步——分配奖励。</b><i>密钥路径花费：</i>如果所有条件都是常规的且无争议，主密钥的持有者可以签署一笔交易，按预先约定的公式分配奖励。<i>脚本路径花费：</i>如果需要满足特定条件（例如争议解决或按时间释放），则执行 MAST 结构中编码的相关脚本，据此分配奖励。</p>
+<p id="tr-37" data-src="5ad636da3e7c"><b>第 5 步——奖励成熟与花费。</b>coinbase 交易产生的奖励必须经过 100 个区块的成熟期才能花费。成熟之后，按被触发的密钥路径或脚本路径条件进行分配。</p>
+<h2 id="tr-38" data-src="7e1530701e7b">不公开 Taproot 主密钥</h2>
+<p id="tr-39" data-src="4e24233ffdfc">让 Taproot 主密钥在用于 coinbase 交易之前对所有相关方都保持未知，是可行的，有时也更可取；尤其是当主密钥主要用于某一特定功能（例如分配挖矿奖励），并且为了安全和隐私而限制其暴露时。</p>
+<p id="tr-40" data-src="fbcd51279f6f"><b>保密性：</b>在首次使用之前让 Taproot 主密钥保持未知，有助于防止协议细节和分配公式过早暴露——这在竞争激烈的挖矿环境中是有利的。<b>安全性：</b>限制密钥的暴露，可以降低未经授权访问或泄露的风险；这个密钥一旦使用，可能控制大量加密货币。</p>
+<p id="tr-41" data-src="5bec7548333d"><b>实现方式。</b><i>生成：</i>密钥可以由一个受信任方生成，也可以通过 MuSig 之类的协议协作生成，由多方共同参与生成，而任何一方都不知道完整的密钥。<i>使用：</i>该密钥用于 coinbase 交易中 Taproot 地址的脚本。<i>公开：</i>密钥在交易签名过程中向区块链网络公开，但如果之后的交易不需要，它对各参与方可能仍然是隐藏的。</p>
+<div id="tr-41u" class="update" data-src="a8aa61b31a9d"><p><b>2026 年 11 月注。</b>32 字节的输出密钥本身是公开的：从区块被挖出的那一刻起，它就在 coinbase 输出中。能够保持私密的是<i>内部</i>密钥，以及所有从未被使用的脚本叶子。使用 MuSig2 时，任何一方都不会持有组合密钥的私钥。</p></div>
+<p id="tr-42" data-src="ed3301217a3a">在矿池场景中，使用一个在启用之前所有参与者都不知道的 Taproot 密钥，可以在不向每个矿工透露具体细节的情况下执行约定的分配规则，并允许把争议解决或有条件分配编码在脚本路径中，仅在满足特定条件时才触发。</p>
+<h2 id="tr-43" data-src="d70ee64df2e8">无需私钥即可验证分配</h2>
+<p id="tr-44" data-src="dc6d284c14d9">由于比特币区块链是公开透明的，Alice、Bob 和其他人无需知道私钥，就能验证与某个 Taproot 地址相关的挖矿奖励分配。</p>
+<ul id="tr-45" data-src="af95f40d3e84"><li><b>公钥透明：</b>即使私钥未知，与 Taproot 地址相关的公钥也是可见、可验证的。Taproot 的 Schnorr 签名支持密钥聚合和更保护隐私的脚本执行，但仍允许公开验证预期的交易结构。</li>
+ <li><b>脚本探查：</b>Taproot 地址可以包含 MAST，把复杂脚本隐藏起来，只在使用时才需要公开。这些脚本的执行条件可以通过公开文档或合作矿池的协议，从一开始就做到透明。</li>
+ <li><b>预先承诺条件：</b>奖励分配的条件可以预先承诺在 Taproot 脚本中。虽然各个脚本只在使用时才公开，但这些脚本的哈希（默克尔根的一部分）可以事先共享，并与区块链上承诺的内容进行核对。</li>
+ <li><b>模拟与工具：</b>工具可以基于公钥以及已知或假定的脚本条件模拟交易，而无需实际执行交易或接触私钥。</li></ul>
+<p id="tr-46" data-src="a6382d933845">实践中，在开始挖某个候选区块之前，参与者会审查 Taproot 设置及相关脚本，使用区块链分析工具核实公钥和脚本哈希与约定条款一致，并通过模拟或合同协议确认奖励分配符合预期。</p>
+<h2 id="tr-47" data-src="9c35ab90b28f">MAST 中无效地址的处理</h2>
+<p id="tr-48" data-src="bb8d827afaa9">如果 MAST 设置中的某笔花费交易试图把资金发往无效地址，根据“无效地址”的性质，可能出现以下几种情况：</p>
+<ul id="tr-49" data-src="5d5043888572"><li><b>地址格式无效：</b>如果地址不符合任何公认的比特币地址格式，钱包会拒绝构建该交易（见下方注释）。</li>
+ <li><b>地址有效但不存在对应私钥：</b>如果地址在技术上有效，但不对应任何已知私钥，交易仍可被处理并加入区块——这些比特币实际上被销毁了，因为没有人持有花费它们的密钥。</li>
+ <li><b>脚本求值失败：</b>如果地址是由一个执行失败的脚本派生的，那么在尝试执行该输出脚本时，交易会被判定为无效，从而无法确认。</li></ul>
+<div id="tr-49u" class="update" data-src="9ff411c8de61"><p><b>2026 年 11 月注。</b>在协议层面没有地址，只有输出脚本。无法解码的地址在任何交易产生之前就会被钱包拦下。没有人能满足的输出脚本在区块中仍然有效，其中的币被销毁。失败的脚本叶子只有在有人试图用它花费时才会失败。</p></div>
+<p id="tr-50" data-src="3b1fab360aa3"><b>处理与预防：</b>设计良好的钱包和节点会在广播之前验证地址；MAST 中的脚本应设计成能安全地失败；脚本在部署前应经过充分测试和审计；高级设置可以包含恢复条件（需要谨慎的密码学设计，以免引入新的漏洞）。发往无效地址通常会导致交易被拒绝或资金损失，因此严格的检查和审计必不可少。</p>
+<h2 id="tr-51" data-src="fad7dd05ef9d">比特币挖矿基础，结合 Taproot</h2>
+<p id="tr-52" data-src="8cb0a4dfd76d">比特币挖矿是把新交易加入区块链的过程；矿工用强大的计算机求解哈希难题，最先求解者可以添加一个区块并获得奖励。由于挖矿需要大量算力，个体矿工通常加入矿池，把计算能力合并起来；矿池成功时，奖励按成员贡献的算力在成员之间分配。</p>
+<p id="tr-53" data-src="d24b30aaaf65"><b>引入 Taproot：</b>生成一个 Taproot 地址来接收挖矿奖励（为简单起见可以只是单个公钥，也可以在其 MAST 中隐藏复杂条件）。矿池挖出区块时，coinbase 可以把奖励输出到该 Taproot 地址——简单分配走密钥路径，有条件的分成（按时间或贡献的算力）走脚本路径，只在需要时才公开。甚至在挖候选区块之前，所有成员都可以验证地址设置和分配脚本以确保公平；使用 Taproot 可以增强安全和隐私，因为除非条件要求公开，复杂性都是隐藏的，而所有交易在区块链上仍然可以验证。</p>
+<h2 id="tr-54" data-src="a4b4d12dd79c">Taproot 与 P2Pool</h2>
+<p id="tr-55" data-src="01312dcac35e">在 P2Pool 这样的去中心化矿池中引入 Taproot，由于其动态特性，需要做一些修改。P2Pool 具有<b>去中心化模型</b>（没有矿池运营者；每个矿工在点对点网络上运行一个节点）、<b>份额链</b>（一条辅助性的区块链，其中每个份额都是为找到主链区块而做出贡献的工作量证明；份额被找到的频率远高于区块）以及<b>动态参与</b>（矿工无需注册即可加入和离开，以提交的份额来衡量）。</p>
+<ul id="tr-56" data-src="a226a71c41b8"><li><b>动态生成 Taproot 地址：</b>每个矿工可以生成一个个人 Taproot 地址，其中包含简单的支付条件（密钥路径）和基于持续参与的有条件支付（脚本路径）；或者使用一个集体 Taproot 地址，由共识机制管理，随贡献的变化和份额链状态进行调整。</li>
+ <li><b>奖励分配：</b>挖出区块时，奖励发送到集体 Taproot 地址；分配依据份额链数据，反映每个矿工在一个滚动窗口内的贡献——公平且与工作量成比例。</li>
+ <li><b>动态脚本执行：</b>嵌入 MAST 的条件可以根据份额链的滚动窗口自动调整分配，考虑算力、份额频率和参与情况的变化，并处理参与者的加入和离开。</li>
+ <li><b>去中心化验证：</b>所有参与的矿工都可以通过区块链和份额链验证分配的完整性与公平性。</li>
+ <li><b>效率与隐私：</b>Taproot 只在需要时公开特定脚本，Schnorr 签名在大小和验证时间上更高效——这在高频环境中是有利的。</li></ul>
+<h2 id="tr-57" data-src="fd7d9f083be2">硬件对地址数量的限制</h2>
+<p id="tr-58" data-src="9cd9e0b03656">矿机厂商限制可使用的 coinbase 地址数量——这种做法可能限制此类硬件在 P2Pool 或 c2pool 等去中心化矿池中的使用——这个问题不能仅靠 Taproot 彻底解决。Taproot 可以<b>把多种花费条件合并到一个地址之下</b>（通过 MAST 和 Schnorr）、<b>减少对多个地址的需求</b>，并<b>增强隐私和效率</b>——让有限数量的地址发挥更大作用。但问题的核心涉及厂商政策、硬件控制权和矿工自主权：</p>
+<ul id="tr-59" data-src="abe051d71b6a"><li><b>硬件固件限制：</b>如果固件锁定了特定的一组地址或限制了地址功能，那么不修改固件或硬件，Taproot 的能力可能无法充分发挥。</li>
+ <li><b>需要厂商配合或政策改变：</b>真正的改变可能需要厂商调整政策，或来自社区的压力。</li>
+ <li><b>替代方案：</b>矿工可以转向更开源或更可定制的硬件，以便对这类设置拥有更多控制权。</li></ul>
+<p id="tr-60" data-src="855ca4da183f">Taproot 解决的是<i>症状</i>——每个被允许的地址能被多高效、多灵活地使用——而不是<i>根本原因</i>，即厂商强加的地址数量限制。变通办法包括：在不同区块之间复用地址（如果允许）、在矿池层面管理地址（每个矿池一个 Taproot 地址或一小组地址），以及在合法、合乎道德的前提下修改固件；同时更广泛地倡导开放标准，并注意法律、保修和监管方面的影响。</p>
+<h2 id="tr-c2" data-src="260c2e84c29f">c2pool 中的 Taproot 现状</h2>
+<ul id="tr-c3" data-src="207c937a337f">
+ <li>与莱特币网络一样，c2pool 的莱特币节点要求 <code>segwit</code>、<code>taproot</code> 和 <code>mweb</code> 软分叉。</li>
+ <li><b>目前莱特币份额链不支持 Taproot 收款地址。</b>V36 份额携带的是 20 字节的收款哈希，而 P2TR（或 P2WSH）输出需要 32 字节。c2pool 接受这样的登录，但该矿工的莱特币支付会被重新分配给其他矿工（按节点的 <code>--redistribute</code> 模式），日志中会给出警告，仪表板上显示“P2WSH/P2TR address &rarr; redistributed”（译文：“P2WSH/P2TR 地址 &rarr; 已重新分配”）。请使用 P2PKH、P2WPKH 或 P2SH 地址。</li>
+ <li>进行联合挖矿时，c2pool 需要为每个莱特币矿工提供一个狗狗币收款地址。狗狗币既没有 SegWit 也没有 Taproot，因此 c2pool 会支付到莱特币地址对应的密钥（P2PKH 和 P2WPKH 按 P2PKH 支付，P2SH 按 P2SH 支付），除非矿工在 stratum 登录中明确给出狗狗币地址（<code>LTC_ADDRESS,DOGE_ADDRESS</code>）。</li>
+</ul>
+<div id="tr-61" class="v37" data-src="e638d56274f5"><span class="tag">V37</span><b>众多矿工，一个 coinbase，没有运营者密钥。</b>
+ <p>上面的方案依赖一个“可能由矿池运营者持有”的 Taproot 密钥，并依赖 MAST 把许多条件打包进一个输出。由运营者持有的密钥路径是一种托管式结构，去中心化矿池必须避免。MAST 合并也无法用大小有限的 coinbase 向数量无上限的矿工付款。</p>
+ <p>此框的早期版本描述过一种补救办法：把欠矿工的余额记在共享账本中，在之后的区块里支付。该模型已撤回：一项独立审查表明，没有托管方的矿池无法在欠付一部分矿工的同时不多付给其他矿工，而多付的部分永远无法收回。参见 <a href="/zh/purple-paper/">Purple Paper 摘要</a>中 2026 年 10 月 4 日的勘误；论文第 9 节已标记为撤回。</p>
+ <p>Taproot 仍然是一种有用的基础构件：为了隐私和效率，每个输出仍然可以是一个 Taproot 密钥。但它本身并不能解决 coinbase 大小的问题。</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>最初由 Technocore One 发布于“P2Pool scientific basics”，2026 年 11 月更新。© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>
