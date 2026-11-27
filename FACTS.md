@@ -46,6 +46,13 @@ Legend: **C** = changed from the original text, **N** = new text, **K** = kept f
 | mk-u126 DGB live daemonless mainnet, standalone Scrypt parent, no testnet | README.md:194, 205 |
 | mk-u127 Python p2pool off the LTC chain since 3601 | README.md:321-327 |
 | mk-128 V37 box reworded: credit by target met; V37 design/prototype stage | README.md:211-215; paper §5 |
+| mk-80 "contiguous std::deque" → std::deque (not contiguous) | `src/impl/ltc/share_tracker.hpp:331` (`std::deque<PPLNSEntry> m_entries`) |
+| mk-87 the CHECKMULTISIG dummy is supplied by the spender; NULLDUMMY requires it empty | BIP 147 |
+| mk-101 HogEx = "Hogwarts Express", the MWEB integration transaction | LIP-0003 (litecoin-project/lips, lip-0003.mediawiki:199) |
+| mk-124 Litecoin retargets every 2016 blocks; Dogecoin at every block since DigiShield | `src/impl/ltc/coin/header_chain.hpp:186-189`; `src/impl/doge/coin/chain_params.hpp:6-30` |
+| mk-u96 a ±10% clamp doubles the target in ≈ 7.3 shares and triples it in ≈ 11.5; the original "23 shares" is kept as written | arithmetic: ln 2 / ln 1.1, ln 3 / ln 1.1 |
+| mk-u74 names both chains (LTC, BTC) | as above |
+| wm-05 weights decide approval (contradiction with wm-upd removed) | editorial |
 | Everything else (GENTX counts, timings, test topology, 12 address cases, OOM figures) | **H**: the original authors' June 2026 account, not re-verified |
 
 ## luck (K + N)
