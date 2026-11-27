@@ -81,26 +81,24 @@ def difficulty(target):
  <li>les verrouillages temporels (lock times) exprimés en temps sont comparés au MTP, et non à l’horodatage propre du bloc (BIP 113).</li>
 </ul>
 <p id="da-22b" data-src="d3a4f0b25cf3">Il n’intervient pas dans le réajustement de la difficulté. Voici l’exemple de la page d’origine, qui calcule le MTP de la pointe de la chaîne par RPC (le <code>getblock</code> de Bitcoin Core le renvoie aussi directement sous le nom <code>mediantime</code>) :</p>
-<pre id="da-23" data-src="35cbb7d5c494">import bitcoin.rpc
- def calculate_mediantime():
+<pre id="da-23" data-src="eeafa1c83a84">import bitcoin.rpc
+def calculate_mediantime():
     proxy = bitcoin.rpc.Proxy()  # Establish connection to Bitcoin Core client
     block_count = proxy.getblockcount()
-    if block_count &gt;= 11:
+    if block_count &gt;= 10:
         timestamps = []
         for height in range(block_count, block_count - 11, -1):
             block_hash = proxy.getblockhash(height)
-            block = proxy.getblock(block_hash)
-            timestamp = block['time']
+            timestamp = proxy.getblockheader(block_hash).nTime
             timestamps.append(timestamp)
         sorted_timestamps = sorted(timestamps)
         mediantime = sorted_timestamps[5]  # Take the middle timestamp
         return mediantime
     return None  # Return None if there are not enough blocks to calculate mediantime
- # Example usage
- mediantime = calculate_mediantime()
- print(mediantime)</pre>
-
-<p id="da-24" data-src="175bb26a534f">Dans l’extrait de code ci-dessus, on établit une connexion à un client Bitcoin Core en cours d’exécution à l’aide de la classe bitcoin.rpc.Proxy. La fonction calculate_mediantime récupère d’abord le nombre de blocs actuel avec getblockcount. Si la blockchain compte au moins 11 blocs, elle procède au calcul. Elle parcourt les 11 blocs précédents, en partant du bloc courant, et récupère l’horodatage de chaque bloc avec getblock. Les horodatages sont stockés dans la liste timestamps. Cette liste est ensuite triée par ordre croissant avec la fonction sorted. Enfin, l’horodatage du milieu de la liste triée (à l’index 5) est retenu comme mediantime. La fonction renvoie ce mediantime. S’il n’y a pas assez de blocs pour le calculer, elle renvoie None.</p>
+# Example usage
+mediantime = calculate_mediantime()
+print(mediantime)</pre>
+<p id="da-24" data-src="40d5a008e974">Dans l’extrait de code ci-dessus, on établit une connexion à un client Bitcoin Core en cours d’exécution à l’aide de la classe bitcoin.rpc.Proxy. La fonction calculate_mediantime récupère d’abord le nombre de blocs actuel avec getblockcount. Si la blockchain compte au moins 11 blocs (une hauteur de pointe de 10 ou plus), elle procède au calcul. Elle parcourt les 11 blocs précédents, en partant du bloc courant, et lit l’horodatage de chaque bloc (nTime) avec getblockheader. Les horodatages sont stockés dans la liste timestamps. Cette liste est ensuite triée par ordre croissant avec la fonction sorted. Enfin, l’horodatage du milieu de la liste triée (à l’index 5) est retenu comme mediantime. La fonction renvoie ce mediantime. S’il n’y a pas assez de blocs pour le calculer, elle renvoie None.</p>
 
 <h2 id="da-30" data-src="eaa4e0ba3c89">Litecoin</h2>
 <p id="da-31" data-src="b1681d53e458">Litecoin reprend la règle de Bitcoin avec un espacement de 2,5 minutes : 2016 blocs en 3,5 jours. Une différence : après la première période, la fenêtre remonte de 2016 blocs complets au lieu de 2015 (un correctif attribué à Art Forz, contre la manipulation de la difficulté). Le nœud Litecoin embarqué de c2pool calcule lui-même la cible suivante à partir des en-têtes qu’il a synchronisés, avec le même bornage et les mêmes horodatages.</p>
@@ -108,14 +106,14 @@ def difficulty(target):
 <p id="da-33" data-src="b52a959ce3f8">Dogecoin, que c2pool mine en minage fusionné avec Litecoin, avait une fenêtre de réajustement de 4 heures (240 blocs d’une minute) jusqu’à la hauteur 145 000. À partir de cette hauteur, il utilise DigiShield, qui réajuste la difficulté à chaque bloc. Le minage fusionné (AuxPoW) a commencé à la hauteur 371 337. Le nœud Dogecoin embarqué de c2pool suit ces deux règles.</p>
 <h2 id="da-40" data-src="2e3f15e1888d">La difficulté propre à la chaîne de shares</h2>
 <p id="da-41" data-src="aa53fce15723">Une chaîne de shares P2Pool a sa propre difficulté, fixée à chaque share plutôt qu’à chaque période. Dans c2pool, comme dans p2pool :</p>
-<ul id="da-42" data-src="718455082253">
+<ul id="da-42" data-src="1b24d2abac2a">
  <li>le nœud estime le taux de hachage (hashrate) du pool à partir des shares récentes et calcule la cible qui donnerait une share par <i>période de share</i> : 15 secondes sur la chaîne de shares Litecoin, 30 secondes sur Bitcoin ;</li>
  <li>le résultat est borné à &plusmn;10 % de la cible de la share précédente, de sorte que la difficulté des shares évolue en douceur ;</li>
- <li>quand aucune share n’est arrivée depuis 20 périodes de share (5 minutes sur Litecoin), une règle de difficulté d’urgence assouplit la cible de référence : celle-ci double toutes les 10 périodes de share supplémentaires, avec une interpolation linéaire entre les deux, avant que le bornage à &plusmn;10 % ne s’applique. Cela évite qu’un pool qui a soudain perdu l’essentiel de son taux de hachage ne se bloque.</li>
+ <li>quand aucune share n’est arrivée depuis 20 périodes de share (5 minutes sur Litecoin), une règle de difficulté d’urgence (issue de p2pool V36 ; le p2pool d’origine n’en a pas) assouplit la cible de référence : celle-ci double toutes les 10 périodes de share supplémentaires, avec une interpolation linéaire entre les deux, avant que le bornage à &plusmn;10 % ne s’applique. Cela évite qu’un pool qui a soudain perdu l’essentiel de son taux de hachage ne se bloque.</li>
 </ul>
-<div id="da-25" class="v37" data-src="4e17b54c2ba6"><span class="tag">V37</span><b>Cible contre difficulté, et calendrier absolu.</b>
+<div id="da-25" class="v37" data-src="0794c950e7a1"><span class="tag">V37</span><b>Cible contre difficulté, et calendrier absolu.</b>
  <p>La difficulté et la cible sont inverses l’une de l’autre (difficulté = max_target / cible) : le réajustement multiplie donc la cible par le rapport des durées, et la difficulté évolue en sens inverse. Des blocs plus rapides (un rapport plus petit) font monter la difficulté.</p>
- <p>Remonter la chaîne pour effectuer un réajustement coûte cher sur de longues fenêtres. Un calendrier absolu (de type ASERT) calcule la cible directement à partir d’un bloc d’ancrage et du dernier bloc, en temps constant. Il ne parcourt aucune fenêtre : les horodatages situés dans une fenêtre ne peuvent donc pas faire dériver la cible, même si l’horodatage propre du dernier bloc compte toujours. Bitcoin Cash en utilise un depuis novembre 2020. C’est une piste pour la difficulté propre d’une chaîne de shares dans les travaux de conception de V37 ; les chaînes de shares de c2pool utilisent aujourd’hui la règle par share décrite ci-dessus.</p>
+ <p>Un réajustement par fenêtre dépend des horodatages situés aux deux extrémités de sa fenêtre. Un calendrier absolu (de type ASERT) calcule la cible directement à partir d’un bloc d’ancrage et du dernier bloc, en temps constant. Il ne parcourt aucune fenêtre : les horodatages situés dans une fenêtre ne peuvent donc pas faire dériver la cible, même si l’horodatage propre du dernier bloc compte toujours. Bitcoin Cash en utilise un depuis novembre 2020. C’est une piste pour la difficulté propre d’une chaîne de shares dans les travaux de conception de V37 ; les chaînes de shares de c2pool utilisent aujourd’hui la règle par share décrite ci-dessus.</p>
  </div>
 </article>
 </main>

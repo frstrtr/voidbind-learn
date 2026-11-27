@@ -68,11 +68,11 @@
  </tbody>
 </table></div>
 <h2 id="ld-11" data-src="c6cc1c529a9f">chainstate 中的键</h2>
-<div id="ld-12" class="table-wrap" data-src="207f2ac46772"><table>
+<div id="ld-12" class="table-wrap" data-src="d798ea289d99"><table>
  <thead><tr><th>键</th><th>值</th></tr></thead>
  <tbody>
  <tr><td><code>'C'</code> + txid + 输出索引（varint）</td><td>一个未花费输出：高度、是否为 coinbase 输出、金额和脚本（自 Bitcoin Core 0.15 起）</td></tr>
- <tr><td><code>'c'</code> + txid</td><td>旧的按交易存储的格式（0.15 之前）；只在升级旧数据库时才会遇到</td></tr>
+ <tr><td><code>'c'</code> + txid</td><td>旧的按交易存储的格式（0.15 之前）；如果 chainstate 中仍有这种记录，Bitcoin Core v28.1 会拒绝使用它，并要求执行 <code>-reindex-chainstate</code></td></tr>
  <tr><td><code>'B'</code></td><td>UTXO 集已完整对应到的那个区块的哈希</td></tr>
  <tr><td><code>'H'</code></td><td>刷写被中断时的头部区块</td></tr>
  </tbody>
@@ -126,8 +126,8 @@ def parse_block_index_value(value):
 <p id="ld-17" data-src="5ae42dd747a3">把区块 80,000 的记录值传给 <code>parse_block_index_value</code>，它返回高度 80000、两笔交易、文件 0、<code>bits = 0x1b5bede6</code>，以及它根据区块头重新计算出的区块哈希 <code>000000000043a8c0fd1d6f726790caa2a406010d19efd2780db27bdbbd93baf6</code>。哈希以小端字节序存储，因此显示时要反转字节顺序。</p>
 <h2 id="ld-18" data-src="ff41a17c89a7">直接读取区块文件</h2>
 <p id="ld-19" data-src="b621b34522cd"><code>blk*.dat</code> 文件中的每个区块依次存储为：网络魔数（4 字节）、区块大小（4 字节，小端序），然后是区块本身。自 <b>Bitcoin Core 28.0</b> 起，如果节点的 blocks 目录是新建的，这些文件会用一个 8 字节的随机密钥做 XOR，密钥保存在 <code>blocks/xor.dat</code> 中（选项 <code>-blocksxor</code>）。旧软件在应用该密钥之前无法读取这类文件。由更早版本创建的 blocks 目录保持全零密钥。</p>
-<div id="ld-24" class="v37" data-src="8b9256361203"><span class="tag">V37</span><b>这种方法的实际应用。</b>
- <p>区块索引只存放区块头和文件位置；区块本身是只追加写入的普通文件。正因如此，才能直接读取而无需守护进程。本站的<a href="/zh/real-difficulty/">真实难度</a>图表就是这样制作的：我们从一个全节点的磁盘上读取 <code>blocks/blk00000.dat</code>，按顺序解析前 4,032 个区块的 80 字节区块头（魔数、大小、区块头，然后是 <code>nBits</code> 和两次 SHA-256 得到的区块哈希），没有使用 RPC。对于用 Bitcoin Core 28.0 或更高版本建立的节点，要先应用 <code>blocks/xor.dat</code> 中的密钥。V37 设计工作也基于同样的特性：节点可以从紧凑的磁盘记录中重建已承诺的状态，并用对数大小的默克尔证明来证明它；参见 <a href="/zh/purple-paper/">Purple Paper 摘要</a>第 13 节（验证支付）。</p>
+<div id="ld-24" class="v37" data-src="97c27b8eac27"><span class="tag">V37</span><b>这种方法的实际应用。</b>
+ <p>区块索引只存放区块头、文件位置和少量状态数据；区块本身是只追加写入的普通文件。正因如此，才能直接读取而无需守护进程。本站的<a href="/zh/real-difficulty/">真实难度</a>图表就是这样制作的：我们从一个全节点的磁盘上读取 <code>blocks/blk00000.dat</code>，按顺序解析前 4,032 个区块的 80 字节区块头（魔数、大小、区块头，然后是 <code>nBits</code> 和两次 SHA-256 得到的区块哈希），没有使用 RPC。对于用 Bitcoin Core 28.0 或更高版本建立的节点，要先应用 <code>blocks/xor.dat</code> 中的密钥。V37 设计工作也基于同样的特性：节点可以从紧凑的磁盘记录中重建已承诺的状态，并用对数大小的默克尔证明来证明它；参见 <a href="/zh/purple-paper/">Purple Paper 摘要</a>第 13 节（验证支付）。</p>
  </div>
 </article>
 </main>

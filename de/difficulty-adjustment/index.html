@@ -81,26 +81,24 @@ def difficulty(target):
  <li>zeitbasierte Lock-Times werden mit der MTP verglichen, nicht mit dem eigenen Zeitstempel des Blocks (BIP 113).</li>
 </ul>
 <p id="da-22b" data-src="d3a4f0b25cf3">In das Retarget der Schwierigkeit geht sie nicht ein. Hier das Beispiel der ursprünglichen Seite, das die MTP der Chain-Spitze per RPC berechnet (<code>getblock</code> von Bitcoin Core liefert sie auch direkt als <code>mediantime</code>):</p>
-<pre id="da-23" data-src="35cbb7d5c494">import bitcoin.rpc
- def calculate_mediantime():
+<pre id="da-23" data-src="eeafa1c83a84">import bitcoin.rpc
+def calculate_mediantime():
     proxy = bitcoin.rpc.Proxy()  # Establish connection to Bitcoin Core client
     block_count = proxy.getblockcount()
-    if block_count &gt;= 11:
+    if block_count &gt;= 10:
         timestamps = []
         for height in range(block_count, block_count - 11, -1):
             block_hash = proxy.getblockhash(height)
-            block = proxy.getblock(block_hash)
-            timestamp = block['time']
+            timestamp = proxy.getblockheader(block_hash).nTime
             timestamps.append(timestamp)
         sorted_timestamps = sorted(timestamps)
         mediantime = sorted_timestamps[5]  # Take the middle timestamp
         return mediantime
     return None  # Return None if there are not enough blocks to calculate mediantime
- # Example usage
- mediantime = calculate_mediantime()
- print(mediantime)</pre>
-
-<p id="da-24" data-src="175bb26a534f">Im obigen Code-Ausschnitt stellen wir mit der Klasse bitcoin.rpc.Proxy eine Verbindung zu einem laufenden Bitcoin-Core-Client her. Die Funktion calculate_mediantime ermittelt zuerst mit getblockcount die aktuelle Blockanzahl. Gibt es mindestens 11 Blöcke in der Blockchain, fährt sie mit der Berechnung fort. Sie durchläuft die letzten 11 Blöcke, beginnend mit dem aktuellen Block, und holt mit getblock jeweils den Zeitstempel des Blocks. Die Zeitstempel werden in der Liste timestamps gespeichert. Diese Liste wird dann mit der Funktion sorted aufsteigend sortiert. Schließlich wird der mittlere Zeitstempel der sortierten Liste (an Index 5) als mediantime genommen. Die Funktion gibt mediantime zurück. Gibt es nicht genug Blöcke, um mediantime zu berechnen, wird None zurückgegeben.</p>
+# Example usage
+mediantime = calculate_mediantime()
+print(mediantime)</pre>
+<p id="da-24" data-src="40d5a008e974">Im obigen Code-Ausschnitt stellen wir mit der Klasse bitcoin.rpc.Proxy eine Verbindung zu einem laufenden Bitcoin-Core-Client her. Die Funktion calculate_mediantime ermittelt zuerst mit getblockcount die aktuelle Blockanzahl. Gibt es mindestens 11 Blöcke in der Blockchain (eine Höhe der Spitze von 10 oder mehr), fährt sie mit der Berechnung fort. Sie durchläuft die letzten 11 Blöcke, beginnend mit dem aktuellen Block, und liest jeweils den Zeitstempel des Blocks (nTime) aus getblockheader. Die Zeitstempel werden in der Liste timestamps gespeichert. Diese Liste wird dann mit der Funktion sorted aufsteigend sortiert. Schließlich wird der mittlere Zeitstempel der sortierten Liste (an Index 5) als mediantime genommen. Die Funktion gibt mediantime zurück. Gibt es nicht genug Blöcke, um mediantime zu berechnen, wird None zurückgegeben.</p>
 
 <h2 id="da-30" data-src="eaa4e0ba3c89">Litecoin</h2>
 <p id="da-31" data-src="b1681d53e458">Litecoin behält die Regel von Bitcoin mit einem Blockabstand von 2,5 Minuten bei: 2016 Blöcke in 3,5 Tagen. Ein Unterschied: Nach der ersten Periode reicht das Fenster volle 2016 Blöcke zurück statt 2015 (eine Korrektur gegen Manipulation der Schwierigkeit, die Art Forz zugeschrieben wird). Der eingebettete Litecoin-Knoten von c2pool berechnet das nächste Target selbst aus den Headern, die er synchronisiert hat, mit derselben Begrenzung und denselben Zeitstempeln.</p>
@@ -108,14 +106,14 @@ def difficulty(target):
 <p id="da-33" data-src="b52a959ce3f8">Dogecoin, das c2pool per Merged Mining zusammen mit Litecoin mined, hatte bis Höhe 145.000 ein Retarget-Fenster von 4 Stunden (240 Blöcke zu je einer Minute). Ab dieser Höhe verwendet es DigiShield, das bei jedem Block neu berechnet. Merged Mining (AuxPoW) begann bei Höhe 371.337. Der eingebettete Dogecoin-Knoten von c2pool folgt beiden Regeln.</p>
 <h2 id="da-40" data-src="2e3f15e1888d">Die eigene Schwierigkeit der Share-Chain</h2>
 <p id="da-41" data-src="aa53fce15723">Eine P2Pool-Share-Chain hat eine eigene Schwierigkeit, festgelegt pro Share statt pro Periode. In c2pool gilt, wie in p2pool:</p>
-<ul id="da-42" data-src="718455082253">
+<ul id="da-42" data-src="1b24d2abac2a">
  <li>Der Knoten schätzt die Rate des Pools aus den letzten Shares und berechnet das Target, das einen Share pro <i>Share-Periode</i> ergäbe: 15 Sekunden auf der Litecoin-Share-Chain, 30 Sekunden auf Bitcoin;</li>
  <li>das Ergebnis wird auf &plusmn;10&nbsp;% um das Target des vorigen Shares begrenzt, sodass sich die Share-Schwierigkeit gleichmäßig bewegt;</li>
- <li>ist 20 Share-Perioden lang (5 Minuten auf Litecoin) kein Share eingetroffen, lockert eine Notfall-Schwierigkeitsregel das Referenz-Target: Es verdoppelt sich je weitere 10 Share-Perioden, dazwischen linear interpoliert, bevor die Begrenzung auf &plusmn;10&nbsp;% greift. So bleibt ein Pool, der plötzlich den größten Teil seiner Hashrate verloren hat, nicht stecken.</li>
+ <li>ist 20 Share-Perioden lang (5 Minuten auf Litecoin) kein Share eingetroffen, lockert eine Notfall-Schwierigkeitsregel (aus p2pool V36; das ursprüngliche p2pool hat keine) das Referenz-Target: Es verdoppelt sich je weitere 10 Share-Perioden, dazwischen linear interpoliert, bevor die Begrenzung auf &plusmn;10&nbsp;% greift. So bleibt ein Pool, der plötzlich den größten Teil seiner Hashrate verloren hat, nicht stecken.</li>
 </ul>
-<div id="da-25" class="v37" data-src="4e17b54c2ba6"><span class="tag">V37</span><b>Target vs. Schwierigkeit, und ein absoluter Zeitplan.</b>
+<div id="da-25" class="v37" data-src="0794c950e7a1"><span class="tag">V37</span><b>Target vs. Schwierigkeit, und ein absoluter Zeitplan.</b>
  <p>Schwierigkeit und Target sind zueinander invers (difficulty = max_target / target), daher multipliziert das Retarget das Target mit dem Zeitspannen-Verhältnis, und die Schwierigkeit bewegt sich in die Gegenrichtung: Schnellere Blöcke (ein kleineres Verhältnis) erhöhen die Schwierigkeit.</p>
- <p>Für ein Retarget die Chain zurückzulaufen, ist bei langen Fenstern aufwendig. Ein absoluter Zeitplan (nach Art von ASERT) berechnet das Target in konstanter Zeit direkt aus einem Ankerblock und dem jüngsten Block. Er durchläuft kein Fenster, daher können Zeitstempel innerhalb eines Fensters das Target nicht abdriften lassen, auch wenn der eigene Zeitstempel des jüngsten Blocks weiterhin eine Rolle spielt. Bitcoin Cash verwendet einen solchen Zeitplan seit November 2020. Er ist in der V37-Designarbeit ein Kandidat für die eigene Schwierigkeit einer Share-Chain; die c2pool-Share-Chains verwenden heute die oben beschriebene Regel pro Share.</p>
+ <p>Ein fensterbasiertes Retarget hängt von den Zeitstempeln an den beiden Enden seines Fensters ab. Ein absoluter Zeitplan (nach Art von ASERT) berechnet das Target in konstanter Zeit direkt aus einem Ankerblock und dem jüngsten Block. Er durchläuft kein Fenster, daher können Zeitstempel innerhalb eines Fensters das Target nicht abdriften lassen, auch wenn der eigene Zeitstempel des jüngsten Blocks weiterhin eine Rolle spielt. Bitcoin Cash verwendet einen solchen Zeitplan seit November 2020. Er ist in der V37-Designarbeit ein Kandidat für die eigene Schwierigkeit einer Share-Chain; die c2pool-Share-Chains verwenden heute die oben beschriebene Regel pro Share.</p>
  </div>
 </article>
 </main>

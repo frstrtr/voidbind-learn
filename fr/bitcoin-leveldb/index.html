@@ -68,11 +68,11 @@
  </tbody>
 </table></div>
 <h2 id="ld-11" data-src="c6cc1c529a9f">Les clés du chainstate</h2>
-<div id="ld-12" class="table-wrap" data-src="207f2ac46772"><table>
+<div id="ld-12" class="table-wrap" data-src="d798ea289d99"><table>
  <thead><tr><th>Clé</th><th>Valeur</th></tr></thead>
  <tbody>
  <tr><td><code>'C'</code> + txid + index de sortie (varint)</td><td>une sortie non dépensée : hauteur, s’il s’agit ou non d’une sortie coinbase, montant et script (depuis Bitcoin Core 0.15)</td></tr>
- <tr><td><code>'c'</code> + txid</td><td>l’ancien format par transaction (avant 0.15) ; on ne le rencontre qu’en mettant à niveau une ancienne base</td></tr>
+ <tr><td><code>'c'</code> + txid</td><td>l’ancien format par transaction (avant 0.15) ; Bitcoin Core v28.1 refuse un chainstate qui le contient encore et demande <code>-reindex-chainstate</code></td></tr>
  <tr><td><code>'B'</code></td><td>le hash du bloc jusqu’auquel l’ensemble UTXO est complet</td></tr>
  <tr><td><code>'H'</code></td><td>les blocs de tête lorsqu’une écriture sur disque (flush) est interrompue</td></tr>
  </tbody>
@@ -126,8 +126,8 @@ def parse_block_index_value(value):
 <p id="ld-17" data-src="5ae42dd747a3">Si on lui fournit la valeur de l’enregistrement du bloc 80 000, <code>parse_block_index_value</code> renvoie la hauteur 80000, deux transactions, le fichier 0, <code>bits = 0x1b5bede6</code> et le hash de bloc <code>000000000043a8c0fd1d6f726790caa2a406010d19efd2780db27bdbbd93baf6</code>, qu’elle recalcule à partir de l’en-tête. Les hashs sont stockés en ordre d’octets little-endian ; on les inverse donc pour l’affichage.</p>
 <h2 id="ld-18" data-src="ff41a17c89a7">Lire directement les fichiers de blocs</h2>
 <p id="ld-19" data-src="b621b34522cd">Chaque bloc d’un fichier <code>blk*.dat</code> est stocké sous la forme des octets magiques du réseau (4 octets), de la taille du bloc (4 octets, little-endian), puis du bloc. Depuis <b>Bitcoin Core 28.0</b>, un nœud dont le répertoire des blocs est créé à neuf applique un XOR à ces fichiers avec une clé aléatoire de 8 octets conservée dans <code>blocks/xor.dat</code> (option <code>-blocksxor</code>). Un logiciel plus ancien ne peut pas lire ces fichiers tant qu’il n’applique pas la clé. Un répertoire des blocs créé par une version antérieure garde une clé entièrement nulle.</p>
-<div id="ld-24" class="v37" data-src="8b9256361203"><span class="tag">V37</span><b>Cette méthode en pratique.</b>
- <p>L’index des blocs ne contient que les en-têtes et les positions dans les fichiers ; les blocs eux-mêmes sont de simples fichiers en ajout seul. C’est ce qui rend possibles des lectures directes, sans démon. Les graphiques de la page <a href="/fr/real-difficulty/">Difficulté réelle</a> de ce site ont été réalisés ainsi : nous avons lu <code>blocks/blk00000.dat</code> sur le disque d’un nœud complet et analysé dans l’ordre les en-têtes de 80 octets (octets magiques, taille, en-tête, puis <code>nBits</code> et le hash de bloc double SHA-256) des 4032 premiers blocs, sans RPC. Sur un nœud installé avec Bitcoin Core 28.0 ou ultérieur, appliquez d’abord la clé de <code>blocks/xor.dat</code>. La même propriété sous-tend les travaux de conception de V37 : un nœud peut reconstruire l’état engagé à partir d’enregistrements compacts sur disque et le prouver par des preuves de Merkle de taille logarithmique ; voir le <a href="/fr/purple-paper/">résumé du Purple Paper</a>, &sect;13 (Vérifier le paiement).</p>
+<div id="ld-24" class="v37" data-src="97c27b8eac27"><span class="tag">V37</span><b>Cette méthode en pratique.</b>
+ <p>L’index des blocs ne contient que les en-têtes, les positions dans les fichiers et quelques données d’état ; les blocs eux-mêmes sont de simples fichiers en ajout seul. C’est ce qui rend possibles des lectures directes, sans démon. Les graphiques de la page <a href="/fr/real-difficulty/">Difficulté réelle</a> de ce site ont été réalisés ainsi : nous avons lu <code>blocks/blk00000.dat</code> sur le disque d’un nœud complet et analysé dans l’ordre les en-têtes de 80 octets (octets magiques, taille, en-tête, puis <code>nBits</code> et le hash de bloc double SHA-256) des 4032 premiers blocs, sans RPC. Sur un nœud installé avec Bitcoin Core 28.0 ou ultérieur, appliquez d’abord la clé de <code>blocks/xor.dat</code>. La même propriété sous-tend les travaux de conception de V37 : un nœud peut reconstruire l’état engagé à partir d’enregistrements compacts sur disque et le prouver par des preuves de Merkle de taille logarithmique ; voir le <a href="/fr/purple-paper/">résumé du Purple Paper</a>, &sect;13 (Vérifier le paiement).</p>
  </div>
 </article>
 </main>
