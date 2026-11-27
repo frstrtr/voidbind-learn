@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Purple Paper: Work Receipts — P2Pool scientific basics</title>
+<meta name="description" content="A summary of the Work Receipts paper, with its errata of 4 October 2026 and a link to the canonical copy.">
+<link rel="canonical" href="https://learn.voidbind.com/en/purple-paper/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/purple-paper/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/purple-paper/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/purple-paper/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/purple-paper/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/purple-paper/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/purple-paper/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<a class="brand" href="/en/">P2Pool scientific basics</a>
+<nav class="langs" aria-label="Language"><a class="lang" href="/en/purple-paper/" hreflang="en" lang="en" data-lang="en" aria-current="true">English</a> · <a class="lang" href="/fr/purple-paper/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/purple-paper/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/purple-paper/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/purple-paper/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Contents"><ul>
+<li><a href="/en/">Home</a></li>
+<li><a href="/en/c2pool-today/">c2pool today</a></li>
+<li><a href="/en/references/">References</a></li>
+<li><a href="/en/making-of-c2pool/">Making of c2pool</a></li>
+<li><a href="/en/luck/">Luck</a></li>
+<li><a href="/en/real-difficulty/">Real difficulty</a></li>
+<li><a href="/en/difficulty-adjustment/">Difficulty adjustment</a></li>
+<li><a href="/en/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/en/weighted-multisig/">Weighted multisig</a></li>
+<li><a href="/en/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/en/purple-paper/" aria-current="page">Purple Paper</a></li>
+<li><a href="/en/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Purple Paper" data-desc="A summary of the Work Receipts paper, with its errata of 4 October 2026 and a link to the canonical copy.">
+<h1 id="pp-01">Purple Paper: Work Receipts</h1>
+<p id="pp-02" class="sub">A summary of &ldquo;Work Receipts: A Peer-to-Peer Mining-Reward Accounting System&rdquo; (frstrtr, 2026)</p>
+<p id="pp-03">The paper is published at <a href="https://frstrtr.github.io/c2pool/">frstrtr.github.io/c2pool</a> under the MIT License. That copy is the reference, with its errata. This page only summarises it, section by section, so that the articles on this site can point to it. Where this summary and the paper differ, the paper is right.</p>
+<div id="pp-04" class="update"><p><b>Errata of 4 October 2026 (from the paper).</b> Section 9, and the parts of the abstract and of Sections 10 and 14 that rely on an owed balance, are withdrawn. An independent review showed that a pool with no custodian cannot owe some miners without overpaying others, and the overpayment is never recovered. The paper says a revised Section 9 will describe paying each block&rsquo;s window in full, in that block; that revision has not been published. Section 3 is narrowed: work done on a tip of the underlying chain that had already been passed earns nothing.</p></div>
+<p id="pp-05"><b>Status.</b> The paper describes a design. It is not a description of a running network: V37, the design line that follows it in c2pool, is at the design and prototype stage and is not run in production. In particular, the time-binned window of Sections 4 and 6 is not what the experimental Monero lane runs today.</p>
+<h2 id="pp-10">The idea</h2>
+<p id="pp-11">A P2Pool share does two jobs: it proves work, and it takes a place in an order. A share that loses the race for its place is thrown away with its proof, and work below the share difficulty is not counted at all. The paper separates the two jobs. The share chain orders only <i>carriers</i> (ordinary shares). Work is counted from <i>receipts</i> the carriers embed: proofs of work bound to the pool, to the worker to be paid and to a settled block of the underlying chain.</p>
+<h2 id="pp-20">Sections</h2>
+<ul id="pp-21">
+ <li id="pp-s2"><b>&sect;2 Receipts.</b> A receipt cannot be forged, transferred, replayed or backdated, and it depends on no predecessor. A share that became stale is a receipt whose work met the share target; it is carried in the worker&rsquo;s next share and counted in full.</li>
+ <li><b>&sect;3 Time.</b> Each receipt commits to a block of the underlying chain, which serves as a clock nobody controls. Work is placed in time by when it was done, once that block is buried beyond reorganization.</li>
+ <li><b>&sect;4 The hybrid evaluation of time.</b> Time is divided into bins: an open present, a settled past held more coarsely as it ages, and a reserved future. The paper notes that the Monero lane as first released is an exception.</li>
+ <li id="pp-s5"><b>&sect;5 Proof of work as measurement.</b> A unit of work is credited by the target it had to meet, never by how far below the target its hash fell. The overshoot would let one lucky hash take a whole reward. See <a href="/en/real-difficulty/">Real difficulty</a> and <a href="/en/luck/">Luck</a>.</li>
+ <li><b>&sect;6 Accounting.</b> Work counts in a window of recent units with a decay by age, in integer fixed-point arithmetic, so every node gets the same result. The window is a fixed count of units at one target, so pulsing, hopping and withholding gain nothing in expectation. A window measured in time is adopted only with a rule that removes a bias the paper describes.</li>
+ <li><b>&sect;7 Many chains.</b> One accounting serves several underlying chains as lanes that share one set of workers.</li>
+ <li id="pp-s8"><b>&sect;8 Recovering work below the order.</b> Hashes that meet a lower target are carried as receipts and credited the work of that lower target, exactly in expectation and the same under one identity or many.</li>
+ <li><b>&sect;9 Paying many from a small coinbase.</b> <i>Withdrawn on 4 October 2026</i> (see the errata above).</li>
+ <li><b>&sect;10 Settlement beyond the coinbase</b> and <b>&sect;11 Other uses.</b> Delivered work as a quantity anyone can verify; the parts that rely on an owed balance are withdrawn.</li>
+ <li><b>&sect;12 Reclaiming space.</b> Old work is summarised in levels, so the whole history fits in a few megabytes while the exact reward of any past span stays recoverable.</li>
+ <li id="pp-s13"><b>&sect;13 Verifying payment.</b> The committed state is a Merkle root in the coinbase. A device holding only headers can check it with a proof of logarithmic size, and every node recomputes the coinbase a block must carry.</li>
+ <li><b>&sect;14 Network</b> and <b>&sect;16 Conclusion.</b> Nodes and workers come and go without permission; the parts that rely on an owed balance are withdrawn.</li>
+ <li id="pp-s15"><b>&sect;15 Incentive.</b> The honest strategy, to work continuously and send one&rsquo;s receipts, is the one that pays most.</li>
+</ul>
+<p id="pp-30">Read the paper: <a href="https://frstrtr.github.io/c2pool/">Work Receipts: A Peer-to-Peer Mining-Reward Accounting System</a> (English).</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Summary © 2026 technocore.one. The paper itself is © 2026 frstrtr, released under the MIT License.</p>
+<p>Facts about c2pool checked against release v0.2.12.16 on 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>The Monero CCS proposal: a timeline — P2Pool scientific basics</title>
+<meta name="description" content="A dated timeline of the 2026 Monero CCS proposal for c2pool, the external payout review, and the withdrawal of the owed-balance model.">
+<link rel="canonical" href="https://learn.voidbind.com/en/monero-ccs/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/monero-ccs/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/monero-ccs/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/monero-ccs/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/monero-ccs/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/monero-ccs/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/monero-ccs/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<a class="brand" href="/en/">P2Pool scientific basics</a>
+<nav class="langs" aria-label="Language"><a class="lang" href="/en/monero-ccs/" hreflang="en" lang="en" data-lang="en" aria-current="true">English</a> · <a class="lang" href="/fr/monero-ccs/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/monero-ccs/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/monero-ccs/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/monero-ccs/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Contents"><ul>
+<li><a href="/en/">Home</a></li>
+<li><a href="/en/c2pool-today/">c2pool today</a></li>
+<li><a href="/en/references/">References</a></li>
+<li><a href="/en/making-of-c2pool/">Making of c2pool</a></li>
+<li><a href="/en/luck/">Luck</a></li>
+<li><a href="/en/real-difficulty/">Real difficulty</a></li>
+<li><a href="/en/difficulty-adjustment/">Difficulty adjustment</a></li>
+<li><a href="/en/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/en/weighted-multisig/">Weighted multisig</a></li>
+<li><a href="/en/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/en/purple-paper/">Purple Paper</a></li>
+<li><a href="/en/monero-ccs/" aria-current="page">Monero CCS</a></li>
+</ul></nav>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Monero CCS" data-desc="A dated timeline of the 2026 Monero CCS proposal for c2pool, the external payout review, and the withdrawal of the owed-balance model.">
+<h1 id="mc-01">The Monero CCS proposal: a timeline</h1>
+<p id="mc-02" class="sub">September to October 2026, from the public record</p>
+<p id="mc-03">In September 2026 c2pool asked the Monero Community Crowdfunding System (CCS) to fund a daemonless Monero pool. This page lists, in order and with links, the public record of that proposal and of a review of c2pool&rsquo;s payout model published at the same time. Quotes are short and attributed. Times are UTC.</p>
+<h2 id="mc-10">Timeline</h2>
+<ul id="mc-11">
+ <li><b>2026-09-19 19:25.</b> SChernykh, the author of Monero&rsquo;s P2Pool, publishes a review of c2pool&rsquo;s payout code (<code>frstrtr/c2pool</code> master, the V37 settlement and coinbase stages): <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba">&ldquo;Fairness gaps in the c2pool payout ledger&rdquo;</a>. Its summary: &ldquo;Eight ways the <i>Work Receipts</i> owed-ledger and coinbase selection can pay the wrong miner &mdash; several of them with every participant behaving honestly.&rdquo;</li>
+ <li><b>2026-09-25 06:30.</b> <a href="https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/699">Merge request !699</a> opens in the CCS repository: &ldquo;c2pool: a Monero pool with no operator and no daemon (mainnet milestone, 25 XMR)&rdquo;.</li>
+ <li><b>2026-09-28 17:24.</b> frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6394929#gistcomment-6394929">answers on the review</a>: &ldquo;Thanks for the review, will check and revert.&rdquo;</li>
+ <li><b>2026-10-02 10:32.</b> frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6402841#gistcomment-6402841">posts a finding-by-finding reply</a>: &ldquo;We re-checked every finding against the code and reproduced most of them.&rdquo;</li>
+ <li><b>2026-10-03.</b> The proposal is discussed in the <a href="https://libera.monerologs.net/monero-community/20261003">#monero-community channel</a> (public log). At 20:07 frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6405381#gistcomment-6405381">posts on the review</a> an answer to the question SChernykh (sech1) asked there: &ldquo;if a full reward must be paid out, and &lsquo;owed&rsquo; wallets are not owed enough to cover the full reward, what do you do?&rdquo;</li>
+ <li><b>2026-10-04 09:11.</b> SChernykh <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6406006#gistcomment-6406006">replies with numbers</a>: &ldquo;owed balances can&rsquo;t be fair.&rdquo; In his example, c2pool&rsquo;s own allocator gives a miner with 20% of the work &ldquo;0.47 XMR of each 0.6 XMR block instead of 0.12, which is 3.94&times; its share&rdquo;. He also shows that a block paying from a window fixed 61 heights earlier gives a well-timed hopper 1.312 where a fair payout is 1.000, in c2pool&rsquo;s own pulse test.</li>
+ <li><b>2026-10-04 11:46 and 12:18.</b> frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6406115#gistcomment-6406115">replies</a> (&ldquo;refuted and recreating the canonical Work Receipts design&rdquo;) and <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6406130#gistcomment-6406130">explains the change</a>: &ldquo;You&rsquo;re right, and your numbers leave little room to argue.&rdquo; and &ldquo;So the ledger goes. Each pool block pays its own window in full, in its own coinbase, from state fixed before the block.&rdquo;</li>
+ <li><b>2026-10-04 13:37.</b> frstrtr <a href="https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/699">closes merge request !699</a>, with the comment: &ldquo;Closing this. The payout model needs to change first; I&rsquo;ll come back with working code and numbers.&rdquo;</li>
+ <li><b>2026-10-04.</b> The <a href="/en/purple-paper/">Work Receipts paper</a> publishes errata: Section 9 (paying from owed balances), and the parts of the paper that rely on an owed balance, are withdrawn.</li>
+</ul>
+<h2 id="mc-20">Where it stands</h2>
+<p id="mc-21">Monero CCS: the funding proposal (MR !699) was withdrawn by its author on 2026-10-04 while the payout model is replaced by Work Receipts (Path B). No funding application is open.</p>
+<p id="mc-22">The Monero lane in c2pool, in the words of the project&rsquo;s <a href="https://github.com/frstrtr/c2pool/blob/master/README.md#supported-chains">README</a>: &ldquo;<b>Experimental</b> (v37 lane, Path B payouts; <code>c2pool-v37-xmr</code>, can run daemonless; not built by the release workflow): regtest, stagenet and testnet run a pool; mainnet runs only <code>--follow-only</code> and needs <code>--i-understand-mainnet</code> even for that.&rdquo; And: &ldquo;Mainnet pool mode is disabled in code.&rdquo;</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>© 2026 technocore.one.</p>
+<p>Facts about c2pool checked against release v0.2.12.16 on 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

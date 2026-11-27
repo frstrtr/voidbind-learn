@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>c2pool today — P2Pool scientific basics</title>
+<meta name="description" content="What c2pool is and what it runs today: chains, daemonless nodes, the Litecoin share chain and public nodes.">
+<link rel="canonical" href="https://learn.voidbind.com/en/c2pool-today/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/c2pool-today/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/c2pool-today/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/c2pool-today/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/c2pool-today/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/c2pool-today/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/c2pool-today/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<a class="brand" href="/en/">P2Pool scientific basics</a>
+<nav class="langs" aria-label="Language"><a class="lang" href="/en/c2pool-today/" hreflang="en" lang="en" data-lang="en" aria-current="true">English</a> · <a class="lang" href="/fr/c2pool-today/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/c2pool-today/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/c2pool-today/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/c2pool-today/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Contents"><ul>
+<li><a href="/en/">Home</a></li>
+<li><a href="/en/c2pool-today/" aria-current="page">c2pool today</a></li>
+<li><a href="/en/references/">References</a></li>
+<li><a href="/en/making-of-c2pool/">Making of c2pool</a></li>
+<li><a href="/en/luck/">Luck</a></li>
+<li><a href="/en/real-difficulty/">Real difficulty</a></li>
+<li><a href="/en/difficulty-adjustment/">Difficulty adjustment</a></li>
+<li><a href="/en/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/en/weighted-multisig/">Weighted multisig</a></li>
+<li><a href="/en/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/en/purple-paper/">Purple Paper</a></li>
+<li><a href="/en/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="c2pool today" data-desc="What c2pool is and what it runs today: chains, daemonless nodes, the Litecoin share chain and public nodes.">
+<h1 id="ct-01">c2pool today</h1>
+<p id="ct-02" class="sub">The state of c2pool at release <a href="https://github.com/frstrtr/c2pool/releases/tag/v0.2.12.16">v0.2.12.16</a> (25 November 2026)</p>
+<p id="ct-03">c2pool is a C++ reimplementation of <a href="https://github.com/p2pool/p2pool">p2pool</a>, the decentralized mining pool, built for the V36 share format. It has no pool operator: miners run nodes that agree on a chain of shares, and every block a node finds pays the miners in that block&rsquo;s own coinbase. The source is at <a href="https://github.com/frstrtr/c2pool">github.com/frstrtr/c2pool</a>.</p>
+<h2 id="ct-04">Chains</h2>
+<p id="ct-05">c2pool builds one binary per parent chain (<code>c2pool-&lt;coin&gt;</code>). Several parent chains also merge-mine AuxPoW child chains in the same coinbase.</p>
+<div id="ct-06" class="table-wrap"><table>
+ <thead><tr><th>Parent chain</th><th>Algorithm</th><th>Merged mining</th><th>Status</th></tr></thead>
+ <tbody>
+ <tr><td>Litecoin (LTC)</td><td>Scrypt</td><td>Dogecoin (embedded node); PEP, LKY, SHIC through external daemons, untested; BELLS and JKC not yet</td><td><b>Production</b> (V36 share chain, live LTC and DOGE blocks)</td></tr>
+ <tr><td>Dash (DASH)</td><td>X11</td><td>none</td><td><b>Production</b>, daemonless</td></tr>
+ <tr><td>Bitcoin (BTC)</td><td>SHA-256d</td><td>Namecoin, in development</td><td>Live, daemonless</td></tr>
+ <tr><td>DigiByte (DGB)</td><td>Scrypt</td><td>Dogecoin (embedded)</td><td>Live, daemonless, mainnet only</td></tr>
+ <tr><td>Bitcoin Cash (BCH)</td><td>SHA-256d</td><td>none</td><td>Live, daemonless</td></tr>
+ <tr><td>BIP-110 (Bitcoin Knots fork)</td><td>BLAKE2b (SHA-256d below height 961,640)</td><td>none</td><td><b>Experimental</b>, daemonless</td></tr>
+ <tr><td>Monero (XMR)</td><td>RandomX</td><td>none</td><td><b>Experimental</b>, not in the release packages</td></tr>
+ </tbody>
+</table></div>
+<p id="ct-07">&ldquo;Live&rdquo; means that a public voidbind node runs that binary with no coin daemon on the serve path. It is not a claim of production maturity: only the Litecoin and Dash lines are in production use. DigiByte runs its Scrypt algorithm as a parent chain of its own; it is not a child chain of Litecoin.</p>
+<p id="ct-08">Monero, in the project&rsquo;s own words: &ldquo;<b>Experimental</b> (v37 lane, Path B payouts; <code>c2pool-v37-xmr</code>, can run daemonless; not built by the release workflow): regtest, stagenet and testnet run a pool; mainnet runs only <code>--follow-only</code> and needs <code>--i-understand-mainnet</code> even for that.&rdquo; Mainnet pool mode is disabled in code. (<a href="https://github.com/frstrtr/c2pool/blob/master/README.md#supported-chains">README, Supported chains</a>)</p>
+<h2 id="ct-09">No coin daemon</h2>
+<ul id="ct-10">
+ <li><b>Litecoin and Dogecoin.</b> c2pool embeds lightweight nodes for both chains. They sync headers over the coins&rsquo; own peer-to-peer networks, keep a UTXO set to compute fees, keep a mempool and build block templates themselves. No <code>litecoind</code> or <code>dogecoind</code> is needed.</li>
+ <li><b>Dash.</b> <code>c2pool-dash</code> speaks the Dash peer-to-peer protocol itself and rebuilds the deterministic masternode list, LLMQ quorums, ChainLocks and the DIP-4 coinbase inside the node. It needs no <code>dashd</code>, no RPC credentials and no wallet access. Blocks built this way have been accepted on Dash mainnet. The Dash Core 24 rules are built in from v0.2.11.1, so a daemonless pool has no <code>dashd</code> to upgrade for that hard fork. A node can still be started with a <code>dashd</code> as a fallback.</li>
+ <li><b>Bitcoin, Bitcoin Cash, DigiByte and BIP-110</b> also run without a coin daemon on the public voidbind nodes.</li>
+</ul>
+<h2 id="ct-11">The Litecoin share chain</h2>
+<ul id="ct-12">
+ <li>Since <b>2026-11-13 00:00:00 UTC</b> every share is a <b>share version 3601</b> share: the V36 share format under share type 3601, fixed by a flag day in the release, not by a vote. It changed the merged-mining payout rule and lets a share carry several merged chains at once.</li>
+ <li>Only c2pool v0.2.12.1 and later are on this share chain. Python p2pool nodes are not.</li>
+ <li>The Python implementations <a href="https://github.com/frstrtr/p2pool-merged-v36">p2pool-merged-v36</a> and <a href="https://github.com/frstrtr/p2pool-dash">p2pool-dash</a> are no longer maintained. All updates, including security fixes, ship only in c2pool.</li>
+ <li>Payouts use PPLNS with exponential decay (half-life of a quarter of the 8,640-share window). One share is targeted every 15 seconds.</li>
+</ul>
+<h2 id="ct-13">Public nodes</h2>
+<p id="ct-14">Public voidbind nodes with their dashboards: <a href="https://ltc.voidbind.com/">ltc.voidbind.com</a> (Litecoin + Dogecoin), <a href="https://dash.voidbind.com/">dash.voidbind.com</a>, <a href="https://btc.voidbind.com/">btc.voidbind.com</a>, <a href="https://bch.voidbind.com/">bch.voidbind.com</a>, <a href="https://dgb.voidbind.com/">dgb.voidbind.com</a> and <a href="https://bip110.voidbind.com/">bip110.voidbind.com</a>. Each dashboard is a view of that node&rsquo;s share chain; anyone running a node sees the same data from their own copy.</p>
+<h2 id="ct-15">Download and verify</h2>
+<ul id="ct-16">
+ <li>Packages per parent chain for Linux x86_64 (<code>.tar.gz</code>), Windows x86_64 (<code>.zip</code> or installer) and macOS (one universal package for Apple Silicon and Intel, macOS 26.0 or later) are on the <a href="https://github.com/frstrtr/c2pool/releases">releases page</a>.</li>
+ <li>Each release carries a <code>SHA256SUMS</code> file and, from v0.2.7, a detached signature <code>SHA256SUMS.asc</code>. The signing key is published at <a href="https://github.com/frstrtr.gpg">github.com/frstrtr.gpg</a>, fingerprint <code>99556F8DE6AD66057A1A10EC50AB1379285EFE76</code>.</li>
+ <li>Known problems are listed in <a href="https://github.com/frstrtr/c2pool/blob/master/KNOWN_ISSUES.md">KNOWN_ISSUES.md</a>.</li>
+</ul>
+<h2 id="ct-17">What comes next</h2>
+<p id="ct-18">V37, the next design line (Work Receipts and the MRR settlement core), is at the design and prototype stage and is not run in production. Its paper is summarised on the <a href="/en/purple-paper/">Purple Paper</a> page.</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>© 2026 technocore.one.</p>
+<p>Facts about c2pool checked against release v0.2.12.16 on 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Enhancing security with weighted multisig wallets on PoW blockchains — P2Pool scientific basics</title>
+<meta name="description" content="Weighted multisignature spending conditions on proof-of-work chains, with a valid script.">
+<link rel="canonical" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/weighted-multisig/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/weighted-multisig/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/weighted-multisig/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/weighted-multisig/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<a class="brand" href="/en/">P2Pool scientific basics</a>
+<nav class="langs" aria-label="Language"><a class="lang" href="/en/weighted-multisig/" hreflang="en" lang="en" data-lang="en" aria-current="true">English</a> · <a class="lang" href="/fr/weighted-multisig/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/weighted-multisig/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/weighted-multisig/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/weighted-multisig/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Contents"><ul>
+<li><a href="/en/">Home</a></li>
+<li><a href="/en/c2pool-today/">c2pool today</a></li>
+<li><a href="/en/references/">References</a></li>
+<li><a href="/en/making-of-c2pool/">Making of c2pool</a></li>
+<li><a href="/en/luck/">Luck</a></li>
+<li><a href="/en/real-difficulty/">Real difficulty</a></li>
+<li><a href="/en/difficulty-adjustment/">Difficulty adjustment</a></li>
+<li><a href="/en/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/en/weighted-multisig/" aria-current="page">Weighted multisig</a></li>
+<li><a href="/en/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/en/purple-paper/">Purple Paper</a></li>
+<li><a href="/en/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Weighted multisig" data-desc="Weighted multisignature spending conditions on proof-of-work chains, with a valid script.">
+<h1 id="wm-02">Enhancing security with weighted multisig wallets on PoW blockchains</h1>
+<p id="wm-03" class="sub">Weighted approval on proof-of-work chains, with a script that works</p>
+<div id="wm-upd" class="update"><p><b>Updated November 2026.</b> The script in the first version of this page was not valid Bitcoin script: <code>OP_CHECKMULTISIG</code> has no notion of weight. It is replaced below by a construction that runs on Bitcoin today. A multisig decides <i>who may approve</i> a spend; it does not split the funds by the weights. Any split is in the outputs of the spending transaction.</p></div>
+<h2 id="wm-04">Introduction</h2>
+<p id="wm-05">In the evolving landscape of blockchain technology, security and distributed control over funds remain paramount. This article delves into the concept of weighted multisig (multi-signature) wallets, an innovative approach to manage and secure funds on Proof of Work (PoW) blockchains like Bitcoin. We will explore how such wallets can be configured to distribute funds using predetermined percentages, offering a robust solution for partnerships, corporate governance, and other collaborative financial operations.</p>
+<h2 id="wm-06">Concept of Weighted Multisig Wallets</h2>
+<p id="wm-07">A multisig wallet typically requires multiple signatures to approve a transaction, thereby adding a layer of security beyond traditional single-signature wallets. In a weighted multisig setup, different parties involved in the wallet have varying degrees of influence or &lsquo;weight&rsquo; in approving transactions. This flexibility allows for a dynamic and secure management of blockchain transactions.</p>
+<h2 id="wm-08">Practical Example</h2>
+<p id="wm-09">Consider a scenario with three stakeholders: Alice, Bob, and Charlie, who have formed a joint venture and decided to manage their funds through a multisig wallet. Their voting weights are distributed as follows:</p>
+<ul id="wm-10"><li>Alice: 50% of the vote.</li><li>Bob: 30% of the vote.</li><li>Charlie: 20% of the vote.</li></ul>
+<p id="wm-11">For transactions to be executed, the combined weights of approving signatures must reach at least a 60% threshold.</p>
+<h2 id="wm-12">Transaction Scenario</h2>
+<p id="wm-13">To illustrate, let's assume the trio wishes to withdraw 1000 units of cryptocurrency. The transaction would proceed as follows: Alice's approval, holding 50%, is insufficient alone. With Bob's additional 30%, the combined weight reaches 80%, surpassing the required threshold. The transaction is executed. Alice and Charlie together (70%) could also approve; Bob and Charlie together (50%) could not.</p>
+<h2 id="wm-14">Implementing Weighted Multisig in PoW Blockchains</h2>
+<p id="wm-15">Bitcoin&rsquo;s <code>OP_CHECKMULTISIG</code> and Taproot&rsquo;s <code>OP_CHECKSIGADD</code> count signatures one each. A weighted threshold is built by checking each key on its own and adding its weight. With weights Alice&nbsp;=&nbsp;5, Bob&nbsp;=&nbsp;3, Charlie&nbsp;=&nbsp;2 and a threshold of 6 (60% of 10), the script is:</p>
+<pre id="wm-16"><code>&lt;Alice_pubkey&gt;   OP_CHECKSIG  OP_IF 5 OP_ELSE 0 OP_ENDIF
+OP_SWAP &lt;Bob_pubkey&gt;     OP_CHECKSIG  OP_IF 3 OP_ADD OP_ENDIF
+OP_SWAP &lt;Charlie_pubkey&gt; OP_CHECKSIG  OP_IF 2 OP_ADD OP_ENDIF
+6 OP_GREATERTHANOREQUAL</code></pre>
+<ul id="wm-16b">
+ <li>The witness supplies the three signatures in the order <code>&lt;sig_Charlie&gt; &lt;sig_Bob&gt; &lt;sig_Alice&gt;</code>, Alice&rsquo;s on top. A signer who does not approve supplies an empty value. <code>OP_CHECKSIG</code> then pushes false and that weight is not added; an invalid non-empty signature makes the whole script fail (a consensus rule in a Taproot leaf, BIP 342; the standard relay policy NULLFAIL for P2WSH).</li>
+ <li>The script can be the witness script of a P2WSH output, or one leaf of a Taproot tree (in a Taproot leaf the same opcodes apply, with Schnorr signatures and 32-byte keys).</li>
+ <li>With Taproot, the common case can also take the cheap key path: a combined key for the most likely set of signers, with the weighted script kept as a leaf that is revealed only if it is used.</li>
+</ul>
+<h2 id="wm-17">Conclusion</h2>
+<p id="wm-18">Weighted multisig wallets on PoW blockchains like Bitcoin offer an enhanced security framework by requiring a predefined threshold of weighted approvals for transactions. This approach not only secures the funds against unauthorized access but also embeds flexibility and fairness in financial operations among multiple stakeholders. As blockchain technology continues to mature, such innovations in wallet configurations are pivotal for the widespread adoption and utility of cryptocurrencies in complex transactional environments.</p>
+<div id="wm-19" class="v37"><span class="tag">V37</span><b>Why a decentralized pool does <i>not</i> use a weighted (or any) shared wallet for payouts.</b>
+ <p>A weighted multisig is a <b>custodial</b> construct: pooled funds sit in one shared address that a quorum of signers controls. That is precisely the shape a decentralized pool must avoid: it re-introduces an operator, a trusted signer set, and a key that can be lost or coerced.</p>
+ <p>P2Pool and c2pool pay a different way and hold <b>no pooled funds at all.</b> The coinbase outputs of a found block are a deterministic function of the share chain: every node computes the identical outputs, each paying a miner&rsquo;s own payout script directly. There is no shared wallet, no signing quorum and no custody, and the V37 design keeps it that way. &ldquo;Weight&rdquo; does matter in a pool, but as <b>work-weighted accounting</b> (credit by proof of work) and work-weighted version voting, in consensus, not as approval power over a wallet. This page is a scripting primer for treasury and governance cases; it is not how a decentralized pool distributes rewards. See the <a href="/en/purple-paper/">Purple Paper summary</a>, &sect;5 (Proof-of-Work as Measurement) and &sect;15 (Incentive).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Originally published by Technocore One in “P2Pool scientific basics”, updated in November 2026. © 2026 technocore.one.</p>
+<p>Facts about c2pool checked against release v0.2.12.16 on 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

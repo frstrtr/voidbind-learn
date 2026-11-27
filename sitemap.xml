@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<url><loc>https://learn.voidbind.com/en/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/c2pool-today/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/c2pool-today/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/references/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/references/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/making-of-c2pool/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/making-of-c2pool/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/luck/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/luck/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/real-difficulty/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/real-difficulty/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/difficulty-adjustment/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/difficulty-adjustment/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/taproot-coinbase/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/taproot-coinbase/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/weighted-multisig/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/weighted-multisig/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/bitcoin-leveldb/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/bitcoin-leveldb/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/purple-paper/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/purple-paper/"/>
+</url>
+<url><loc>https://learn.voidbind.com/en/monero-ccs/</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/monero-ccs/"/>
+</url>
+</urlset>
