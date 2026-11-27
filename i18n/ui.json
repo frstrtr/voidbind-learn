@@ -11,7 +11,8 @@
     "attr_new": "© 2026 technocore.one.",
     "attr_technocore": "Originally published by Technocore One in “P2Pool scientific basics”, updated in November 2026. © 2026 technocore.one.",
     "attr_paper": "Summary © 2026 technocore.one. The paper itself is © 2026 frstrtr, released under the MIT License.",
-    "checked": "Facts about c2pool checked against release {tag} on {date}."
+    "checked": "Facts about c2pool checked against release {tag} on {date}.",
+    "checked_history": "The dated notes were checked against c2pool release {tag} on {date}; the June 2026 text is kept as written."
   },
   "fr": {
     "site_name": "Bases scientifiques de P2Pool",
@@ -25,7 +26,8 @@
     "attr_new": "© 2026 technocore.one.",
     "attr_technocore": "Publié à l’origine par Technocore One dans « P2Pool scientific basics », mis à jour en novembre 2026. © 2026 technocore.one.",
     "attr_paper": "Résumé © 2026 technocore.one. L’article lui-même est © 2026 frstrtr, publié sous licence MIT.",
-    "checked": "Faits sur c2pool vérifiés par rapport à la version {tag} le {date}."
+    "checked": "Faits sur c2pool vérifiés par rapport à la version {tag} le {date}.",
+    "checked_history": "Les notes datées ont été vérifiées par rapport à la version {tag} de c2pool le {date} ; le texte de juin 2026 est conservé tel quel."
   },
   "ru": {
     "site_name": "Научные основы P2Pool",
@@ -39,7 +41,8 @@
     "attr_new": "© 2026 technocore.one.",
     "attr_technocore": "Впервые опубликовано Technocore One в «P2Pool scientific basics», обновлено в ноябре 2026 года. © 2026 technocore.one.",
     "attr_paper": "Краткое изложение © 2026 technocore.one. Сама статья © 2026 frstrtr, лицензия MIT.",
-    "checked": "Сведения о c2pool проверены по выпуску {tag} {date}."
+    "checked": "Сведения о c2pool проверены по выпуску {tag} {date}.",
+    "checked_history": "Датированные примечания проверены по выпуску c2pool {tag} {date}; текст июня 2026 года сохранён без изменений."
   },
   "de": {
     "site_name": "Wissenschaftliche Grundlagen von P2Pool",
@@ -53,7 +56,8 @@
     "attr_new": "© 2026 technocore.one.",
     "attr_technocore": "Ursprünglich von Technocore One in „P2Pool scientific basics“ veröffentlicht, im November 2026 aktualisiert. © 2026 technocore.one.",
     "attr_paper": "Zusammenfassung © 2026 technocore.one. Das Paper selbst ist © 2026 frstrtr, veröffentlicht unter der MIT-Lizenz.",
-    "checked": "Angaben zu c2pool geprüft gegen Release {tag} am {date}."
+    "checked": "Angaben zu c2pool geprüft gegen Release {tag} am {date}.",
+    "checked_history": "Die datierten Hinweise wurden am {date} gegen c2pool-Release {tag} geprüft; der Text vom Juni 2026 bleibt unverändert."
   },
   "zh": {
     "site_name": "P2Pool 科学基础",
@@ -67,6 +71,7 @@
     "attr_new": "© 2026 technocore.one。",
     "attr_technocore": "最初由 Technocore One 发布于“P2Pool scientific basics”，2026 年 11 月更新。© 2026 technocore.one。",
     "attr_paper": "摘要 © 2026 technocore.one。论文本身 © 2026 frstrtr，以 MIT 许可证发布。",
-    "checked": "有关 c2pool 的事实已于 {date} 按版本 {tag} 核对。"
+    "checked": "有关 c2pool 的事实已于 {date} 按版本 {tag} 核对。",
+    "checked_history": "带日期的注释已于 {date} 按 c2pool 版本 {tag} 核对；2026 年 6 月的原文保持不变。"
   }
 }

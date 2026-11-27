@@ -81,26 +81,23 @@ def difficulty(target):
 </ul>
 <p id="da-22b">It does not enter the difficulty retarget. Here is the original page&rsquo;s example, which computes the MTP of the chain tip over RPC (Bitcoin Core&rsquo;s <code>getblock</code> also returns it directly as <code>mediantime</code>):</p>
 <pre id="da-23">import bitcoin.rpc
- def calculate_mediantime():
+def calculate_mediantime():
     proxy = bitcoin.rpc.Proxy()  # Establish connection to Bitcoin Core client
     block_count = proxy.getblockcount()
-    if block_count &gt;= 11:
+    if block_count &gt;= 10:
         timestamps = []
         for height in range(block_count, block_count - 11, -1):
             block_hash = proxy.getblockhash(height)
-            block = proxy.getblock(block_hash)
-            timestamp = block['time']
+            timestamp = proxy.getblockheader(block_hash).nTime
             timestamps.append(timestamp)
         sorted_timestamps = sorted(timestamps)
         mediantime = sorted_timestamps[5]  # Take the middle timestamp
         return mediantime
     return None  # Return None if there are not enough blocks to calculate mediantime
- # Example usage
- mediantime = calculate_mediantime()
- print(mediantime)</pre>
-
-<p id="da-24">In the code snippet above, we establish a connection to a running Bitcoin Core client using the bitcoin.rpc.Proxy class. The calculate_mediantime function first retrieves the current block count using getblockcount. If there are at least 11 blocks in the blockchain, it proceeds with the calculation. It iterates over the previous 11 blocks, starting from the current block, and fetches the block timestamp using getblock. The timestamps are stored in the timestamps list. The timestamps list is then sorted in ascending order using the sorted function. Finally, the middle timestamp from the sorted list (at index 5) is taken as the mediantime. The mediantime is returned by the function. If there are not enough blocks to calculate the mediantime, None is returned.</p>
-
+# Example usage
+mediantime = calculate_mediantime()
+print(mediantime)</pre>
+<p id="da-24">In the code snippet above, we establish a connection to a running Bitcoin Core client using the bitcoin.rpc.Proxy class. The calculate_mediantime function first retrieves the current block count using getblockcount. If there are at least 11 blocks in the blockchain (a tip height of 10 or more), it proceeds with the calculation. It iterates over the previous 11 blocks, starting from the current block, and reads the block timestamp (nTime) from getblockheader. The timestamps are stored in the timestamps list. The timestamps list is then sorted in ascending order using the sorted function. Finally, the middle timestamp from the sorted list (at index 5) is taken as the mediantime. The mediantime is returned by the function. If there are not enough blocks to calculate the mediantime, None is returned.</p>
 <h2 id="da-30">Litecoin</h2>
 <p id="da-31">Litecoin keeps Bitcoin&rsquo;s rule with a 2.5-minute spacing: 2016 blocks in 3.5 days. One difference: after the first period, the window goes back a full 2016 blocks instead of 2015 (a fix credited to Art Forz, against difficulty manipulation). c2pool&rsquo;s embedded Litecoin node computes the next target itself from the headers it has synced, with the same clamp and the same timestamps.</p>
 <h2 id="da-32">Dogecoin</h2>
@@ -110,11 +107,11 @@ def difficulty(target):
 <ul id="da-42">
  <li>the node estimates the pool&rsquo;s rate from recent shares and computes the target that would give one share per <i>share period</i>: 15 seconds on the Litecoin share chain, 30 seconds on Bitcoin;</li>
  <li>the result is clamped to within &plusmn;10% of the previous share&rsquo;s target, so the share difficulty moves smoothly;</li>
- <li>when no share has arrived for 20 share periods (5 minutes on Litecoin), an emergency rule eases the reference target: it doubles for every further 10 share periods, interpolated linearly in between, before the &plusmn;10% clamp applies. This keeps a pool that suddenly lost most of its hash rate from stalling.</li>
+ <li>when no share has arrived for 20 share periods (5 minutes on Litecoin), an emergency rule (from p2pool V36; the original p2pool has none) eases the reference target: it doubles for every further 10 share periods, interpolated linearly in between, before the &plusmn;10% clamp applies. This keeps a pool that suddenly lost most of its hash rate from stalling.</li>
 </ul>
 <div id="da-25" class="v37"><span class="tag">V37</span><b>Target vs. difficulty, and an absolute schedule.</b>
  <p>Difficulty and target are inverses (difficulty = max_target / target), so the retarget multiplies the target by the timespan ratio and difficulty moves the opposite way: faster blocks (a smaller ratio) raise difficulty.</p>
- <p>Walking back through the chain to retarget is costly over long windows. An absolute schedule (ASERT-style) computes the target directly from an anchor block and the latest block in constant time. It walks no window, so timestamps inside a window cannot make the target drift, although the latest block&rsquo;s own timestamp still matters. Bitcoin Cash has used one since November 2020. It is a candidate for a share chain&rsquo;s own difficulty in the V37 design work; the c2pool share chains today use the per-share rule above.</p>
+ <p>A window-based retarget depends on the timestamps at the two ends of its window. An absolute schedule (ASERT-style) computes the target directly from an anchor block and the latest block in constant time. It walks no window, so timestamps inside a window cannot make the target drift, although the latest block&rsquo;s own timestamp still matters. Bitcoin Cash has used one since November 2020. It is a candidate for a share chain&rsquo;s own difficulty in the V37 design work; the c2pool share chains today use the per-share rule above.</p>
  </div>
 </article>
 </main>

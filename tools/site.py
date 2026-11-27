@@ -139,7 +139,7 @@ def render(lang, page, meta_by_lang, stale_ids):
            + ('\n' + '\n'.join(notes) if notes else ''))
     attr = page.get('attr', 'technocore')
     foot = (f'<footer class="foot">\n<p>{ui["attr_" + attr]}</p>\n'
-            f'<p>{esc(ui["checked"].format(tag=CFG["c2pool_tag"], date=CFG["checked_date"]))}</p>\n</footer>')
+            f'<p>{esc(ui[page.get("checked", "checked")].format(tag=CFG["c2pool_tag"], date=CFG["checked_date"]))}</p>\n</footer>')
     return head, top, foot
 
 

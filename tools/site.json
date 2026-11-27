@@ -46,7 +46,8 @@
     },
     {
       "slug": "making-of-c2pool",
-      "attr": "technocore"
+      "attr": "technocore",
+      "checked": "checked_history"
     },
     {
       "slug": "luck",

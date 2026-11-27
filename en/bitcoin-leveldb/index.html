@@ -71,7 +71,7 @@
  <thead><tr><th>Key</th><th>Value</th></tr></thead>
  <tbody>
  <tr><td><code>'C'</code> + txid + output index (varint)</td><td>one unspent output: height, whether it is a coinbase output, amount and script (from Bitcoin Core 0.15)</td></tr>
- <tr><td><code>'c'</code> + txid</td><td>the older per-transaction format (before 0.15); only met when upgrading an old database</td></tr>
+ <tr><td><code>'c'</code> + txid</td><td>the older per-transaction format (before 0.15); Bitcoin Core v28.1 refuses a chainstate that still holds it and asks for <code>-reindex-chainstate</code></td></tr>
  <tr><td><code>'B'</code></td><td>the hash of the block up to which the UTXO set is complete</td></tr>
  <tr><td><code>'H'</code></td><td>the head blocks while a flush is interrupted</td></tr>
  </tbody>
@@ -126,7 +126,7 @@ def parse_block_index_value(value):
 <h2 id="ld-18">Reading the block files directly</h2>
 <p id="ld-19">Each block in a <code>blk*.dat</code> file is stored as the network magic (4 bytes), the block size (4 bytes, little-endian), then the block. Since <b>Bitcoin Core 28.0</b>, a node whose blocks directory is created fresh XORs these files with an 8-byte random key kept in <code>blocks/xor.dat</code> (option <code>-blocksxor</code>). Older software cannot read such files until it applies the key. A blocks directory created by an earlier version keeps an all-zero key.</p>
 <div id="ld-24" class="v37"><span class="tag">V37</span><b>This method, in practice.</b>
- <p>The block index holds headers and file positions only; the blocks themselves are plain append-only files. That is what makes direct, daemon-free reads possible. The <a href="/en/real-difficulty/">Real difficulty</a> charts on this site were made this way: we read <code>blocks/blk00000.dat</code> from a full node&rsquo;s disk and parsed the 80-byte headers in order (magic, size, header, then <code>nBits</code> and the double SHA-256 block hash) for the first 4,032 blocks, with no RPC. On a node set up with Bitcoin Core 28.0 or later, apply the key from <code>blocks/xor.dat</code> first. The same property underlies the V37 design work: a node can rebuild committed state from compact on-disk records and prove it with Merkle proofs of logarithmic size; see the <a href="/en/purple-paper/">Purple Paper summary</a>, &sect;13 (Verifying Payment).</p>
+ <p>The block index holds headers, file positions and a little status data only; the blocks themselves are plain append-only files. That is what makes direct, daemon-free reads possible. The <a href="/en/real-difficulty/">Real difficulty</a> charts on this site were made this way: we read <code>blocks/blk00000.dat</code> from a full node&rsquo;s disk and parsed the 80-byte headers in order (magic, size, header, then <code>nBits</code> and the double SHA-256 block hash) for the first 4,032 blocks, with no RPC. On a node set up with Bitcoin Core 28.0 or later, apply the key from <code>blocks/xor.dat</code> first. The same property underlies the V37 design work: a node can rebuild committed state from compact on-disk records and prove it with Merkle proofs of logarithmic size; see the <a href="/en/purple-paper/">Purple Paper summary</a>, &sect;13 (Verifying Payment).</p>
  </div>
 </article>
 </main>
