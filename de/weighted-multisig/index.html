@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Mehr Sicherheit mit gewichteten Multisig-Wallets auf PoW-Blockchains — Wissenschaftliche Grundlagen von P2Pool</title>
+<meta name="description" content="Gewichtete Multisignatur-Ausgabebedingungen auf Proof-of-Work-Chains, mit einem gültigen Skript.">
+<link rel="canonical" href="https://learn.voidbind.com/de/weighted-multisig/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/weighted-multisig/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/weighted-multisig/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/weighted-multisig/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/weighted-multisig/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="top">
+<a class="brand" href="/de/">Wissenschaftliche Grundlagen von P2Pool</a>
+<nav class="langs" aria-label="Sprache"><a class="lang" href="/en/weighted-multisig/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/weighted-multisig/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/weighted-multisig/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/weighted-multisig/" hreflang="de" lang="de" data-lang="de" aria-current="true">Deutsch</a> · <a class="lang" href="/zh/weighted-multisig/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Inhalt"><ul>
+<li><a href="/de/">Startseite</a></li>
+<li><a href="/de/c2pool-today/">c2pool heute</a></li>
+<li><a href="/de/references/">Quellen</a></li>
+<li><a href="/de/making-of-c2pool/">Making-of c2pool</a></li>
+<li><a href="/de/luck/">Glück</a></li>
+<li><a href="/de/real-difficulty/">Echte Schwierigkeit</a></li>
+<li><a href="/de/difficulty-adjustment/">Schwierigkeitsanpassung</a></li>
+<li><a href="/de/taproot-coinbase/">Taproot-Coinbase</a></li>
+<li><a href="/de/weighted-multisig/" aria-current="page">Gewichtetes Multisig</a></li>
+<li><a href="/de/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/de/purple-paper/">Purple Paper</a></li>
+<li><a href="/de/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Maschinengestützte Übersetzung, noch nicht von Muttersprachlern geprüft. <a href="/en/weighted-multisig/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Gewichtetes Multisig" data-desc="Gewichtete Multisignatur-Ausgabebedingungen auf Proof-of-Work-Chains, mit einem gültigen Skript.">
+<h1 id="wm-02" data-src="425817595a2c">Mehr Sicherheit mit gewichteten Multisig-Wallets auf PoW-Blockchains</h1>
+<p id="wm-03" class="sub" data-src="64d6fce7ce3f">Gewichtete Freigabe auf Proof-of-Work-Chains, mit einem Skript, das funktioniert</p>
+<div id="wm-upd" class="update" data-src="764be6615f00"><p><b>Aktualisiert im November 2026.</b> Das Skript in der ersten Version dieser Seite war kein gültiges Bitcoin-Script: <code>OP_CHECKMULTISIG</code> kennt kein Gewicht. Es wird unten durch eine Konstruktion ersetzt, die heute auf Bitcoin läuft. Ein Multisig entscheidet, <i>wer eine Ausgabe freigeben darf</i>; es teilt die Mittel nicht nach den Gewichten auf. Jede Aufteilung erfolgt in den Outputs der ausgebenden Transaktion.</p></div>
+<h2 id="wm-04" data-src="b605350bc002">Einleitung</h2>
+<p id="wm-05" data-src="50c0fb73ec95">In der sich wandelnden Landschaft der Blockchain-Technologie bleiben Sicherheit und verteilte Kontrolle über Mittel von größter Bedeutung. Dieser Artikel befasst sich mit dem Konzept gewichteter Multisig-Wallets (Mehrfachsignatur-Wallets), einem innovativen Ansatz zur Verwaltung und Sicherung von Mitteln auf Proof-of-Work-Blockchains (PoW) wie Bitcoin. Wir untersuchen, wie solche Wallets so konfiguriert werden können, dass sie Freigaben mit vorab festgelegten Stimmgewichten verlangen, als robuste Lösung für Partnerschaften, Unternehmensführung und andere gemeinschaftliche Finanzvorgänge.</p>
+<h2 id="wm-06" data-src="88c8b3581386">Konzept gewichteter Multisig-Wallets</h2>
+<p id="wm-07" data-src="f3656c293f8f">Ein Multisig-Wallet verlangt typischerweise mehrere Signaturen, um eine Transaktion freizugeben, und fügt damit eine Sicherheitsebene über herkömmliche Wallets mit nur einer Signatur hinaus hinzu. In einem gewichteten Multisig-Setup haben die beteiligten Parteien unterschiedlich viel Einfluss oder ‚Gewicht‘ bei der Freigabe von Transaktionen. Diese Flexibilität ermöglicht eine dynamische und sichere Verwaltung von Blockchain-Transaktionen.</p>
+<h2 id="wm-08" data-src="d7c5bab311cf">Praxisbeispiel</h2>
+<p id="wm-09" data-src="8bf8295c6241">Betrachten wir ein Szenario mit drei Beteiligten: Alice, Bob und Charlie haben ein Joint Venture gegründet und beschlossen, ihre Mittel über ein Multisig-Wallet zu verwalten. Ihre Stimmgewichte sind wie folgt verteilt:</p>
+<ul id="wm-10" data-src="6da87a435f9a"><li>Alice: 50&nbsp;% der Stimmen.</li><li>Bob: 30&nbsp;% der Stimmen.</li><li>Charlie: 20&nbsp;% der Stimmen.</li></ul>
+<p id="wm-11" data-src="4aec33a34252">Damit Transaktionen ausgeführt werden, muss das kombinierte Gewicht der freigebenden Signaturen mindestens einen Schwellenwert von 60&nbsp;% erreichen.</p>
+<h2 id="wm-12" data-src="d65a130b5efe">Transaktionsszenario</h2>
+<p id="wm-13" data-src="037fe02e65ce">Nehmen wir zur Veranschaulichung an, das Trio möchte 1000 Einheiten einer Kryptowährung abheben. Die Transaktion liefe so ab: Alices Freigabe mit 50&nbsp;% reicht allein nicht aus. Mit Bobs zusätzlichen 30&nbsp;% erreicht das kombinierte Gewicht 80&nbsp;% und übersteigt den erforderlichen Schwellenwert. Die Transaktion wird ausgeführt. Auch Alice und Charlie zusammen (70&nbsp;%) könnten freigeben; Bob und Charlie zusammen (50&nbsp;%) könnten es nicht.</p>
+<h2 id="wm-14" data-src="1d3b6769c03f">Gewichtetes Multisig auf PoW-Blockchains umsetzen</h2>
+<p id="wm-15" data-src="19a7aadc432e"><code>OP_CHECKMULTISIG</code> von Bitcoin und <code>OP_CHECKSIGADD</code> von Taproot zählen jede Signatur einfach. Ein gewichteter Schwellenwert entsteht, indem man jeden Schlüssel einzeln prüft und sein Gewicht addiert. Mit den Gewichten Alice&nbsp;=&nbsp;5, Bob&nbsp;=&nbsp;3, Charlie&nbsp;=&nbsp;2 und einem Schwellenwert von 6 (60&nbsp;% von 10) lautet das Skript:</p>
+<pre id="wm-16" data-src="370f7e7bfc01"><code>&lt;Alice_pubkey&gt;   OP_CHECKSIG  OP_IF 5 OP_ELSE 0 OP_ENDIF
+OP_SWAP &lt;Bob_pubkey&gt;     OP_CHECKSIG  OP_IF 3 OP_ADD OP_ENDIF
+OP_SWAP &lt;Charlie_pubkey&gt; OP_CHECKSIG  OP_IF 2 OP_ADD OP_ENDIF
+6 OP_GREATERTHANOREQUAL</code></pre>
+<ul id="wm-16b" data-src="a58618e110df">
+ <li>Der Witness liefert die drei Signaturen in der Reihenfolge <code>&lt;sig_Charlie&gt; &lt;sig_Bob&gt; &lt;sig_Alice&gt;</code>, die von Alice oben auf dem Stack. Ein Unterzeichner, der nicht zustimmt, liefert einen leeren Wert. <code>OP_CHECKSIG</code> legt dann false auf den Stack, und dieses Gewicht wird nicht addiert; eine ungültige, nicht leere Signatur lässt das gesamte Skript fehlschlagen (in einem Taproot-Leaf ist das eine Konsensregel, BIP 342; bei P2WSH die Standard-Relay-Policy NULLFAIL).</li>
+ <li>Das Skript kann das Witness-Script eines P2WSH-Outputs sein oder ein Leaf eines Taproot-Baums (in einem Taproot-Leaf gelten dieselben Opcodes, mit Schnorr-Signaturen und 32-Byte-Schlüsseln).</li>
+ <li>Mit Taproot kann der häufige Fall auch den günstigen Key-Path nehmen: ein kombinierter Schlüssel für die wahrscheinlichste Gruppe von Unterzeichnern, während das gewichtete Skript als Leaf erhalten bleibt, das nur offengelegt wird, wenn es verwendet wird.</li>
+</ul>
+<h2 id="wm-17" data-src="89db2ad881f2">Fazit</h2>
+<p id="wm-18" data-src="221f4ef7be72">Gewichtete Multisig-Wallets auf PoW-Blockchains wie Bitcoin bieten einen verbesserten Sicherheitsrahmen, indem sie für Transaktionen einen vorab festgelegten Schwellenwert gewichteter Freigaben verlangen. Dieser Ansatz schützt die Mittel nicht nur vor unbefugtem Zugriff, sondern bringt auch Flexibilität und Fairness in Finanzvorgänge zwischen mehreren Beteiligten. Während die Blockchain-Technologie weiter reift, sind solche Innovationen bei Wallet-Konfigurationen entscheidend für die breite Akzeptanz und den Nutzen von Kryptowährungen in komplexen Transaktionsumgebungen.</p>
+<div id="wm-19" class="v37" data-src="e64afcfc5f82"><span class="tag">V37</span><b>Warum ein dezentraler Pool für Auszahlungen <i>kein</i> gewichtetes (oder sonst ein) gemeinsames Wallet verwendet.</b>
+ <p>Ein gewichtetes Multisig ist ein <b>verwahrendes (custodial)</b> Konstrukt: Gepoolte Mittel liegen auf einer gemeinsamen Adresse, die ein Quorum von Unterzeichnern kontrolliert. Genau diese Form muss ein dezentraler Pool vermeiden: Sie führt einen Betreiber wieder ein, eine Gruppe vertrauenswürdiger Unterzeichner und einen Schlüssel, der verloren gehen oder unter Zwang herausgegeben werden kann.</p>
+ <p>P2Pool und c2pool zahlen auf andere Weise aus und halten <b>überhaupt keine gepoolten Mittel.</b> Die Coinbase-Outputs eines gefundenen Blocks sind eine deterministische Funktion der Share-Chain: Jeder Knoten berechnet identische Outputs, wobei der Anteil jedes Miners direkt an dessen eigenes Auszahlungsskript geht, neben einem kleinen Spenden-Output an ein festes Skript. Die Belohnungen der Miner laufen nie über ein gemeinsames Wallet, ein Signatur-Quorum oder einen Verwahrer, und das V37-Design hält es so. „Gewicht“ spielt in einem Pool durchaus eine Rolle, aber als <b>arbeitsgewichtete Abrechnung</b> (Gutschrift nach Proof of Work) und als Versionsabstimmung (ein Share, eine Stimme, mit einer arbeitsgewichteten Prüfung am Fensterende), im Konsens, nicht als Freigabemacht über ein Wallet. Diese Seite ist eine Einführung in Bitcoin-Script für Treasury- und Governance-Fälle; so verteilt ein dezentraler Pool keine Belohnungen. Siehe die <a href="/de/purple-paper/">Zusammenfassung des Purple Paper</a>, &sect;5 (Proof-of-Work as Measurement) und &sect;15 (Incentive).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Ursprünglich von Technocore One in „P2Pool scientific basics“ veröffentlicht, im November 2026 aktualisiert. © 2026 technocore.one.</p>
+<p>Angaben zu c2pool geprüft gegen Release v0.2.12.16 am 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

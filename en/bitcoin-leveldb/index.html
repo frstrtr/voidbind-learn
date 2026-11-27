@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Bitcoin LevelDB — P2Pool scientific basics</title>
+<meta name="description" content="Reading the Bitcoin Core block index and chainstate databases directly.">
+<link rel="canonical" href="https://learn.voidbind.com/en/bitcoin-leveldb/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/bitcoin-leveldb/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/bitcoin-leveldb/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/bitcoin-leveldb/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/bitcoin-leveldb/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/bitcoin-leveldb/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/bitcoin-leveldb/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<a class="brand" href="/en/">P2Pool scientific basics</a>
+<nav class="langs" aria-label="Language"><a class="lang" href="/en/bitcoin-leveldb/" hreflang="en" lang="en" data-lang="en" aria-current="true">English</a> · <a class="lang" href="/fr/bitcoin-leveldb/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/bitcoin-leveldb/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/bitcoin-leveldb/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/bitcoin-leveldb/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Contents"><ul>
+<li><a href="/en/">Home</a></li>
+<li><a href="/en/c2pool-today/">c2pool today</a></li>
+<li><a href="/en/references/">References</a></li>
+<li><a href="/en/making-of-c2pool/">Making of c2pool</a></li>
+<li><a href="/en/luck/">Luck</a></li>
+<li><a href="/en/real-difficulty/">Real difficulty</a></li>
+<li><a href="/en/difficulty-adjustment/">Difficulty adjustment</a></li>
+<li><a href="/en/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/en/weighted-multisig/">Weighted multisig</a></li>
+<li><a href="/en/bitcoin-leveldb/" aria-current="page">Bitcoin LevelDB</a></li>
+<li><a href="/en/purple-paper/">Purple Paper</a></li>
+<li><a href="/en/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Bitcoin LevelDB" data-desc="Reading the Bitcoin Core block index and chainstate databases directly.">
+<h1 id="ld-02">Bitcoin LevelDB</h1>
+<p id="ld-03" class="sub">Reading Bitcoin Core&rsquo;s block index and chainstate directly from disk</p>
+<div id="ld-upd" class="update"><p><b>Updated November 2026.</b> The first version of this page reproduced, without attribution, an answer by Pieter Wuille on Bitcoin Stack Exchange and a parser posted under the same question. Both are published there under CC&nbsp;BY-SA&nbsp;4.0. This version is rewritten in our own words from the Bitcoin Core source (release v28.1) and links to those answers instead. It also corrects the record layout and the varint encoder, and adds the block-file XOR key of Bitcoin Core 28.0.</p></div>
+<p id="ld-04">Further reading: <a href="https://bitcoin.stackexchange.com/a/29418">Pieter Wuille&rsquo;s answer</a> to &ldquo;What are the keys used in the blockchain levelDB?&rdquo;, and <a href="https://bitcoin.stackexchange.com/questions/28168">the other answers to that question</a> (Bitcoin Stack Exchange, CC&nbsp;BY-SA&nbsp;4.0).</p>
+<h2 id="ld-05">Two databases and a pile of files</h2>
+<p id="ld-06">Bitcoin Core keeps two LevelDB key-value databases next to its raw block files:</p>
+<ul id="ld-07">
+ <li><code>blocks/index/</code>, the <b>block index</b>: one record per known block header, saying where the block and its undo data are on disk;</li>
+ <li><code>chainstate/</code>, the <b>UTXO set</b> of the current best chain;</li>
+ <li><code>blocks/blkNNNNN.dat</code> and <code>blocks/revNNNNN.dat</code>: the blocks themselves, in network format, and their undo data, appended one after another. These are plain files, not a database.</li>
+</ul>
+<p id="ld-08">The optional transaction index has lived in its own database, <code>indexes/txindex/</code>, since Bitcoin Core 0.17. LevelDB does not allow two programs to open a database at once, so copy it, or stop the node, before reading. For most questions the RPC calls <code>getblock</code>, <code>gettxout</code> and <code>gettxoutsetinfo</code> are simpler.</p>
+<h2 id="ld-09">Keys in the block index</h2>
+<div id="ld-10" class="table-wrap"><table>
+ <thead><tr><th>Key</th><th>Value</th></tr></thead>
+ <tbody>
+ <tr><td><code>'b'</code> + 32-byte block hash</td><td>the block index record (below)</td></tr>
+ <tr><td><code>'f'</code> + 4-byte file number</td><td>statistics of one block file: block count, file sizes, lowest and highest height and time</td></tr>
+ <tr><td><code>'l'</code></td><td>the number of the last block file used</td></tr>
+ <tr><td><code>'R'</code></td><td>set while a reindex is in progress</td></tr>
+ <tr><td><code>'F'</code> + flag name</td><td>a named boolean flag</td></tr>
+ </tbody>
+</table></div>
+<h2 id="ld-11">Keys in the chainstate</h2>
+<div id="ld-12" class="table-wrap"><table>
+ <thead><tr><th>Key</th><th>Value</th></tr></thead>
+ <tbody>
+ <tr><td><code>'C'</code> + txid + output index (varint)</td><td>one unspent output: height, whether it is a coinbase output, amount and script (from Bitcoin Core 0.15)</td></tr>
+ <tr><td><code>'c'</code> + txid</td><td>the older per-transaction format (before 0.15); Bitcoin Core v28.1 refuses a chainstate that still holds it and asks for <code>-reindex-chainstate</code></td></tr>
+ <tr><td><code>'B'</code></td><td>the hash of the block up to which the UTXO set is complete</td></tr>
+ <tr><td><code>'H'</code></td><td>the head blocks while a flush is interrupted</td></tr>
+ </tbody>
+</table></div>
+<p id="ld-13">The chainstate values are XOR-obfuscated with a key stored in the same database (key <code>0x0e 0x00 "obfuscate_key"</code>). XOR each value with the key, repeated, before decoding it.</p>
+<h2 id="ld-14">The block index record</h2>
+<p id="ld-15">A <code>'b'</code> record is a run of varints followed by the 80-byte block header: client version, height, status flags, transaction count; then, only if the status says the data is there, the file number and the byte offsets of the block and its undo data; then the header (version, previous hash, merkle root, time, bits, nonce). Bitcoin Core&rsquo;s varint is not the common LEB128: it is big-endian base 128, and each continuation byte also adds one, so every number has exactly one encoding.</p>
+<pre id="ld-16"><code>import hashlib
+
+def read_varint(buf, i):
+    &quot;&quot;&quot;Bitcoin Core VARINT (serialize.h ReadVarInt): MSB base-128 with an offset.&quot;&quot;&quot;
+    n = 0
+    while True:
+        b = buf[i]; i += 1
+        n = (n &lt;&lt; 7) | (b &amp; 0x7F)
+        if b &amp; 0x80:
+            n += 1
+        else:
+            return n, i
+
+def write_varint(n):
+    &quot;&quot;&quot;Inverse of read_varint (serialize.h WriteVarInt).&quot;&quot;&quot;
+    out = [n &amp; 0x7F]
+    while n &gt; 0x7F:
+        n = (n &gt;&gt; 7) - 1
+        out.append((n &amp; 0x7F) | 0x80)
+    return bytes(reversed(out))
+
+BLOCK_HAVE_DATA, BLOCK_HAVE_UNDO = 8, 16
+
+def parse_block_index_value(value):
+    &quot;&quot;&quot;Value of a &#x27;b&#x27; + block-hash key in blocks/index (chain.h CDiskBlockIndex).&quot;&quot;&quot;
+    i, rec = 0, {}
+    for field in (&#x27;client_version&#x27;, &#x27;height&#x27;, &#x27;status&#x27;, &#x27;tx_count&#x27;):
+        rec[field], i = read_varint(value, i)
+    if rec[&#x27;status&#x27;] &amp; (BLOCK_HAVE_DATA | BLOCK_HAVE_UNDO):
+        rec[&#x27;file&#x27;], i = read_varint(value, i)
+    if rec[&#x27;status&#x27;] &amp; BLOCK_HAVE_DATA:
+        rec[&#x27;data_pos&#x27;], i = read_varint(value, i)
+    if rec[&#x27;status&#x27;] &amp; BLOCK_HAVE_UNDO:
+        rec[&#x27;undo_pos&#x27;], i = read_varint(value, i)
+    header = value[i:i + 80]
+    rec[&#x27;version&#x27;] = int.from_bytes(header[0:4], &#x27;little&#x27;)
+    rec[&#x27;prev_hash&#x27;] = header[4:36][::-1].hex()
+    rec[&#x27;merkle_root&#x27;] = header[36:68][::-1].hex()
+    rec[&#x27;time&#x27;] = int.from_bytes(header[68:72], &#x27;little&#x27;)
+    rec[&#x27;bits&#x27;] = hex(int.from_bytes(header[72:76], &#x27;little&#x27;))
+    rec[&#x27;nonce&#x27;] = int.from_bytes(header[76:80], &#x27;little&#x27;)
+    rec[&#x27;block_hash&#x27;] = hashlib.sha256(hashlib.sha256(header).digest()).digest()[::-1].hex()
+    return rec</code></pre>
+<p id="ld-17">Fed the value of the record for block 80,000, <code>parse_block_index_value</code> returns height 80000, two transactions, file 0, <code>bits = 0x1b5bede6</code>, and the block hash <code>000000000043a8c0fd1d6f726790caa2a406010d19efd2780db27bdbbd93baf6</code>, which it recomputes from the header. Hashes are stored in little-endian byte order, so they are reversed for display.</p>
+<h2 id="ld-18">Reading the block files directly</h2>
+<p id="ld-19">Each block in a <code>blk*.dat</code> file is stored as the network magic (4 bytes), the block size (4 bytes, little-endian), then the block. Since <b>Bitcoin Core 28.0</b>, a node whose blocks directory is created fresh XORs these files with an 8-byte random key kept in <code>blocks/xor.dat</code> (option <code>-blocksxor</code>). Older software cannot read such files until it applies the key. A blocks directory created by an earlier version keeps an all-zero key.</p>
+<div id="ld-24" class="v37"><span class="tag">V37</span><b>This method, in practice.</b>
+ <p>The block index holds headers, file positions and a little status data only; the blocks themselves are plain append-only files. That is what makes direct, daemon-free reads possible. The <a href="/en/real-difficulty/">Real difficulty</a> charts on this site were made this way: we read <code>blocks/blk00000.dat</code> from a full node&rsquo;s disk and parsed the 80-byte headers in order (magic, size, header, then <code>nBits</code> and the double SHA-256 block hash) for the first 4,032 blocks, with no RPC. On a node set up with Bitcoin Core 28.0 or later, apply the key from <code>blocks/xor.dat</code> first. The same property underlies the V37 design work: a node can rebuild committed state from compact on-disk records and prove it with Merkle proofs of logarithmic size; see the <a href="/en/purple-paper/">Purple Paper summary</a>, &sect;13 (Verifying Payment).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Originally published by Technocore One in “P2Pool scientific basics”, updated in November 2026. © 2026 technocore.one.</p>
+<p>Facts about c2pool checked against release v0.2.12.16 on 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

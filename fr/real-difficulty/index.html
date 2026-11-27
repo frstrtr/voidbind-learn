@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Difficulté réelle — Bases scientifiques de P2Pool</title>
+<meta name="description" content="La cible, la difficulté atteinte et la signification du rapport cible/hash.">
+<link rel="canonical" href="https://learn.voidbind.com/fr/real-difficulty/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/real-difficulty/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/real-difficulty/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/real-difficulty/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/real-difficulty/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<a class="brand" href="/fr/">Bases scientifiques de P2Pool</a>
+<nav class="langs" aria-label="Langue"><a class="lang" href="/en/real-difficulty/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/real-difficulty/" hreflang="fr" lang="fr" data-lang="fr" aria-current="true">Français</a> · <a class="lang" href="/ru/real-difficulty/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/real-difficulty/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/real-difficulty/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Sommaire"><ul>
+<li><a href="/fr/">Accueil</a></li>
+<li><a href="/fr/c2pool-today/">c2pool aujourd’hui</a></li>
+<li><a href="/fr/references/">Références</a></li>
+<li><a href="/fr/making-of-c2pool/">Coulisses de c2pool</a></li>
+<li><a href="/fr/luck/">Chance</a></li>
+<li><a href="/fr/real-difficulty/" aria-current="page">Difficulté réelle</a></li>
+<li><a href="/fr/difficulty-adjustment/">Ajustement de la difficulté</a></li>
+<li><a href="/fr/taproot-coinbase/">Coinbase Taproot</a></li>
+<li><a href="/fr/weighted-multisig/">Multisignature pondérée</a></li>
+<li><a href="/fr/bitcoin-leveldb/">LevelDB de Bitcoin</a></li>
+<li><a href="/fr/purple-paper/">Purple Paper</a></li>
+<li><a href="/fr/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Traduction assistée par machine, pas encore relue par un locuteur natif. <a href="/en/real-difficulty/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Difficulté réelle" data-desc="La cible, la difficulté atteinte et la signification du rapport cible/hash.">
+<h1 id="rd-02" data-src="7e4f901aecb4">Difficulté réelle</h1>
+<p id="rd-03" class="sub" data-src="4e6bfc614a92">Cible, hash et difficulté atteinte</p>
+<div id="rd-upd" class="update" data-src="ad913b22edfb"><p><b>Mis à jour en novembre 2026.</b> Dans la première version de cette page, les définitions de la cible, de la « cible réelle » (real target) et du rapport cible/hash se contredisaient par endroits, et la structure du champ « bits » était fausse. Ces paragraphes sont réécrits ci-dessous. Les graphiques sont inchangés.</p></div>
+<p id="rd-04" data-src="83ab1a28f5ef">Un bloc est valide lorsque son hash de preuve de travail, lu comme un nombre de 256 bits, n’est pas supérieur à la cible exigée par la chaîne. La cible, la difficulté et le hash sont trois façons de voir cette seule et même comparaison.</p>
+<h2 id="rd-05" data-src="978354db0c00">Cible</h2>
+<p id="rd-06" data-src="427db2c8a37e">La cible est un nombre de 256 bits. L’en-tête ne la stocke pas en entier : le champ <code>nBits</code> de 4 octets (« bits ») l’encode sous forme compacte. Le premier octet est un exposant <i>e</i> et les trois octets restants forment une mantisse <i>m</i> :</p>
+<pre id="rd-07" data-src="cda5e12b685f">target = m &times; 2^(8 &times; (e &minus; 3))</pre>
+<p id="rd-08" data-src="fe6fb57eaf5e">Par exemple, le bloc genesis de Bitcoin a <code>nBits = 0x1d00ffff</code> : <i>e</i>&nbsp;=&nbsp;0x1d, <i>m</i>&nbsp;=&nbsp;0x00ffff, donc cible&nbsp;=&nbsp;0xffff&nbsp;&times;&nbsp;2<sup>208</sup>. C’est la plus grande cible autorisée par Bitcoin, la cible de « difficulté&nbsp;1 ».</p>
+<h2 id="rd-09" data-src="be44133ed57f">Difficulté</h2>
+<p id="rd-10" data-src="bf0cd4ae0641">La difficulté est la cible de difficulté 1 divisée par la cible actuelle : <code>difficulty = target<sub>max</sub> / target</code>. Une cible <b>plus petite</b> signifie une difficulté <b>plus élevée</b> et davantage de travail par bloc. Sur les chaînes de type Bitcoin, un bloc à la difficulté <i>D</i> demande en moyenne environ <i>D</i>&nbsp;&times;&nbsp;2<sup>32</sup> hashs.</p>
+<p id="rd-11" data-src="4d6b741fab3e">La cible est ajustée périodiquement (tous les 2016 blocs sur Bitcoin) pour que les blocs continuent d’arriver à peu près à l’intervalle prévu ; voir <a href="/fr/difficulty-adjustment/">Ajustement de la difficulté</a>.</p>
+<h2 id="rd-12" data-src="748a92ffe045">Le hash de preuve de travail</h2>
+<p id="rd-13" data-src="5f304adc648c">Les mineurs modifient le nonce (et d’autres champs de l’en-tête) et hachent de nouveau l’en-tête jusqu’à ce que le résultat soit inférieur ou égal à la cible. Chaque tentative réussit avec une probabilité d’environ cible&nbsp;/&nbsp;2<sup>256</sup>, indépendamment des tentatives précédentes.</p>
+<p id="rd-14" data-src="1ddd452919f5">Sur Bitcoin, le hash de preuve de travail est le double SHA-256 de l’en-tête de 80 octets, qui sert aussi d’identifiant au bloc. Les chaînes que mine c2pool utilisent différentes fonctions de preuve de travail. Sur Litecoin et Dogecoin, le bloc reste identifié par son hash SHA-256d, tandis que sa preuve de travail est vérifiée avec Scrypt ; sur Dash, les deux sont en X11 :</p>
+<div id="rd-15" class="table-wrap" data-src="b0b2f459a0a0"><table>
+ <thead><tr><th>Chaîne</th><th>Fonction de preuve de travail</th></tr></thead>
+ <tbody>
+ <tr><td>Bitcoin (BTC), Bitcoin Cash (BCH)</td><td>SHA-256d</td></tr>
+ <tr><td>Litecoin (LTC), Dogecoin (DOGE, en minage fusionné), DigiByte (DGB, tel que c2pool le mine)</td><td>Scrypt</td></tr>
+ <tr><td>Dash (DASH)</td><td>X11</td></tr>
+ <tr><td>Fork BIP-110</td><td>SHA-256d sous la hauteur 961 640, BLAKE2b à partir de cette hauteur</td></tr>
+ <tr><td>Monero (XMR, expérimental dans c2pool)</td><td>RandomX</td></tr>
+ </tbody>
+</table></div>
+<h2 id="rd-16" data-src="ad96e32ee007">Difficulté atteinte et dépassement</h2>
+<p id="rd-17" data-src="1cb0697f7a28">La première version de cette page employait le terme « cible réelle » pour la valeur que le hash effectivement trouvé par un mineur aurait encore satisfaite. Deux rapports sont utiles, et il ne faut pas les confondre :</p>
+<ul id="rd-18" data-src="bbd1c696c9b4">
+ <li><b>Difficulté atteinte</b> = target<sub>max</sub>&nbsp;/&nbsp;hash. La difficulté à laquelle ce hash précis aurait encore été valide. La « best share » (traduction : « meilleure share ») du tableau de bord est de ce type.</li>
+ <li><b>Dépassement</b> R = cible&nbsp;/&nbsp;hash = difficulté atteinte&nbsp;/&nbsp;difficulté. Un bloc valide a R&nbsp;&ge;&nbsp;1. R indique de combien ce hash est tombé sous sa cible.</li>
+</ul>
+<p id="rd-19" data-src="65eca43dc797">Le dépassement mesure la chance, pas l’effort. Tout bloc valide à une difficulté donnée a demandé le même travail espéré, quel que soit son R. Sachant qu’un hash atteint la cible, R suit <code>Pr[R &ge; r] = 1/r</code> : la moitié des blocs ont un R inférieur à 2, un sur mille a un R supérieur à 1000, et l’espérance n’existe pas.</p>
+<figure id="rd-29" data-src="af12333ee29e">
+ <img src="/assets/img/real-diff-epochs.png" alt="graphique original du facteur">
+ <figcaption>Graphique original (tel que publié) : target/real_target par bloc pour epoch_0 (0&ndash;2015) et epoch_1 (2016&ndash;4031) de la blockchain Bitcoin. Conservé ici pour référence.</figcaption>
+ </figure>
+
+<figure id="rd-30" data-src="8103ad98238f">
+ <img src="/assets/img/real-diff-real.png" alt="difficulté atteinte par bloc, données BTC réelles">
+ <figcaption>Les mêmes données, recalculées sur l’ensemble des 4032 blocs (R = cible/hash ; la difficulté vaut 1 tout au long des deux époques, donc R est le dépassement propre à chaque bloc). La chaîne exige seulement R &ge; 1 ; les rares pics relèvent de la pure chance. R médian &asymp; 2.</figcaption>
+ </figure>
+
+<p id="rd-20" data-src="6c161e351884">Dans le second graphique, la difficulté vaut 1 tout au long des deux époques, donc R est la difficulté atteinte de chaque bloc. La médiane proche de 2 est ce que prédit <code>Pr[R &ge; r] = 1/r</code>.</p>
+<div id="rd-45" class="v37" data-src="7dc8701aaccc"><span class="tag">V37</span><b>À quoi sert &mdash; et ne sert pas &mdash; la difficulté atteinte (« réelle »).</b>
+ <p>La difficulté <b>atteinte</b> d’un hash (la « cible réelle » de la première version de cette page) indique de combien ce hash est tombé sous sa cible. Il est tentant de payer les mineurs en proportion : « vous avez trouvé un hash plus rare, vous gagnez plus ». <b>C’est faux, et on peut le démontrer.</b></p>
+ <p>La difficulté atteinte relève de la <b>pure chance</b>. Sachant que la cible est atteinte, le dépassement <code>R = target/hash</code> suit une loi de puissance, <code>Pr[R &ge; r] = 1/r</code>, dont l’espérance ne converge pas : un seul hash chanceux peut dépasser la somme de tous les autres. Payer selon la difficulté atteinte permettrait à une seule share chanceuse de rafler toute une fenêtre de paiement &mdash; et réintroduirait dans le pool exactement la variance que la mise en commun est censée supprimer.</p>
+ <p><b>Le travail est donc crédité selon la <i>cible</i> qu’une share devait atteindre, jamais selon la valeur que son hash a fini par atteindre.</b> Deux shares qui atteignent la même cible sont créditées de la même façon &mdash; la comptabilité reste <i>neutre vis-à-vis de la chance</i>.</p>
+ <p>Le travail situé sous la cible de share est compté selon la même règle. Un hash qui a atteint une cible plus facile (numériquement plus grande) est lui-même une unité de travail à cette cible plus facile : un worker trop faible pour trouver souvent des shares peut donc tout de même être crédité du travail qu’il a fourni, en comptant ses hashs à cette cible plus facile. Le dépassement n’est pas nécessaire pour cela. <b>La mesure, pas le paiement.</b> C’est ainsi que l’article Work Receipts (reçus de travail) crédite le travail ; voir le <a href="/fr/purple-paper/">résumé du Purple Paper</a>, &sect;5 (La preuve de travail comme mesure) et &sect;8 (Récupérer le travail sous l’ordre).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Publié à l’origine par Technocore One dans « P2Pool scientific basics », mis à jour en novembre 2026. © 2026 technocore.one.</p>
+<p>Faits sur c2pool vérifiés par rapport à la version v0.2.12.16 le 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

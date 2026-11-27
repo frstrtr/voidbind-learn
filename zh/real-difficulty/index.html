@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>真实难度 — P2Pool 科学基础</title>
+<meta name="description" content="目标值、实际达到的难度，以及 target/hash 这个比值的含义。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/real-difficulty/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/real-difficulty/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/real-difficulty/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/real-difficulty/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/real-difficulty/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/real-difficulty/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/real-difficulty/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/real-difficulty/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/real-difficulty/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/real-difficulty/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/" aria-current="page">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/real-difficulty/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="真实难度" data-desc="目标值、实际达到的难度，以及 target/hash 这个比值的含义。">
+<h1 id="rd-02" data-src="7e4f901aecb4">真实难度</h1>
+<p id="rd-03" class="sub" data-src="4e6bfc614a92">目标值、哈希与实际达到的难度</p>
+<div id="rd-upd" class="update" data-src="ad913b22edfb"><p><b>2026 年 11 月更新。</b>本页第一版中对目标值、“真实目标值”（real target）以及 target/hash 比值的定义有几处相互矛盾，“bits”字段的布局也写错了。这些段落已在下文重写。图表未作改动。</p></div>
+<p id="rd-04" data-src="83ab1a28f5ef">一个区块有效的条件是：其工作量证明哈希作为一个 256 位数读取时，不大于该链要求的目标值。目标值、难度和哈希是对这同一个比较的三种看法。</p>
+<h2 id="rd-05" data-src="978354db0c00">目标值</h2>
+<p id="rd-06" data-src="427db2c8a37e">目标值是一个 256 位的数。区块头并不完整存储它：4 字节的 <code>nBits</code> 字段（“bits”）以紧凑形式对它编码。第一个字节是指数 <i>e</i>，其余三个字节是尾数 <i>m</i>：</p>
+<pre id="rd-07" data-src="cda5e12b685f">target = m &times; 2^(8 &times; (e &minus; 3))</pre>
+<p id="rd-08" data-src="fe6fb57eaf5e">例如，比特币创世区块的 <code>nBits = 0x1d00ffff</code>：<i>e</i>&nbsp;=&nbsp;0x1d，<i>m</i>&nbsp;=&nbsp;0x00ffff，因此目标值&nbsp;=&nbsp;0xffff&nbsp;&times;&nbsp;2<sup>208</sup>。这是比特币允许的最大目标值，即“难度&nbsp;1”目标值。</p>
+<h2 id="rd-09" data-src="be44133ed57f">难度</h2>
+<p id="rd-10" data-src="bf0cd4ae0641">难度等于难度 1 目标值除以当前目标值：<code>difficulty = target<sub>max</sub> / target</code>。目标值<b>越小</b>，难度<b>越高</b>，每个区块需要的工作量越多。在比特币类的链上，难度为 <i>D</i> 的区块平均需要约 <i>D</i>&nbsp;&times;&nbsp;2<sup>32</sup> 次哈希。</p>
+<p id="rd-11" data-src="4d6b741fab3e">目标值会定期调整（比特币上每 2016 个区块一次），使区块保持大致预定的出块间隔；参见<a href="/zh/difficulty-adjustment/">难度调整</a>。</p>
+<h2 id="rd-12" data-src="748a92ffe045">工作量证明哈希</h2>
+<p id="rd-13" data-src="5f304adc648c">矿工不断改变 nonce（以及其他区块头字段）并重新对区块头求哈希，直到结果小于或等于目标值。每次尝试成功的概率约为 目标值&nbsp;/&nbsp;2<sup>256</sup>，与之前的尝试相互独立。</p>
+<p id="rd-14" data-src="1ddd452919f5">在比特币上，工作量证明哈希是对 80 字节区块头做两次 SHA-256 的结果，这同时也是区块的 ID。c2pool 挖的各条链使用不同的工作量证明函数。在莱特币和狗狗币上，区块仍以其 SHA-256d 哈希命名，而工作量证明用 Scrypt 校验；在达世币上，两者都是 X11：</p>
+<div id="rd-15" class="table-wrap" data-src="b0b2f459a0a0"><table>
+ <thead><tr><th>链</th><th>工作量证明函数</th></tr></thead>
+ <tbody>
+ <tr><td>比特币（BTC）、比特币现金（BCH）</td><td>SHA-256d</td></tr>
+ <tr><td>莱特币（LTC）、狗狗币（DOGE，联合挖矿）、DigiByte（DGB，按 c2pool 的挖法）</td><td>Scrypt</td></tr>
+ <tr><td>达世币（DASH）</td><td>X11</td></tr>
+ <tr><td>BIP-110 分叉</td><td>高度 961,640 之前为 SHA-256d，从该高度起为 BLAKE2b</td></tr>
+ <tr><td>门罗币（XMR，在 c2pool 中为实验性）</td><td>RandomX</td></tr>
+ </tbody>
+</table></div>
+<h2 id="rd-16" data-src="ad96e32ee007">实际达到的难度与超出倍数</h2>
+<p id="rd-17" data-src="1cb0697f7a28">本页第一版用“真实目标值”（real target）一词指代矿工实际找到的那个哈希仍然可以满足的值。有两个比值很有用，而且不应混用：</p>
+<ul id="rd-18" data-src="bbd1c696c9b4">
+ <li><b>实际达到的难度</b> = target<sub>max</sub>&nbsp;/&nbsp;hash。即这个特定哈希仍然有效时所对应的难度。仪表板上的“best share”（最佳份额）就属于这一类。</li>
+ <li><b>超出倍数</b> R = target&nbsp;/&nbsp;hash = 实际达到的难度&nbsp;/&nbsp;难度。有效区块的 R&nbsp;&ge;&nbsp;1。R 表示这个哈希碰巧比其目标值低了多少。</li>
+</ul>
+<p id="rd-19" data-src="65eca43dc797">超出倍数衡量的是运气，而不是工作量。在给定难度下，每个有效区块的期望工作量都相同，无论它的 R 是多少。在哈希满足目标值的条件下，R 服从 <code>Pr[R &ge; r] = 1/r</code>：一半的区块 R 小于 2，千分之一的区块 R 大于 1,000，而均值不存在。</p>
+<figure id="rd-29" data-src="af12333ee29e">
+ <img src="/assets/img/real-diff-epochs.png" alt="原始倍数图">
+ <figcaption>原始图表（按原样发布）：比特币区块链 epoch_0（0&ndash;2015）和 epoch_1（2016&ndash;4031）中每个区块的 target/real_target。保留于此供参考。</figcaption>
+ </figure>
+
+<figure id="rd-30" data-src="8103ad98238f">
+ <img src="/assets/img/real-diff-real.png" alt="每个区块实际达到的难度，真实 BTC 数据">
+ <figcaption>同一组数据，在全部 4,032 个区块上重新计算（R = target/hash；两个周期内难度始终为 1，因此 R 就是区块自身的超出倍数）。链只要求 R &ge; 1；罕见的尖峰纯属运气。R 的中位数 &asymp; 2。</figcaption>
+ </figure>
+
+<p id="rd-20" data-src="6c161e351884">在第二张图中，两个周期内难度始终为 1，因此 R 就是每个区块实际达到的难度。中位数接近 2，正是 <code>Pr[R &ge; r] = 1/r</code> 所预测的。</p>
+<div id="rd-45" class="v37" data-src="7dc8701aaccc"><span class="tag">V37</span><b>实际达到的（“真实”）难度能用来做什么，不能用来做什么。</b>
+ <p>一个哈希<b>实际达到的</b>难度（即本页第一版中的“真实目标值”）表示该哈希碰巧比其目标值低了多少。人们很容易想按它的比例给矿工付款：“你找到了更稀有的哈希，就该多拿。”<b>这是错的，而且可以证明是错的。</b></p>
+ <p>实际达到的难度<b>纯属运气</b>。在满足目标值的条件下，超出倍数 <code>R = target/hash</code> 服从幂律 <code>Pr[R &ge; r] = 1/r</code>，其均值不收敛：单个幸运的哈希可以超过所有其他哈希之和。按实际达到的难度付款，会让一个幸运的份额拿走整个支付窗口——把矿池本来要消除的方差原封不动地带回矿池。</p>
+ <p><b>因此，工作量按份额被要求满足的<i>目标值</i>记账，从不按其哈希碰巧达到的数值记账。</b>满足相同目标值的两个份额得到相同的记账——记账保持<i>与运气无关</i>。</p>
+ <p>低于份额目标值的工作也按同样的规则计算。满足更容易（数值更大）的目标值的哈希本身就是该更容易的目标值下的一个工作单位，因此一个算力太弱、难以经常找到份额的矿机，仍然可以通过按该更容易的目标值计算其哈希，为它所做的工作获得记账。这并不需要超出倍数。<b>是度量，而不是支付。</b>这正是 Work Receipts（工作收据）论文为工作量记账的方式；参见 <a href="/zh/purple-paper/">Purple Paper 摘要</a>第 5 节（工作量证明作为度量）和第 8 节（找回排序之下的工作）。</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>最初由 Technocore One 发布于“P2Pool scientific basics”，2026 年 11 月更新。© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

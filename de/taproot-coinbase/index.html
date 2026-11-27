@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Taproot-Coinbase — Wissenschaftliche Grundlagen von P2Pool</title>
+<meta name="description" content="Taproot-Outputs in einer Coinbase-Transaktion und was sie für einen dezentralen Pool leisten können und was nicht.">
+<link rel="canonical" href="https://learn.voidbind.com/de/taproot-coinbase/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/taproot-coinbase/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/taproot-coinbase/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/taproot-coinbase/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/taproot-coinbase/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/taproot-coinbase/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/taproot-coinbase/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="top">
+<a class="brand" href="/de/">Wissenschaftliche Grundlagen von P2Pool</a>
+<nav class="langs" aria-label="Sprache"><a class="lang" href="/en/taproot-coinbase/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/taproot-coinbase/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/taproot-coinbase/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/taproot-coinbase/" hreflang="de" lang="de" data-lang="de" aria-current="true">Deutsch</a> · <a class="lang" href="/zh/taproot-coinbase/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Inhalt"><ul>
+<li><a href="/de/">Startseite</a></li>
+<li><a href="/de/c2pool-today/">c2pool heute</a></li>
+<li><a href="/de/references/">Quellen</a></li>
+<li><a href="/de/making-of-c2pool/">Making-of c2pool</a></li>
+<li><a href="/de/luck/">Glück</a></li>
+<li><a href="/de/real-difficulty/">Echte Schwierigkeit</a></li>
+<li><a href="/de/difficulty-adjustment/">Schwierigkeitsanpassung</a></li>
+<li><a href="/de/taproot-coinbase/" aria-current="page">Taproot-Coinbase</a></li>
+<li><a href="/de/weighted-multisig/">Gewichtetes Multisig</a></li>
+<li><a href="/de/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/de/purple-paper/">Purple Paper</a></li>
+<li><a href="/de/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Maschinengestützte Übersetzung, noch nicht von Muttersprachlern geprüft. <a href="/en/taproot-coinbase/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Taproot-Coinbase" data-desc="Taproot-Outputs in einer Coinbase-Transaktion und was sie für einen dezentralen Pool leisten können und was nicht.">
+<h1 id="tr-02" data-src="29d2a7e91599">Taproot-Coinbase</h1>
+<p id="tr-03" class="sub" data-src="5f8688fcd91b">Taproot-Outputs in einer Coinbase-Transaktion und was sie für einen dezentralen Pool leisten können und was nicht</p>
+<p id="tr-04" data-src="42b9b70d8e2b">Taproot-Adressen in der Coinbase-Transaktion zu verwenden, um mehrere Outputs abzubilden oder mehrere Transaktionen zu ermöglichen, ist technisch machbar und bietet einige Vorteile bei Effizienz und Privatsphäre.</p>
+<h2 id="tr-05" data-src="98424e34c596">Eine einzige Taproot-Adresse für mehrere Outputs</h2>
+<p id="tr-06" data-src="32a69db335cc">Eine Taproot-Adresse, abgeleitet aus einem Schnorr-Public-Key in Kombination mit MAST (Merkelized Abstract Syntax Trees), kann komplexe Ausgabebedingungen hinter einer einzigen Adresse verbergen. Damit ließen sich potenziell mehrere Parteien aus einem einzigen Taproot-Output bezahlen, indem man unterschiedliche Bedingungen in den Script-Path-Spend dieses Outputs kodiert. Allerdings wird der Output als Ganzes ausgegeben: Wer eine der Bedingungen erfüllt, gibt ihn vollständig aus. Jede Aufteilung zwischen den Parteien muss daher in den Outputs der ausgebenden Transaktion erfolgen.</p>
+<h2 id="tr-07" data-src="5a1f89027110">Mehrere Taproot-Adressen in der Coinbase</h2>
+<p id="tr-08" data-src="ba0fda88d0eb">Man kann auch mehrere Taproot-Adressen direkt in den Outputs einer Coinbase-Transaktion verwenden, ähnlich wie mehrere Legacy- oder SegWit-Adressen. Jeder Output kann auf eine andere Taproot-Adresse zeigen. So kann die Transaktion die Block-Belohnung an mehrere Empfänger oder Adressen verteilen, jede mit eigenen komplexen Ausgabebedingungen, die über Taproot kodiert sind.</p>
+<h2 id="tr-09" data-src="3392adf56de6">Vorteile</h2>
+<ul id="tr-10" data-src="1ac74157172a"><li><b>Privatsphäre:</b> Taproot-Adressen können mehr Privatsphäre bieten, da die Bedingungen, unter denen die Coins ausgegeben werden, verborgen bleiben können, bis sie relevant werden (d.&nbsp;h. wenn sie tatsächlich in einer Transaktion verwendet werden).</li>
+ <li><b>Effizienz:</b> Taproot kann Schnorr-Signaturen nutzen, die im Vergleich zu den ECDSA-Signaturen klassischer Bitcoin-Transaktionen platzsparender und schneller zu verifizieren sind.</li></ul>
+<h2 id="tr-11" data-src="64375db4404f">Hinweise zur Verwendung</h2>
+<p id="tr-12" data-src="6ac91e5dd400">Wenn man mit einer einzigen Taproot-Adresse mehrere Zahlungsbedingungen kodiert, ist es entscheidend, die Bedingungen so zu strukturieren, dass sie das Ausgeben der Mittel nicht unnötig verkomplizieren. Der Kerngedanke ist, die Effizienz der Transaktion zu erhalten und zugleich die Fähigkeit von Taproot zu nutzen, komplexe Transaktionen zu vereinfachen.</p>
+<p id="tr-13" data-src="7f047427cf39">Zusammengefasst: Man kann eine oder zwei Taproot-Adressen in einer Coinbase-Transaktion verwenden, entweder indem mehrere Outputs auf verschiedene Taproot-Adressen zeigen oder indem eine Taproot-Adresse mehrere Ausgabebedingungen innerhalb eines einzigen Outputs abdeckt. Dieser Aufbau kann besonders für Mining-Pools nützlich sein, die Auszahlungen vereinfachen und Privatsphäre und Sicherheit der Transaktionen verbessern wollen.</p>
+<p id="tr-14" data-src="0efa1bdcf619">Eine Taproot-Adresse ist ein Bitcoin-Adresstyp, der mit „bc1p“ beginnt und im Bech32m-Format kodiert ist. Anders als klassische Adressen kann eine Taproot-Adresse komplexere Scripts platzsparender und datenschutzfreundlicher darstellen, mithilfe eines Schnorr-Public-Keys, der sich zusätzlich auf einen MAST aus Scripts festlegen kann.</p>
+<h2 id="tr-15" data-src="440c5eac03a0">Beispiel für den Aufbau einer Taproot-Transaktion</h2>
+<h3 id="tr-16" data-src="7abc49dfa87b">Inputs</h3>
+<ul id="tr-17" data-src="1c83e1c8fc78"><li><b>Input 1:</b> Txid (Transaktions-ID einer früheren Transaktion); Vout (Output-Index in der früheren Transaktion); ScriptSig: leer (ein Taproot-Spend trägt seine Daten im Witness); Witness: enthält die Schnorr-Signatur und gegebenenfalls weitere Bestandteile, falls der Script-Path genutzt wird.</li>
+ <li><b>Input 2:</b> Ein weiterer Input im selben Format.</li></ul>
+<h3 id="tr-18" data-src="e7ce99764a2d">Outputs</h3>
+<ul id="tr-19" data-src="4c28ca59352a"><li><b>Output 1:</b> Value (zu sendender Betrag in Bitcoin); ScriptPubKey: <code>OP_1 &lt;32-byte x-only output key&gt;</code> (34 Bytes: <code>51 20 &hellip;</code>), das Format eines Taproot-Output-Scripts, das erst dann komplex wird, wenn ein Script-Path-Spend ausgelöst wird.</li>
+ <li><b>Output 2:</b> Ein weiterer Output mit seinem Betrag und Taproot-Script.</li></ul>
+<h3 id="tr-20" data-src="87ade4b5a529">Schritt für Schritt</h3>
+<p id="tr-21" data-src="b15336f20a78"><b>Txid und Vout:</b> Jeder Input verweist auf den Output einer früheren Transaktion. Diese Outputs werden durch die Inputs der neuen Transaktion ausgegeben.</p>
+<p id="tr-22" data-src="d830b64d23a4"><b>ScriptSig:</b> Taproot-Transaktionen haben in der Regel ein leeres ScriptSig, weil die Script-Validierung auf dem Witness-Teil der Transaktion beruht.</p>
+<p id="tr-23" data-src="dec77a79634f"><b>Witness:</b> Enthält die Schnorr-Signatur, die den Besitz des Taproot-Public-Keys belegt. Werden komplexe Bedingungen genutzt (Script-Path-Spend), stehen hier die betreffenden Scripts und Signaturen.</p>
+<p id="tr-24" data-src="fc76b9cb39f5"><b>Outputs:</b> Jeder Output gibt an, wie viele Bitcoin gesendet werden und an welche Adresse (dargestellt durch den Taproot-Public-Key). Das ScriptPubKey für Taproot-Outputs ist auf <code>OP_1 &lt;Taproot public key&gt;</code> vereinfacht, sodass mögliche komplexe Bedingungen in den Witness-Daten behandelt werden können, falls ein Script-Path-Spend aktiviert wird.</p>
+<p id="tr-25" data-src="6b1d90cfb642">Dieser Aufbau erlaubt ausgefeilte Bedingungen in den Outputs, die erst sichtbar werden, wenn sie gezielt aktiviert werden (z.&nbsp;B. bei Rückerstattungen, Vereinbarungen zwischen mehreren Parteien usw.), und verbessert so Privatsphäre und Flexibilität. Die eigentliche Stärke von Taproot liegt darin, dass – solange eine Transaktion nicht angefochten wird oder die Bedingungen nicht komplex sind – nur der Key-Path-Spend (also eine einzelne Signatur) offengelegt werden muss; andere mögliche Bedingungen bleiben verborgen, und die Transaktionen sehen aus wie gewöhnliche Single-Signature-Transaktionen. Dies ist nur ein konzeptionelles Beispiel. Eine echte Transaktion müsste den Vorgaben der jeweiligen Software- oder Hardware-Wallet entsprechen, die Taproot unterstützt.</p>
+<h2 id="tr-26" data-src="ca5a2490f7c1">Die Coinbase-Belohnung an eine Taproot-Adresse senden</h2>
+<p id="tr-27" data-src="0524c2b1eb70">Es ist ohne Weiteres möglich, die Belohnung der Coinbase-Transaktion in Transaktion 0 (der Coinbase-Transaktion) des Blocks, den ein Miner gefunden hat, an eine Taproot-Adresse zu senden. Taproot erhöht Flexibilität und Privatsphäre von Transaktionen und lässt sich in jede Art von Output integrieren, auch in die Outputs einer Coinbase-Transaktion.</p>
+<ul id="tr-28" data-src="f0f47e27368f"><li><b>Erzeugen einer Taproot-Adresse:</b> Der Miner oder, typischer, der Mining-Pool erzeugt eine Taproot-Adresse. Dazu wird ein Schnorr-Public-Key erstellt, der optional zusätzliche Script-Bedingungen für komplexere Ausgabeszenarien enthalten kann.</li>
+ <li><b>Erstellen der Coinbase-Transaktion:</b> In der Coinbase-Transaktion wird der Output auf die Taproot-Adresse gesetzt. Das scriptPubKey-Feld des Outputs sähe etwa so aus: <code>OP_1 &lt;Taproot public key&gt;</code>.</li>
+ <li><b>Minen des Blocks:</b> Sobald der Block erfolgreich gemined ist, wird die Coinbase-Transaktion samt ihrem Output an die Taproot-Adresse in der Blockchain bestätigt.</li>
+ <li><b>Reifezeit der Block-Belohnung:</b> Wie bei jeder Coinbase-Transaktion sind die ausgeschütteten Bitcoin wegen der Reifeanforderung (Maturity) des Bitcoin-Protokolls erst 100 Blöcke später ausgebbar.</li>
+ <li><b>Ausgeben von der Taproot-Adresse:</b> Nach Ablauf der Reifezeit können die Bitcoin von der Taproot-Adresse ausgegeben werden, entweder über den Key-Path für einfache Single-Signature-Transaktionen oder über den Script-Path für komplexere Bedingungen, falls solche eingerichtet sind.</li></ul>
+<h2 id="tr-29" data-src="4ba37162a9fa">Durchgerechnetes Beispiel: Alice, Bob und andere in einem Pool</h2>
+<p id="tr-30" data-src="0462a2cf5b53">Dieses Beispiel nutzt sowohl den Key-Path als auch den Script-Path von Taproot, um Belohnungen nach bestimmten Bedingungen zu verteilen.</p>
+<p id="tr-31" data-src="d316346f0b8e"><b>Schritt 1 – Erzeugen der Taproot-Adresse.</b> Alice, Bob und andere einigen sich auf Bedingungen, unter denen sie ihren Anteil an den Mining-Belohnungen erhalten. Sie erstellen eine Taproot-Adresse, die ihre Public Keys und alle für komplexere Verteilungen nötigen Scripts kombiniert.</p>
+<p id="tr-32" data-src="97be13b46580"><b>Schritt 2 – Einrichten der Coinbase-Transaktion.</b> Output 1 zahlt an eine Taproot-Adresse mit einem <b>Key-Path</b> (eine einzelne Signatur eines Hauptschlüssels, möglicherweise vom Pool-Betreiber gehalten, für eine einfache Verteilung, wenn alle Parteien zustimmen) und einem <b>Script-Path</b> (Scripts für verschiedene Verteilungen, z.&nbsp;B. erhält Alice 40&nbsp;%, Bob 30&nbsp;%, und die anderen teilen sich die übrigen 30&nbsp;% nach ihren vereinbarten Bedingungen).</p>
+<p id="tr-33" data-src="77bd3b44e71d"><b>Beispiel für das Transaktions-Script:</b></p>
+<pre id="tr-34" data-src="c35631a1a0e7">Key-path output:    OP_1 &lt;combined Schnorr public key&gt;
+Script-path output: Uses MAST to hide individual conditions where:
+  - Alice's condition could be based on time or block height for her shares.
+  - Bob's condition might involve his active participation in mining over a period.
+  - Others have their script based on other criteria like electricity contributions.</pre>
+<p id="tr-35" data-src="954ed2861bef"><b>Schritt 3 – Minen des Blocks.</b> Sobald der Block gemined ist, wird die Coinbase-Transaktion mit der obigen Struktur bestätigt, und der Block wird der Blockchain hinzugefügt.</p>
+<p id="tr-36" data-src="00066f32da28"><b>Schritt 4 – Verteilung der Belohnungen.</b> <i>Key-Path-Spend:</i> Sind alle Bedingungen standardmäßig und unstrittig, kann der Inhaber des Hauptschlüssels eine Transaktion signieren, die die Belohnungen nach einer vorab vereinbarten Formel verteilt. <i>Script-Path-Spend:</i> Müssen bestimmte Bedingungen erfüllt werden (etwa eine Streitbeilegung oder eine zeitgesteuerte Freigabe), werden die betreffenden, in der MAST-Struktur kodierten Scripts ausgeführt, um die Belohnungen entsprechend zu verteilen.</p>
+<p id="tr-37" data-src="5ad636da3e7c"><b>Schritt 5 – Reifezeit und Ausgabe.</b> Die Belohnungen aus der Coinbase-Transaktion müssen 100 Blöcke lang reifen, bevor sie ausgegeben werden können. Danach erfolgt die Verteilung gemäß den ausgelösten Key-Path- oder Script-Path-Bedingungen.</p>
+<h2 id="tr-38" data-src="7e1530701e7b">Den Taproot-Hauptschlüssel geheim halten</h2>
+<p id="tr-39" data-src="4e24233ffdfc">Es ist möglich und mitunter vorzuziehen, dass der Taproot-Hauptschlüssel allen Beteiligten unbekannt bleibt, bis er in der Coinbase-Transaktion verwendet wird, insbesondere wenn der Hauptschlüssel vor allem einer bestimmten Funktion dient, etwa der Verteilung von Mining-Belohnungen, und seine Offenlegung zum Schutz von Sicherheit und Privatsphäre begrenzt wird.</p>
+<p id="tr-40" data-src="fbcd51279f6f"><b>Vertraulichkeit:</b> Bleibt der Taproot-Hauptschlüssel bis zu seiner ersten Verwendung unbekannt, schützt das die Details der Vereinbarung und der Verteilungsformel vor vorzeitiger Offenlegung – vorteilhaft in einem kompetitiven Mining-Umfeld. <b>Sicherheit:</b> Wer die Offenlegung des Schlüssels begrenzt, verringert das Risiko unbefugten Zugriffs oder von Leaks; dieser Schlüssel kann bei seiner Verwendung erhebliche Mengen an Kryptowährung kontrollieren.</p>
+<p id="tr-41" data-src="4a3a59cfeae3"><b>Umsetzung.</b> <i>Erzeugung:</i> Der Schlüssel kann von einer vertrauenswürdigen Partei erzeugt werden oder in einem gemeinsamen Verfahren mit einem Protokoll wie MuSig, bei dem mehrere Parteien zur Erzeugung beitragen, ohne dass eine einzelne Partei den gesamten Schlüssel kennt. <i>Verwendung:</i> Der Schlüssel wird im Script der Taproot-Adresse innerhalb der Coinbase-Transaktion verwendet. <i>Offenlegung:</i> Der Output-Key ist öffentlich, sobald die Coinbase veröffentlicht ist; der interne Schlüssel und alle unbenutzten Script-Leaves bleiben verborgen.</p>
+<div id="tr-41u" class="update" data-src="a8aa61b31a9d"><p><b>Hinweis, November 2026.</b> Der 32-Byte-Output-Key selbst ist öffentlich: Er steht ab dem Moment, in dem der Block gemined wird, im Coinbase-Output. Privat bleiben können der <i>interne</i> Schlüssel und jedes Script-Leaf, das nie verwendet wird. Mit MuSig2 besitzt keine einzelne Partei jemals den privaten Schlüssel eines kombinierten Schlüssels.</p></div>
+<p id="tr-42" data-src="ed3301217a3a">In einem Mining-Pool-Szenario kann ein Taproot-Schlüssel, der bis zu seiner Verwendung allen Teilnehmern unbekannt ist, vereinbarte Verteilungsregeln durchsetzen, ohne jedem Miner die Einzelheiten offenzulegen, und Streitbeilegung oder bedingte Verteilungen ermöglichen, die in den Script-Paths kodiert sind und nur aktiviert werden, wenn bestimmte Bedingungen erfüllt sind.</p>
+<h2 id="tr-43" data-src="d70ee64df2e8">Die Verteilung ohne den privaten Schlüssel überprüfen</h2>
+<p id="tr-44" data-src="dc6d284c14d9">Alice, Bob und andere können die Verteilung der Mining-Belohnungen einer Taproot-Adresse überprüfen, ohne den privaten Schlüssel zu kennen, da die Bitcoin-Blockchain öffentlich und transparent ist.</p>
+<ul id="tr-45" data-src="af95f40d3e84"><li><b>Transparenz des Public Keys:</b> Auch wenn der private Schlüssel unbekannt ist, ist der zur Taproot-Adresse gehörende Public Key sichtbar und überprüfbar. Die Schnorr-Signaturen von Taproot ermöglichen Key Aggregation und eine datenschutzfreundlichere Script-Ausführung, erlauben aber weiterhin die öffentliche Überprüfung der beabsichtigten Transaktionsstrukturen.</li>
+ <li><b>Untersuchung der Scripts:</b> Taproot-Adressen können MAST enthalten, die komplexe Scripts verbergen, welche erst bei Verwendung offengelegt werden müssen. Die Bedingungen, unter denen diese Scripts ausgeführt werden, können von Anfang an transparent gemacht werden, durch öffentliche Dokumentation oder die Vereinbarung eines kooperativen Pools.</li>
+ <li><b>Vorab-Festlegung der Bedingungen:</b> Die Bedingungen der Belohnungsverteilung können vorab im Taproot-Script festgelegt werden. Während einzelne Scripts nur bei Verwendung offengelegt werden, kann der Hash dieser Scripts (Teil der Merkle-Root) geteilt und mit dem abgeglichen werden, was in der Blockchain festgeschrieben ist.</li>
+ <li><b>Simulation und Werkzeuge:</b> Werkzeuge können Transaktionen anhand des Public Keys und der bekannten oder angenommenen Script-Bedingungen simulieren, ohne die Transaktionen auszuführen oder auf den privaten Schlüssel zuzugreifen.</li></ul>
+<p id="tr-46" data-src="a6382d933845">In der Praxis würden die Teilnehmer vor dem Mining auf einem Block-Kandidaten das Taproot-Setup und die zugehörigen Scripts prüfen, mit Blockchain-Analysewerkzeugen verifizieren, dass Public Key und Script-Hashes den vereinbarten Bedingungen entsprechen, und durch Simulation oder vertragliche Vereinbarungen bestätigen, dass die Belohnungsverteilung ihren Erwartungen entspricht.</p>
+<h2 id="tr-47" data-src="9c35ab90b28f">Umgang mit ungültigen Adressen in MAST</h2>
+<p id="tr-48" data-src="bb8d827afaa9">Versucht eine der ausgebenden Transaktionen in einem MAST-Setup, Mittel an eine ungültige Adresse zu senden, sind je nach Art der „ungültigen Adresse“ mehrere Szenarien denkbar:</p>
+<ul id="tr-49" data-src="37043043d10a"><li><b>Ungültiges Adressformat:</b> Entspricht die Adresse keinem anerkannten Bitcoin-Adressformat, weigert sich die Wallet, die Transaktion zu erstellen (siehe den Hinweis unten).</li>
+ <li><b>Nicht existierende, aber gültige Adresse:</b> Ist die Adresse technisch gültig, gehört aber zu keinem bekannten privaten Schlüssel, kann die Transaktion trotzdem verarbeitet und in einen Block aufgenommen werden – die Bitcoin wären praktisch verbrannt, da niemand den Schlüssel besitzt, um sie auszugeben.</li>
+ <li><b>Fehlschlag bei der Script-Auswertung:</b> Ein Output-Script wird bei seiner Erstellung nicht ausgeführt; ein Script, das nie erfolgreich sein kann, lässt nur eine spätere Ausgabe fehlschlagen, und seine Coins sind verbrannt (siehe den Hinweis unten).</li></ul>
+<div id="tr-49u" class="update" data-src="9ff411c8de61"><p><b>Hinweis, November 2026.</b> Auf Protokollebene gibt es keine Adressen, nur Output-Scripts. Eine Adresse, die sich nicht dekodieren lässt, fängt die Wallet ab, bevor überhaupt eine Transaktion existiert. Ein Output-Script, das niemand erfüllen kann, ist in einem Block trotzdem gültig, und seine Coins sind verbrannt. Ein fehlerhaftes Script-Leaf schlägt erst fehl, wenn jemand versucht, damit auszugeben.</p></div>
+<p id="tr-50" data-src="3b1fab360aa3"><b>Umgang und Vorbeugung:</b> Gut konzipierte Wallets und Knoten validieren Adressen vor dem Broadcast; Scripts innerhalb eines MAST sollten so gestaltet sein, dass sie sicher fehlschlagen; Scripts sollten vor dem Einsatz gründlich getestet und auditiert werden; und fortgeschrittene Setups können Wiederherstellungsbedingungen enthalten (mit sorgfältigem kryptografischem Design, um keine neuen Schwachstellen zu schaffen). Das Senden an eine ungültige Adresse führt typischerweise zur Ablehnung der Transaktion oder zum Verlust der Mittel; gründliche Prüfungen und Audits sind daher unerlässlich.</p>
+<h2 id="tr-51" data-src="fad7dd05ef9d">Grundlagen des Bitcoin-Minings, mit Taproot</h2>
+<p id="tr-52" data-src="8cb0a4dfd76d">Bitcoin-Mining ist der Vorgang, neue Transaktionen zur Blockchain hinzuzufügen; Miner lösen mit leistungsfähigen Computern Hash-Rätsel, und wer als Erster eine Lösung findet, darf einen Block anhängen und erhält die Belohnung. Da Mining viel Rechenleistung erfordert, schließen sich einzelne Miner oft Mining-Pools an, die ihre Rechenleistung bündeln; hat der Pool Erfolg, wird die Belohnung nach der beigetragenen Leistung unter den Mitgliedern verteilt.</p>
+<p id="tr-53" data-src="d24b30aaaf65"><b>Einbindung von Taproot:</b> Für den Empfang der Mining-Belohnungen wird eine Taproot-Adresse erzeugt (der Einfachheit halber ein einzelner Public Key oder komplexe Bedingungen, verborgen in ihrem MAST). Wenn der Pool einen Block findet, kann die Coinbase die Belohnung an die Taproot-Adresse ausgeben – Key-Path für eine einfache Aufteilung, Script-Path für bedingte Anteile (nach Zeit oder beigetragener Leistung), die erst bei Bedarf offengelegt werden. Schon vor dem Mining auf einem Kandidaten können alle Mitglieder das Adress-Setup und das Verteilungs-Script überprüfen, um Fairness sicherzustellen, und Taproot erhöht Sicherheit und Privatsphäre, weil die Komplexität verborgen bleibt, solange die Bedingungen keine Offenlegung erfordern, während alle Transaktionen in der Blockchain überprüfbar bleiben.</p>
+<h2 id="tr-54" data-src="a4b4d12dd79c">Taproot mit P2Pool</h2>
+<p id="tr-55" data-src="b47b74f24229">Taproot in einen dezentralen Pool wie P2Pool einzubinden, erfordert wegen dessen dynamischer Natur Anpassungen. P2Pool hat ein <b>dezentrales Modell</b> (kein Pool-Betreiber; Knoten bilden ein Peer-to-Peer-Netzwerk, und ein Miner betreibt seinen eigenen Knoten oder verbindet sich mit einem öffentlichen), eine <b>Share-Chain</b> (eine zweite Blockchain, in der jeder Share ein Proof of Work ist, der zum Finden eines Hauptblocks beiträgt; Shares werden weit häufiger gefunden als Blöcke) und eine <b>dynamische Teilnahme</b> (Miner kommen und gehen ohne Registrierung, gemessen an den eingereichten Shares).</p>
+<ul id="tr-56" data-src="a226a71c41b8"><li><b>Dynamische Erzeugung von Taproot-Adressen:</b> Jeder Miner könnte eine persönliche Taproot-Adresse mit einfachen Auszahlungsbedingungen (Key-Path) und bedingten Auszahlungen je nach fortlaufender Teilnahme (Script-Path) erzeugen; oder es gibt eine gemeinsame Taproot-Adresse, verwaltet über einen Konsensmechanismus, der sich an Änderungen der Beiträge und des Zustands der Share-Chain anpasst.</li>
+ <li><b>Verteilung der Belohnung:</b> Wird ein Block gefunden, geht die Belohnung an die gemeinsame Taproot-Adresse; die Verteilung beruht auf den Daten der Share-Chain und spiegelt den Beitrag jedes Miners über ein gleitendes Fenster wider – fair und proportional zum Aufwand.</li>
+ <li><b>Dynamische Script-Ausführung:</b> Im MAST eingebettete Bedingungen könnten die Verteilung automatisch an das gleitende Fenster der Share-Chain anpassen, Änderungen bei Mining-Leistung, Share-Häufigkeit und Teilnahme berücksichtigen und mit Teilnehmern umgehen, die hinzukommen oder gehen.</li>
+ <li><b>Dezentrale Überprüfung:</b> Alle teilnehmenden Miner überprüfen Integrität und Fairness der Verteilung anhand der Blockchain und der Share-Chain.</li>
+ <li><b>Effizienz und Privatsphäre:</b> Taproot legt bestimmte Scripts nur bei Bedarf offen, und Schnorr-Signaturen sind effizient in Größe und Verifikationszeit – vorteilhaft in einer Umgebung mit hoher Frequenz.</li></ul>
+<h2 id="tr-57" data-src="fd7d9f083be2">Hardwareseitige Begrenzung der Adressanzahl</h2>
+<p id="tr-58" data-src="f4cf9411f724">Würde Mining-Hardware oder ihre Firmware die Zahl der Coinbase-Adressen begrenzen, die ein Miner nutzen kann – was solche Hardware in dezentralen Pools wie P2Pool oder c2pool einschränken würde –, könnte Taproot allein das nicht vollständig lösen. Taproot kann <b>mehrere Ausgabebedingungen unter einer einzigen Adresse bündeln</b> (über MAST und Schnorr), <b>den Bedarf an mehreren Adressen verringern</b> und <b>Privatsphäre und Effizienz verbessern</b> – sodass eine begrenzte Zahl von Adressen weiter reicht. Der Kern des Problems betrifft aber Herstellerrichtlinien, die Kontrolle über die Hardware und die Autonomie der Miner:</p>
+<ul id="tr-59" data-src="abe051d71b6a"><li><b>Einschränkungen der Hardware-Firmware:</b> Ist die Firmware auf bestimmte Adressen festgelegt oder schränkt sie die Adressfunktionen ein, bleiben die Möglichkeiten von Taproot ohne Änderungen an Firmware oder Hardware womöglich ungenutzt.</li>
+ <li><b>Mitwirkung der Hersteller oder Richtlinienänderung nötig:</b> Eine echte Veränderung würde wahrscheinlich einen Kurswechsel der Hersteller oder Druck aus der Community erfordern.</li>
+ <li><b>Alternative Lösungen:</b> Miner könnten auf stärker quelloffene oder anpassbare Hardware ausweichen, bei der sie mehr Kontrolle über solche Einstellungen haben.</li></ul>
+<p id="tr-60" data-src="855ca4da183f">Taproot behandelt die <i>Symptome</i> – wie effizient und flexibel jede erlaubte Adresse genutzt werden kann –, nicht aber die <i>Ursache</i>, die vom Hersteller auferlegte Begrenzung der Adressanzahl. Mögliche Umgehungen sind die Wiederverwendung von Adressen über verschiedene Blöcke hinweg (sofern erlaubt), eine Adressverwaltung auf Pool-Ebene (eine einzige Taproot-Adresse pro Pool oder eine kleine Anzahl) und – wo rechtlich und ethisch vertretbar – Firmware-Änderungen; daneben ein breiteres Eintreten für offene Standards und die Beachtung rechtlicher, garantiebezogener und regulatorischer Folgen.</p>
+<h2 id="tr-c2" data-src="260c2e84c29f">Taproot in c2pool heute</h2>
+<ul id="tr-c3" data-src="cebe87facefa">
+ <li>Der Litecoin-Knoten von c2pool setzt die Soft Forks <code>segwit</code>, <code>taproot</code> und <code>mweb</code> voraus, wie das Litecoin-Netzwerk.</li>
+ <li><b>Eine Taproot-Auszahlungsadresse wird auf der Litecoin-Share-Chain derzeit nicht unterstützt.</b> Ein V36-Share enthält einen 20-Byte-Auszahlungs-Hash, ein P2TR- (oder P2WSH-)Output braucht aber 32 Bytes. c2pool akzeptiert einen solchen Login, doch die Litecoin-Auszahlung dieses Miners wird über den <code>--redistribute</code>-Modus des Knotens umverteilt (im Standardmodus an andere Miner; in den Modi <code>fee</code> und <code>donate</code> an den Betreiber des Knotens bzw. an das Spenden-Script), mit einer Warnung im Log und „P2WSH/P2TR address &rarr; redistributed“ (Übersetzung: „P2WSH/P2TR-Adresse &rarr; umverteilt“) im Dashboard. Verwende eine P2PKH-, P2WPKH- oder P2SH-Adresse.</li>
+ <li>Für Merged Mining braucht c2pool für jeden Litecoin-Miner eine Dogecoin-Auszahlung. Dogecoin hat weder SegWit noch Taproot, daher zahlt c2pool an den Schlüssel der Litecoin-Adresse (P2PKH und P2WPKH als P2PKH, P2SH als P2SH), es sei denn, der Miner gibt im Stratum-Login ausdrücklich eine Dogecoin-Adresse an (<code>LTC_ADDRESS,DOGE_ADDRESS</code>).</li>
+</ul>
+<div id="tr-61" class="v37" data-src="e638d56274f5"><span class="tag">V37</span><b>Viele Miner, eine Coinbase, ohne Betreiberschlüssel.</b>
+ <p>Die obigen Setups stützen sich auf einen Taproot-Schlüssel, „möglicherweise vom Pool-Betreiber gehalten“, und auf MAST, um viele Bedingungen in einen Output zu packen. Ein Key-Path, den ein Betreiber hält, ist eine verwahrende (custodial) Struktur, die ein dezentraler Pool vermeiden muss. Die Bündelung per MAST kann außerdem keine unbegrenzte Zahl von Minern aus einer Coinbase begrenzter Größe bezahlen.</p>
+ <p>Eine frühere Fassung dieses Kastens beschrieb eine Abhilfe, bei der Minern Salden geschuldet würden, die in einem gemeinsamen Ledger geführt und in späteren Blöcken ausgezahlt werden. Dieses Modell ist zurückgezogen: Eine unabhängige Prüfung hat gezeigt, dass ein Pool ohne Verwahrer nicht einigen Minern etwas schulden kann, ohne anderen zu viel auszuzahlen, und die Überzahlung wird nie zurückgeholt. Siehe die Errata vom 4. Oktober 2026 in der <a href="/de/purple-paper/">Zusammenfassung des Purple Paper</a>; Abschnitt 9 des Papers ist als zurückgezogen markiert.</p>
+ <p>Taproot bleibt ein nützlicher Baustein: Jeder Output kann weiterhin ein Taproot-Schlüssel sein, für Privatsphäre und Effizienz. Für sich genommen ist das aber keine Antwort auf das Problem der Coinbase-Größe.</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Ursprünglich von Technocore One in „P2Pool scientific basics“ veröffentlicht, im November 2026 aktualisiert. © 2026 technocore.one.</p>
+<p>Angaben zu c2pool geprüft gegen Release v0.2.12.16 am 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

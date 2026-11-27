@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>运气——残酷的野兽 — P2Pool 科学基础</title>
+<meta name="description" content="挖矿方差实用指南：打不败它的民间说法，以及 c2pool 仪表板如何衡量运气。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/luck/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/luck/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/luck/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/luck/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/luck/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/luck/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/luck/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/luck/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/luck/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/luck/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/luck/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/luck/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/" aria-current="page">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/luck/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="运气" data-desc="挖矿方差实用指南：打不败它的民间说法，以及 c2pool 仪表板如何衡量运气。">
+<h1 id="lk-02" data-src="8985ac05cd64">运气——残酷的野兽</h1>
+<p id="lk-03" class="sub" data-src="469a110c7b18">P2Pool 科学基础——挖矿方差实用指南，以及（打不败它的）各种仪式</p>
+<h2 id="lk-04" data-src="b18592d75af0">有时候就是会走霉运&hellip;&hellip;</h2>
+<p id="lk-05" data-src="60cf44b2a235">在加密货币挖矿的世界里，“运气”在统计上不过是方差，但每个老矿工都知道，当<b>方差怪兽</b>来袭时，感觉就像是冲着你来的。当数学告诉你应该出块，矿池却迟迟不出时，理性往往就被抛到了九霄云外。</p>
+<p id="lk-06" data-src="f51c2a46030e">下面的内容既不传统，也不科学，纯属迷信——就是在老 Bitcoin Talk 论坛和 IRC 频道里悄悄流传的那种。这里收集了一些挖矿民间说法和“转运仪式”。</p>
+<h3 id="lk-07" data-src="214a609c09dd">1. “围观者”效应（量子芝诺效应）</h3>
+<p id="lk-08" data-src="ec2daa2960b6">流传最广的迷信：<i>“盯着看的矿机永远不出块。”</i></p>
+<ul id="lk-09" data-src="7e01fce36687"><li><b>仪式：</b>你必须停止查看仪表板。彻底停止。</li>
+ <li><b>方法：</b>关掉监控标签页，停用出块通知机器人，人离开屏幕至少 24 小时。宇宙知道你在看，而它很害羞。</li>
+ <li><b>“科学原理”：</b>这能降低你的压力，让时间过得更快，直到下一个区块自然到来。</li></ul>
+<h3 id="lk-10" data-src="cff0a1b573b2">2. “献祭”交易</h3>
+<p id="lk-11" data-src="40f3863fcdae">在比特币早期，矿工会把少量币发送到“销毁地址”或知名地址（比如创世区块的地址），作为献给加密之神的供品。</p>
+<ul id="lk-12" data-src="ede6d9c58f08"><li><b>仪式：</b>从你正在挖的币中取出极少的一点（一些粉尘），发给某个慈善机构或随便一个地址。</li>
+ <li><b>逻辑：</b>你在区块链上制造“正向的因果流动”。如果你只拿（挖矿奖励）不给（交易手续费），网络就会惩罚你。</li></ul>
+<h3 id="lk-13" data-src="3cad74dc26e0">3. 服务器风水与“净化”</h3>
+<p id="lk-14" data-src="8280fad1f284">人们相信机器的物理状态会影响它的“数字气场”。</p>
+<ul id="lk-15" data-src="8499e4dfcfd9"><li><b>理线：</b>线缆乱成一团，运气也会“缠在一起”。把网线理直，确保“数据包流动顺畅”（显然是假的，但看着舒服）。</li>
+ <li><b>除尘：</b>让矿机彻底断电，用压缩空气吹灰。一边吹，一边大声告诉服务器它是一台“好机器”。</li>
+ <li><b>重新插拔：</b>拔下网线再插回去。有时候运气只是“卡”在了网口里。</li></ul>
+<h3 id="lk-16" data-src="11cfb6960a37">4. “改名”障眼法</h3>
+<p id="lk-17" data-src="37386077a1d9">有些矿工相信，矿池或网络“诅咒”了某个特定的矿机名或钱包地址。</p>
+<ul id="lk-18" data-src="997e85704a46"><li><b>仪式：</b>在配置中更改矿机名。原来叫 <code>worker1</code>，就改成 <code>lucky_strike</code> 或 <code>block_finder</code>。</li>
+ <li><b>身份转换：</b>暂时更换矿池的 CSS／主题颜色或标志。让宇宙误以为这是一个全新的、幸运的矿池，应该得到一份“新手运气”奖励。</li></ul>
+<h3 id="lk-19" data-src="1aa9913190ac">5. “完整断电重启”（硬重置）</h3>
+<p id="lk-20" data-src="8e8509d1bd35">不只是重启——而是一次精神上的重置。</p>
+<ul id="lk-21" data-src="01cdfec2f396"><li><b>仪式：</b>关闭矿池软件和服务器。从墙上插座拔下电源线。等待 5 分钟。</li>
+ <li><b>目的：</b>让所有电容放完电，让“坏电子”消散。重新开机时，就是一条全新的时间线。</li></ul>
+<h3 id="lk-22" data-src="ff03e6db287e">6. “反向心理学”</h3>
+<ul id="lk-23" data-src="d1230d6fbff5"><li><b>仪式：</b>在房间里（或 Discord 上）大声宣布你“正在考虑关掉矿池”或“改挖别的币”。</li>
+ <li><b>信念：</b>硬件是有意识的，害怕被关掉。它会突然找到一个区块，来证明自己的价值、保住自己的命。</li></ul>
+<h3 id="lk-24" data-src="7d84eb53c66c">7. 月相难度重定 <span class="label">（本版新增）</span></h3>
+<ul id="lk-25" data-src="9c4a75b7207a"><li><b>仪式：</b>把你的区块时间戳与月相对照。满月时找到的区块是“狼人区块”，会把额外的算力带进下一个周期。</li>
+ <li><b>信念：</b>难度每 2016 个区块重定一次；月亮每 29.5 天“重定”一次；这两者显然有关联，而且显然没有人证明过它们没有关联。</li></ul>
+<h3 id="lk-26" data-src="5ee84e97f632">8. 咖啡税 <span class="label">（本版新增）</span></h3>
+<ul id="lk-27" data-src="cd8741f4cee3"><li><b>仪式：</b>早上第一杯咖啡要在查看矿池<i>之前</i>倒好，并在矿机旁的杯子里留一口。机器是要小费的。</li>
+ <li><b>信念：</b>闻到咖啡味的矿机会认为它的运维者醒着、警觉着，出于职业礼貌，会客气地不让你的份额变成孤块。</li></ul>
+<h2 id="lk-28" data-src="8e76a94ac832">总结</h2>
+<p id="lk-29" data-src="2ade43dd70cf">归根结底，方差是一头残酷的野兽。你可能这一周运气 300%，下一周只有 10%。但如果你已经检查过日志、确认过网络连接、保证了延迟很低，有时候剩下唯一能做的，就是清理防尘网、去喝一杯，然后别再盯着算力看了。</p>
+<h2 id="lk-dash-h" data-src="ee2d44cc9421">c2pool 仪表板如何衡量运气</h2>
+<p id="lk-dash-01" data-src="17232cdc5c9b">撇开民间说法不谈，自 v0.2.12.9 起，每个 c2pool 节点的仪表板都按照 2012 年 p2pool.info 页面的方式计算运气。一个算力为 <i>H</i>、面对全网难度 <i>D</i> 的矿池，其出块是一个泊松过程。一个轮次的<b>工作量（effort）</b>是该矿池在这一轮次中预期找到的区块数：从上一个区块到本区块，对 <code>H(t) / (D(t) &times; 2<sup>32</sup>)</code> 求积分。简单地说，工作量就是实际用时除以预期用时。</p>
+<ul id="lk-dash-02" data-src="47bdee18814b">
+ <li>对于一个公平的矿池，工作量服从均值为 1、中位数为 0.69 的指数分布。所有轮次中有一半快于预期时间的 69%，而且每个轮次都与前一个轮次无关。</li>
+ <li><b>单个区块的运气</b>是 100&nbsp;/&nbsp;工作量。它按区块逐一显示，从不取平均：1/工作量的均值是无穷大，因此即使矿池完全公平，各区块运气的平均值也会远高于 100%（30 个区块时约为 450%）。</li>
+ <li><b>一段时间内的运气</b>是找到的区块数 &divide; 预期区块数，即 <code>k / &Sigma; effort</code>，并给出精确的泊松 95% 区间。单个区块几乎说明不了什么；几十个区块才开始有意义。</li>
+ <li>算力 <i>H</i> 是矿池的总算力，即份额链估算值除以（1&nbsp;&minus;&nbsp;过期比例）。节点每分钟采样一次。如果节点的历史记录只覆盖某个轮次的一部分，该行显示的是对这一轮次的最佳估计，而时段数字只计入节点处于观测状态的时间。</li>
+ <li>一个轮次从同一条链上的上一个主链区块开始计算。孤块永远不会结束一个轮次。</li>
+ <li>区块列表中的标记：&#9889; 表示轮次用时不到预期时间的 1/3（&#9889;&#9889; 表示不到 0.1），&#128034; 表示超过 2&times;（&#128034;&#128034; 表示超过 3&times;）。</li>
+</ul>
+<p id="lk-dash-03" data-src="289e3872772e">这只是一个显示用的数字。其中没有任何东西会影响份额目标值、支付或区块。</p>
+<div id="lk-30" class="v37" data-src="8a2cbeb62b0b"><span class="tag">V37</span><b>认识真正的野兽（它有一个概率分布，但没有均值）。</b>
+ <p>这头残酷的野兽不是迷信——它是一个<i>幂律</i>。获胜哈希超出其目标值的倍数 <code>R = target / hash</code> 服从 <code>Pr[R &ge; r] = 1/r</code>——这是一个期望不收敛的帕累托尾部。通俗地说：一半的区块超出倍数不到 2&times;，但每隔一段时间，就会有单个哈希超出<b>数千</b>倍，而一个按超出倍数付款的矿池，可能会把多达整整一个月老实苦挖的收益交给这一次幸运的命中。这个尖峰<i>就是</i>方差怪兽，你可以<a href="/zh/real-difficulty/">在用真实比特币区块绘制的图中看到它</a>——在第 1,430 个区块处那座孤零零的高塔，R&nbsp;&asymp;&nbsp;7,000，就是一个矿工一整个月的运气被压缩进了一个哈希。</p>
+ <p>真正能驯服这头野兽的仪式只有一个，而且不是咖啡：<b>按你实际完成的工作获得报酬，而不是按你碰巧得到的运气。</b>这正是组建矿池的全部意义——也是 V37 按衰减权重、与运气无关的记账方式的意义：它按你的<i>目标值</i>工作量记账，从不按那个幸运的哈希记账。野兽照样咆哮，只是不再吃掉你的收入。参见 <a href="/zh/purple-paper/">Purple Paper</a> 第 5 节（工作量证明作为度量）。</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>最初由 Technocore One 发布于“P2Pool scientific basics”，2026 年 11 月更新。© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>参考资料 — P2Pool 科学基础</title>
+<meta name="description" content="“P2Pool scientific basics”中关于弱区块、联合挖矿和矿池的阅读清单，已于 2026 年 11 月检查链接。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/references/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/references/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/references/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/references/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/references/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/references/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/references/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/references/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/references/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/references/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/references/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/references/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/" aria-current="page">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/references/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="参考资料" data-desc="“P2Pool scientific basics”中关于弱区块、联合挖矿和矿池的阅读清单，已于 2026 年 11 月检查链接。">
+<h1 id="rf-01" data-src="69824d3b0e70">参考资料</h1>
+<p id="rf-02" class="sub" data-src="4ddd0eb19b4d">“P2Pool scientific basics”（P2Pool 科学基础）的阅读清单，2026 年 11 月核查</p>
+<p id="rf-03" data-src="2066157748c0">这是原网站上的“Theory”（理论）清单，每个来源附一行说明其性质。所有链接均于 2026-11-27 检查过。失效链接会被标注出来，而不是悄悄删除。少数网站拒绝自动检查；这些链接保持原样。</p>
+<h2 id="rf-10" data-src="cef754985699">弱区块</h2>
+<ol id="rf-11" data-src="451916517c46">
+ <li><a href="https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2015-September/011157.html">[bitcoin-dev] Weak block thoughts&hellip;</a>：邮件列表帖子，2015 年 9 月。</li>
+ <li><a href="https://popeller.io/index.php/2016/01/19/weak-blocks-the-good-and-the-bad/">Weak Blocks &ndash; The Good And The Bad</a>：博客文章，2016 年 1 月。<span class="ref-dead">（2026-11-27 链接已失效：服务器返回 503）</span></li>
+ <li><a href="https://medium.com/@alexeiZamyatin/a-quick-glance-at-weak-blocks-and-subchains-64ca705bd382">A Quick Glance at Weak Blocks and Subchains</a>：Alexei Zamyatin 的文章。</li>
+ <li><a href="https://www.ledgerjournal.org/ojs/index.php/ledger/article/view/40">Subchains: A Technique to Scale Bitcoin and Improve the User Experience</a>：发表于期刊 <i>Ledger</i> 的论文。</li>
+</ol>
+<h2 id="rf-20" data-src="926211f99714">联合挖矿</h2>
+<ol id="rf-21" start="5" data-src="4b3c058ae960">
+ <li>Merged Mining: Analysis of Effects and Implications，Alexei Zamyatin，学位论文，维也纳工业大学（TU Wien），2017 年。<span class="ref-dead">（2026-11-27 链接已失效：ifs.tuwien.ac.at 上的旧论文 URL 返回 404）</span></li>
+ <li><a href="https://medium.com/@alexeiZamyatin/a-technical-deep-dive-into-merged-mining-5b67706e1a19">Taking a Deep-Dive into Merged Mining</a>：Alexei Zamyatin 的文章。</li>
+</ol>
+<h2 id="rf-30" data-src="ca19a87913a1">矿池与 P2Pool</h2>
+<ol id="rf-31" start="7" data-src="0e436450adce">
+ <li><a href="https://arxiv.org/abs/1905.05999">A Deep Dive into Bitcoin Mining Pools: An Empirical Analysis of Mining Shares</a>：arXiv 上的论文（1905.05999）。</li>
+ <li><a href="https://weis2019.econinfosec.org/wp-content/uploads/sites/6/2019/05/WEIS_2019_paper_40.pdf">Diversification Across Mining Pools: Optimal Mining Strategies under PoW</a>：WEIS 2019 会议论文。</li>
+ <li><a href="https://medium.com/@alexeiZamyatin/p2pool-proof-of-work-reusing-for-trustless-share-validation-8650d0235407">P2Pool at a Glance: Proof-of-Work Reusing for Trustless Share Validation</a>：Alexei Zamyatin 的文章。</li>
+</ol>
+<h2 id="rf-40" data-src="1ce3dc66b714">其他“弱区块”和“近区块”（near blocks）提案及相关提及</h2>
+<ul id="rf-41" data-src="fa6eec12755c">
+ <li><a href="https://bitcointalk.org/index.php?topic=179598.0">bitcointalk.org，主题 179598</a>：论坛主题帖。</li>
+ <li><a href="http://lists.linuxfoundation.org/pipermail/bitcoin-dev/2013-July/002976.html">bitcoin-dev，2013 年 7 月</a>和<a href="http://lists.linuxfoundation.org/pipermail/bitcoin-dev/2013-September/003275.html">bitcoin-dev，2013 年 9 月</a>：邮件列表帖子。</li>
+ <li><a href="https://bitcointalk.org/index.php?topic=673415.msg7658481#msg7658481">bitcointalk.org，主题 673415</a>：论坛回帖。</li>
+ <li>gnusha.org 上 2015-08-20 和 2015-09-20 的 #bitcoin-wizards IRC 日志。<span class="ref-dead">（2026-11-27 链接已失效：旧日志 URL 现在会重定向到该网站首页）</span></li>
+ <li>Scaling Bitcoin 讲座文字记录：<a href="http://diyhpl.us/wiki/transcripts/scalingbitcoin/roundgroup-roundup-1/">roundgroup roundup 1</a> 和 <a href="http://diyhpl.us/wiki/transcripts/scalingbitcoin/bitcoin-block-propagation-iblt-rusty-russell/">block propagation with IBLT (Rusty Russell)</a>。</li>
+</ul>
+<h2 id="rf-50" data-src="b26274898d96">实践</h2>
+<ul id="rf-51" data-src="1c439ac33cc2">
+ <li><a href="https://bitcointalk.org/index.php?topic=457574.0">P2Pool Detailed Settings for Altcoins</a>：论坛主题帖，属于历史资料，针对 Python 版 p2pool。</li>
+ <li><a href="https://github.com/bitcoinops/taproot-workshop">Taproot workshop</a>：Bitcoin Optech 的 Taproot 研讨课程。</li>
+ <li><a href="https://pybtc.readthedocs.io/en/master/">pybtc</a>：一个用于比特币的 Python 库。</li>
+ <li><a href="https://www.tutorialspoint.com/python_blockchain/index.htm">Python blockchain tutorial</a>：一般性入门教程。</li>
+</ul>
+<h2 id="rf-60" data-src="4c1fb999a3af">&ldquo;To be implemented: SegWit, Taproot, MimbleWimble&rdquo;（译文：“待实现：SegWit、Taproot、MimbleWimble”）：这些功能在 c2pool 中的现状</h2>
+<div id="rf-61" class="table-wrap" data-src="41624354e4bf"><table>
+ <thead><tr><th>项目</th><th>在 c2pool 中的状态（莱特币节点，v0.2.12.16）</th></tr></thead>
+ <tbody>
+ <tr><td>SegWit</td><td><b>已完成。</b>节点要求 SegWit 软分叉，构建 SegWit 区块模板，并向 P2WPKH 和 P2SH 矿工地址支付。</td></tr>
+ <tr><td>Taproot</td><td><b>部分完成。</b>节点要求 Taproot 软分叉。莱特币份额链不支持 Taproot（P2TR）收款地址：V36 份额携带的是 20 字节的收款哈希，因此这类矿工的支付会被重新分配。参见<a href="/zh/taproot-coinbase/#tr-c2">c2pool 中的 Taproot 现状</a>。</td></tr>
+ <tr><td>MimbleWimble（莱特币 MWEB）</td><td><b>部分完成。</b>节点在区块之间延续 MWEB 状态，并构建有效的空 MWEB 扩展区块。其区块中不包含 MWEB 交易本身。</td></tr>
+ </tbody>
+</table></div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>最初由 Technocore One 发布于“P2Pool scientific basics”，2026 年 11 月更新。© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

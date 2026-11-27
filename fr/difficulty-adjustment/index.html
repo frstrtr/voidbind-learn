@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Ajustement de la difficulté — Bases scientifiques de P2Pool</title>
+<meta name="description" content="Comment Bitcoin, Litecoin, Dogecoin et la chaîne de shares de c2pool ajustent leur difficulté.">
+<link rel="canonical" href="https://learn.voidbind.com/fr/difficulty-adjustment/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/difficulty-adjustment/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/difficulty-adjustment/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/difficulty-adjustment/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/difficulty-adjustment/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/difficulty-adjustment/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/difficulty-adjustment/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<a class="brand" href="/fr/">Bases scientifiques de P2Pool</a>
+<nav class="langs" aria-label="Langue"><a class="lang" href="/en/difficulty-adjustment/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/difficulty-adjustment/" hreflang="fr" lang="fr" data-lang="fr" aria-current="true">Français</a> · <a class="lang" href="/ru/difficulty-adjustment/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/difficulty-adjustment/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/difficulty-adjustment/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Sommaire"><ul>
+<li><a href="/fr/">Accueil</a></li>
+<li><a href="/fr/c2pool-today/">c2pool aujourd’hui</a></li>
+<li><a href="/fr/references/">Références</a></li>
+<li><a href="/fr/making-of-c2pool/">Coulisses de c2pool</a></li>
+<li><a href="/fr/luck/">Chance</a></li>
+<li><a href="/fr/real-difficulty/">Difficulté réelle</a></li>
+<li><a href="/fr/difficulty-adjustment/" aria-current="page">Ajustement de la difficulté</a></li>
+<li><a href="/fr/taproot-coinbase/">Coinbase Taproot</a></li>
+<li><a href="/fr/weighted-multisig/">Multisignature pondérée</a></li>
+<li><a href="/fr/bitcoin-leveldb/">LevelDB de Bitcoin</a></li>
+<li><a href="/fr/purple-paper/">Purple Paper</a></li>
+<li><a href="/fr/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Traduction assistée par machine, pas encore relue par un locuteur natif. <a href="/en/difficulty-adjustment/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Ajustement de la difficulté" data-desc="Comment Bitcoin, Litecoin, Dogecoin et la chaîne de shares de c2pool ajustent leur difficulté.">
+<h1 id="da-02" data-src="f033a0116ab4">Ajustement de la difficulté</h1>
+<p id="da-03" class="sub" data-src="10a466e95bc4">Comment Bitcoin, Litecoin, Dogecoin et la chaîne de shares de c2pool fixent leur difficulté</p>
+<div id="da-upd" class="update" data-src="dc42335420cc"><p><b>Mis à jour en novembre 2026.</b> La première version de cette page affirmait que le réajustement de Bitcoin utilise le « block mediantime » et qu’il multiplie la difficulté par le rapport des durées. Ces deux affirmations sont fausses : le réajustement utilise les horodatages des blocs, et c’est la <i>cible</i> qui est mise à l’échelle par ce rapport, si bien que la difficulté évolue en sens inverse. La page a été réécrite à partir du code source de Bitcoin Core, et des sections sur Litecoin, Dogecoin et la chaîne de shares de c2pool ont été ajoutées.</p></div>
+<h2 id="da-10" data-src="4984920e9a8f">Le réajustement de Bitcoin</h2>
+<p id="da-11" data-src="83308a5883b4">Tous les 2016 blocs, Bitcoin fixe une nouvelle cible, afin que les blocs continuent d’arriver environ toutes les 10 minutes (2016 blocs en 14 jours, la <i>durée cible</i> T&nbsp;=&nbsp;1 209 600&nbsp;s). Les étapes, telles qu’elles figurent dans le fichier <code>src/pow.cpp</code> de Bitcoin Core :</p>
+<ol id="da-12" data-src="1e1243c3990e">
+ <li><b>Mesurer.</b> La durée réelle est l’horodatage (<code>nTime</code>) du dernier bloc de la période moins l’horodatage du premier bloc de la période, 2015 blocs plus tôt. Ce sont les horodatages propres des en-têtes des blocs, et non leur median time past.</li>
+ <li><b>Borner.</b> La durée réelle est limitée à l’intervalle [T/4, 4T], de sorte qu’un réajustement modifie la cible au plus d’un facteur 4 dans un sens ou dans l’autre.</li>
+ <li><b>Mettre la cible à l’échelle.</b> nouvelle cible = ancienne cible &times; durée réelle / T. Des blocs arrivés trop vite donnent un rapport inférieur à 1, une cible plus petite et une difficulté plus élevée.</li>
+ <li><b>Plafonner et encoder.</b> La nouvelle cible est plafonnée à la plus grande cible autorisée par la chaîne (la cible de « difficulté 1 », c’est-à-dire la difficulté la plus <i>basse</i>) et stockée dans les en-têtes suivants sous la forme compacte <code>nBits</code>, qui l’arrondit légèrement.</li>
+</ol>
+<p id="da-13" data-src="58b997439399">La difficulté est la cible de difficulté 1 divisée par la cible actuelle ; elle varie donc selon l’inverse du rapport des durées.</p>
+<pre id="da-14" data-src="6bc5a93b55bf"><code>TARGET_TIMESPAN = 14 * 24 * 60 * 60      # 2016 blocks x 10 minutes
+POW_LIMIT = 0xffff &lt;&lt; 208                 # difficulty-1 target (nBits 0x1d00ffff)
+
+def bits_to_target(bits):
+    exponent, mantissa = bits &gt;&gt; 24, bits &amp; 0x007fffff
+    return mantissa &lt;&lt; (8 * (exponent - 3)) if exponent &gt;= 3 else mantissa &gt;&gt; (8 * (3 - exponent))
+
+def next_target(last_bits, last_time, first_time):
+    """last_time: nTime of the last block of the period.
+    first_time: nTime of the block 2015 blocks before it."""
+    actual = last_time - first_time
+    actual = max(TARGET_TIMESPAN // 4, min(actual, TARGET_TIMESPAN * 4))
+    new = bits_to_target(last_bits) * actual // TARGET_TIMESPAN
+    return min(new, POW_LIMIT)
+
+def difficulty(target):
+    return POW_LIMIT / target</code></pre>
+<p id="da-15" data-src="e9d630cc57a5">Bitcoin Core réencode ensuite le résultat en <code>nBits</code> (<code>GetCompact</code>), qui conserve trois octets de mantisse. La fenêtre couvre 2015 intervalles et non 2016 : c’est une erreur de décalage d’une unité (off-by-one) bien connue, présente depuis la première version et désormais inscrite dans le consensus. Exemple : avec les horodatages des blocs 30 240 et 32 255, la fonction donne <code>nBits = 0x1d00d86a</code> pour la hauteur 32 256, la première hausse de difficulté de Bitcoin (difficulté d’environ 1,18).</p>
+<h2 id="da-20" data-src="e5c11677a413">Median time past</h2>
+<p id="da-21" data-src="ef88c45da13e">Le median time past (MTP) d’un bloc est la médiane des horodatages de ce bloc et des dix blocs précédents. Il est calculé par chaque nœud ; ce n’est pas un champ de l’en-tête. Il résiste à un horodatage isolé erroné ou manipulé, et Bitcoin l’utilise pour deux règles :</p>
+<ul id="da-22" data-src="f725e5d6edeb">
+ <li>l’horodatage d’un nouveau bloc doit être postérieur au MTP de son parent (sinon, « time-too-old ») ;</li>
+ <li>les verrouillages temporels (lock times) exprimés en temps sont comparés au MTP, et non à l’horodatage propre du bloc (BIP 113).</li>
+</ul>
+<p id="da-22b" data-src="d3a4f0b25cf3">Il n’intervient pas dans le réajustement de la difficulté. Voici l’exemple de la page d’origine, qui calcule le MTP de la pointe de la chaîne par RPC (le <code>getblock</code> de Bitcoin Core le renvoie aussi directement sous le nom <code>mediantime</code>) :</p>
+<pre id="da-23" data-src="eeafa1c83a84">import bitcoin.rpc
+def calculate_mediantime():
+    proxy = bitcoin.rpc.Proxy()  # Establish connection to Bitcoin Core client
+    block_count = proxy.getblockcount()
+    if block_count &gt;= 10:
+        timestamps = []
+        for height in range(block_count, block_count - 11, -1):
+            block_hash = proxy.getblockhash(height)
+            timestamp = proxy.getblockheader(block_hash).nTime
+            timestamps.append(timestamp)
+        sorted_timestamps = sorted(timestamps)
+        mediantime = sorted_timestamps[5]  # Take the middle timestamp
+        return mediantime
+    return None  # Return None if there are not enough blocks to calculate mediantime
+# Example usage
+mediantime = calculate_mediantime()
+print(mediantime)</pre>
+<p id="da-24" data-src="40d5a008e974">Dans l’extrait de code ci-dessus, on établit une connexion à un client Bitcoin Core en cours d’exécution à l’aide de la classe bitcoin.rpc.Proxy. La fonction calculate_mediantime récupère d’abord le nombre de blocs actuel avec getblockcount. Si la blockchain compte au moins 11 blocs (une hauteur de pointe de 10 ou plus), elle procède au calcul. Elle parcourt les 11 blocs précédents, en partant du bloc courant, et lit l’horodatage de chaque bloc (nTime) avec getblockheader. Les horodatages sont stockés dans la liste timestamps. Cette liste est ensuite triée par ordre croissant avec la fonction sorted. Enfin, l’horodatage du milieu de la liste triée (à l’index 5) est retenu comme mediantime. La fonction renvoie ce mediantime. S’il n’y a pas assez de blocs pour le calculer, elle renvoie None.</p>
+
+<h2 id="da-30" data-src="eaa4e0ba3c89">Litecoin</h2>
+<p id="da-31" data-src="b1681d53e458">Litecoin reprend la règle de Bitcoin avec un espacement de 2,5 minutes : 2016 blocs en 3,5 jours. Une différence : après la première période, la fenêtre remonte de 2016 blocs complets au lieu de 2015 (un correctif attribué à Art Forz, contre la manipulation de la difficulté). Le nœud Litecoin embarqué de c2pool calcule lui-même la cible suivante à partir des en-têtes qu’il a synchronisés, avec le même bornage et les mêmes horodatages.</p>
+<h2 id="da-32" data-src="bbc8f6fd09a9">Dogecoin</h2>
+<p id="da-33" data-src="b52a959ce3f8">Dogecoin, que c2pool mine en minage fusionné avec Litecoin, avait une fenêtre de réajustement de 4 heures (240 blocs d’une minute) jusqu’à la hauteur 145 000. À partir de cette hauteur, il utilise DigiShield, qui réajuste la difficulté à chaque bloc. Le minage fusionné (AuxPoW) a commencé à la hauteur 371 337. Le nœud Dogecoin embarqué de c2pool suit ces deux règles.</p>
+<h2 id="da-40" data-src="2e3f15e1888d">La difficulté propre à la chaîne de shares</h2>
+<p id="da-41" data-src="aa53fce15723">Une chaîne de shares P2Pool a sa propre difficulté, fixée à chaque share plutôt qu’à chaque période. Dans c2pool, comme dans p2pool :</p>
+<ul id="da-42" data-src="1b24d2abac2a">
+ <li>le nœud estime le taux de hachage (hashrate) du pool à partir des shares récentes et calcule la cible qui donnerait une share par <i>période de share</i> : 15 secondes sur la chaîne de shares Litecoin, 30 secondes sur Bitcoin ;</li>
+ <li>le résultat est borné à &plusmn;10 % de la cible de la share précédente, de sorte que la difficulté des shares évolue en douceur ;</li>
+ <li>quand aucune share n’est arrivée depuis 20 périodes de share (5 minutes sur Litecoin), une règle de difficulté d’urgence (issue de p2pool V36 ; le p2pool d’origine n’en a pas) assouplit la cible de référence : celle-ci double toutes les 10 périodes de share supplémentaires, avec une interpolation linéaire entre les deux, avant que le bornage à &plusmn;10 % ne s’applique. Cela évite qu’un pool qui a soudain perdu l’essentiel de son taux de hachage ne se bloque.</li>
+</ul>
+<div id="da-25" class="v37" data-src="0794c950e7a1"><span class="tag">V37</span><b>Cible contre difficulté, et calendrier absolu.</b>
+ <p>La difficulté et la cible sont inverses l’une de l’autre (difficulté = max_target / cible) : le réajustement multiplie donc la cible par le rapport des durées, et la difficulté évolue en sens inverse. Des blocs plus rapides (un rapport plus petit) font monter la difficulté.</p>
+ <p>Un réajustement par fenêtre dépend des horodatages situés aux deux extrémités de sa fenêtre. Un calendrier absolu (de type ASERT) calcule la cible directement à partir d’un bloc d’ancrage et du dernier bloc, en temps constant. Il ne parcourt aucune fenêtre : les horodatages situés dans une fenêtre ne peuvent donc pas faire dériver la cible, même si l’horodatage propre du dernier bloc compte toujours. Bitcoin Cash en utilise un depuis novembre 2020. C’est une piste pour la difficulté propre d’une chaîne de shares dans les travaux de conception de V37 ; les chaînes de shares de c2pool utilisent aujourd’hui la règle par share décrite ci-dessus.</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Publié à l’origine par Technocore One dans « P2Pool scientific basics », mis à jour en novembre 2026. © 2026 technocore.one.</p>
+<p>Faits sur c2pool vérifiés par rapport à la version v0.2.12.16 le 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

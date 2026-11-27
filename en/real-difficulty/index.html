@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Real difficulty — P2Pool scientific basics</title>
+<meta name="description" content="Target, achieved difficulty and what the ratio target/hash means.">
+<link rel="canonical" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/real-difficulty/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/real-difficulty/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/real-difficulty/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/real-difficulty/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+<a class="brand" href="/en/">P2Pool scientific basics</a>
+<nav class="langs" aria-label="Language"><a class="lang" href="/en/real-difficulty/" hreflang="en" lang="en" data-lang="en" aria-current="true">English</a> · <a class="lang" href="/fr/real-difficulty/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/real-difficulty/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/real-difficulty/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/real-difficulty/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Contents"><ul>
+<li><a href="/en/">Home</a></li>
+<li><a href="/en/c2pool-today/">c2pool today</a></li>
+<li><a href="/en/references/">References</a></li>
+<li><a href="/en/making-of-c2pool/">Making of c2pool</a></li>
+<li><a href="/en/luck/">Luck</a></li>
+<li><a href="/en/real-difficulty/" aria-current="page">Real difficulty</a></li>
+<li><a href="/en/difficulty-adjustment/">Difficulty adjustment</a></li>
+<li><a href="/en/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/en/weighted-multisig/">Weighted multisig</a></li>
+<li><a href="/en/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/en/purple-paper/">Purple Paper</a></li>
+<li><a href="/en/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Real difficulty" data-desc="Target, achieved difficulty and what the ratio target/hash means.">
+<h1 id="rd-02">Real difficulty</h1>
+<p id="rd-03" class="sub">Target, hash and achieved difficulty</p>
+<div id="rd-upd" class="update"><p><b>Updated November 2026.</b> The definitions of target, &ldquo;real target&rdquo; and the ratio target/hash in the first version of this page contradicted each other in places, and the layout of the &ldquo;bits&rdquo; field was wrong. Those paragraphs are rewritten below. The charts are unchanged.</p></div>
+<p id="rd-04">A block is valid when its proof-of-work hash, read as a 256-bit number, is not above the target the chain requires. Target, difficulty and hash are three views of that one comparison.</p>
+<h2 id="rd-05">Target</h2>
+<p id="rd-06">The target is a 256-bit number. The header does not store it in full: the 4-byte <code>nBits</code> field (&ldquo;bits&rdquo;) encodes it compactly. The first byte is an exponent <i>e</i> and the remaining three bytes are a mantissa <i>m</i>:</p>
+<pre id="rd-07">target = m &times; 2^(8 &times; (e &minus; 3))</pre>
+<p id="rd-08">For example, Bitcoin&rsquo;s genesis block has <code>nBits = 0x1d00ffff</code>: <i>e</i>&nbsp;=&nbsp;0x1d, <i>m</i>&nbsp;=&nbsp;0x00ffff, so target&nbsp;=&nbsp;0xffff&nbsp;&times;&nbsp;2<sup>208</sup>. That is the largest target Bitcoin allows, the &ldquo;difficulty&nbsp;1&rdquo; target.</p>
+<h2 id="rd-09">Difficulty</h2>
+<p id="rd-10">Difficulty is the difficulty-1 target divided by the current target: <code>difficulty = target<sub>max</sub> / target</code>. A <b>smaller</b> target means a <b>higher</b> difficulty and more work per block. On Bitcoin-style chains a block at difficulty <i>D</i> takes about <i>D</i>&nbsp;&times;&nbsp;2<sup>32</sup> hashes on average.</p>
+<p id="rd-11">The target is adjusted periodically (every 2016 blocks on Bitcoin) so that blocks keep arriving at about the intended spacing; see <a href="/en/difficulty-adjustment/">Difficulty adjustment</a>.</p>
+<h2 id="rd-12">The proof-of-work hash</h2>
+<p id="rd-13">Miners change the nonce (and other header fields) and hash the header again until the result is at or below the target. Each attempt succeeds with probability about target&nbsp;/&nbsp;2<sup>256</sup>, independently of the attempts before it.</p>
+<p id="rd-14">On Bitcoin the proof-of-work hash is the double SHA-256 of the 80-byte header, which is also the block&rsquo;s id. The chains c2pool mines use different proof-of-work functions. On Litecoin and Dogecoin the block is still named by its SHA-256d hash while its proof of work is checked with Scrypt; on Dash both are X11:</p>
+<div id="rd-15" class="table-wrap"><table>
+ <thead><tr><th>Chain</th><th>Proof-of-work function</th></tr></thead>
+ <tbody>
+ <tr><td>Bitcoin (BTC), Bitcoin Cash (BCH)</td><td>SHA-256d</td></tr>
+ <tr><td>Litecoin (LTC), Dogecoin (DOGE, merged), DigiByte (DGB, as c2pool mines it)</td><td>Scrypt</td></tr>
+ <tr><td>Dash (DASH)</td><td>X11</td></tr>
+ <tr><td>BIP-110 fork</td><td>SHA-256d below height 961,640, BLAKE2b from that height</td></tr>
+ <tr><td>Monero (XMR, experimental in c2pool)</td><td>RandomX</td></tr>
+ </tbody>
+</table></div>
+<h2 id="rd-16">Achieved difficulty and the overshoot</h2>
+<p id="rd-17">The first version of this page used the term &ldquo;real target&rdquo; for the value a miner&rsquo;s actual hash would still have satisfied. Two ratios are useful, and they should not be mixed:</p>
+<ul id="rd-18">
+ <li><b>Achieved difficulty</b> = target<sub>max</sub>&nbsp;/&nbsp;hash. The difficulty at which this particular hash would still have been valid. The dashboard&rsquo;s &ldquo;best share&rdquo; is of this kind.</li>
+ <li><b>Overshoot</b> R = target&nbsp;/&nbsp;hash = achieved difficulty&nbsp;/&nbsp;difficulty. A valid block has R&nbsp;&ge;&nbsp;1. R tells how far below its target this hash happened to fall.</li>
+</ul>
+<p id="rd-19">The overshoot measures luck, not effort. Every valid block at a given difficulty took the same expected work, whatever its R. Given that a hash meets the target, R follows <code>Pr[R &ge; r] = 1/r</code>: half of all blocks have R below 2, one in a thousand has R above 1,000, and the mean does not exist.</p>
+<figure id="rd-29">
+ <img src="/assets/img/real-diff-epochs.png" alt="original factor chart">
+ <figcaption>Original chart (as published): target/real_target per block for epoch_0 (0&ndash;2015) and epoch_1 (2016&ndash;4031) of the Bitcoin blockchain. Preserved here for reference.</figcaption>
+ </figure>
+
+<figure id="rd-30">
+ <img src="/assets/img/real-diff-real.png" alt="achieved difficulty per block, real BTC data">
+ <figcaption>The same data, recomputed over all 4,032 blocks (R = target/hash; difficulty = 1 throughout both epochs, so R is the block&rsquo;s own overshoot). The chain only requires R &ge; 1; the rare spikes are pure luck. Median R &asymp; 2.</figcaption>
+ </figure>
+
+<p id="rd-20">In the second chart the difficulty is 1 throughout both epochs, so R is each block&rsquo;s achieved difficulty. The median near 2 is what <code>Pr[R &ge; r] = 1/r</code> predicts.</p>
+<div id="rd-45" class="v37"><span class="tag">V37</span><b>What achieved (&ldquo;real&rdquo;) difficulty is &mdash; and is not &mdash; used for.</b>
+ <p>The <b>achieved</b> difficulty of a hash (the &ldquo;real target&rdquo; of the first version of this page) says how far below its target the hash happened to fall. It is tempting to pay miners in proportion to it: &ldquo;you found a rarer hash, you earn more.&rdquo; <b>This is wrong, and provably so.</b></p>
+ <p>Achieved difficulty is <b>pure luck</b>. Conditioned on meeting the target, the overshoot <code>R = target/hash</code> follows a power law, <code>Pr[R &ge; r] = 1/r</code>, whose mean does not converge: a single fortunate hash can exceed the sum of all the others. Paying by achieved difficulty would let one lucky share take an entire payout window &mdash; re-importing into the pool exactly the variance that pooling exists to remove.</p>
+ <p><b>Work is therefore credited by the <i>target</i> a share was required to meet, never by the value its hash happened to reach.</b> Two shares meeting the same target are credited equally &mdash; the accounting stays <i>luck-neutral</i>.</p>
+ <p>Work below the share target is counted by the same rule. A hash that met an easier (numerically larger) target is itself a unit of work at that easier target, so a worker too weak to find shares often can still be credited for the work it did, by counting its hashes at that easier target. The overshoot is not needed for this. <b>Measurement, not payment.</b> This is how the Work Receipts paper credits work; see the <a href="/en/purple-paper/">Purple Paper summary</a>, &sect;5 (Proof-of-Work as Measurement) and &sect;8 (Recovering Work Below the Order).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Originally published by Technocore One in “P2Pool scientific basics”, updated in November 2026. © 2026 technocore.one.</p>
+<p>Facts about c2pool checked against release v0.2.12.16 on 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

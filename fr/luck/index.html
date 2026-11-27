@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>La chance — cette bête cruelle — Bases scientifiques de P2Pool</title>
+<meta name="description" content="Un guide de terrain de la variance du minage, du folklore qui n’en vient pas à bout, et de la façon dont le tableau de bord de c2pool mesure la chance.">
+<link rel="canonical" href="https://learn.voidbind.com/fr/luck/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/luck/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/luck/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/luck/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/luck/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/luck/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/luck/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<a class="brand" href="/fr/">Bases scientifiques de P2Pool</a>
+<nav class="langs" aria-label="Langue"><a class="lang" href="/en/luck/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/luck/" hreflang="fr" lang="fr" data-lang="fr" aria-current="true">Français</a> · <a class="lang" href="/ru/luck/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/luck/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/luck/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Sommaire"><ul>
+<li><a href="/fr/">Accueil</a></li>
+<li><a href="/fr/c2pool-today/">c2pool aujourd’hui</a></li>
+<li><a href="/fr/references/">Références</a></li>
+<li><a href="/fr/making-of-c2pool/">Coulisses de c2pool</a></li>
+<li><a href="/fr/luck/" aria-current="page">Chance</a></li>
+<li><a href="/fr/real-difficulty/">Difficulté réelle</a></li>
+<li><a href="/fr/difficulty-adjustment/">Ajustement de la difficulté</a></li>
+<li><a href="/fr/taproot-coinbase/">Coinbase Taproot</a></li>
+<li><a href="/fr/weighted-multisig/">Multisignature pondérée</a></li>
+<li><a href="/fr/bitcoin-leveldb/">LevelDB de Bitcoin</a></li>
+<li><a href="/fr/purple-paper/">Purple Paper</a></li>
+<li><a href="/fr/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Traduction assistée par machine, pas encore relue par un locuteur natif. <a href="/en/luck/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Chance" data-desc="Un guide de terrain de la variance du minage, du folklore qui n’en vient pas à bout, et de la façon dont le tableau de bord de c2pool mesure la chance.">
+<h1 id="lk-02" data-src="8985ac05cd64">La chance &mdash; cette bête cruelle</h1>
+<p id="lk-03" class="sub" data-src="469a110c7b18">P2Pool scientific basics &mdash; un guide de terrain de la variance du minage et des rituels qui (n’)en viennent (pas) à bout</p>
+<h2 id="lk-04" data-src="b18592d75af0">La malchance frappe parfois&hellip;</h2>
+<p id="lk-05" data-src="60cf44b2a235">Dans le monde du minage de cryptomonnaies, la « chance » n’est, statistiquement, que de la variance, mais tout mineur chevronné sait que lorsque le <b>Monstre de la variance</b> frappe, on le prend pour soi. Quand les maths disent que vous devriez trouver des blocs mais que le pool reste à sec, la logique passe souvent par la fenêtre.</p>
+<p id="lk-06" data-src="f51c2a46030e">Ce qui suit est non conventionnel, non scientifique et superstitieux &mdash; le genre de choses qu’on se chuchotait sur les vieux forums Bitcoin Talk et dans les canaux IRC. Voici un recueil du folklore du minage et de « rituels » pour relancer votre chance.</p>
+<h3 id="lk-07" data-src="214a609c09dd">1. L’effet « observateur » (effet Zénon quantique)</h3>
+<p id="lk-08" data-src="ec2daa2960b6">La superstition la plus citée : <i>« Mineur surveillé ne trouve jamais de bloc. »</i></p>
+<ul id="lk-09" data-src="7e01fce36687"><li><b>Le rituel :</b> vous devez arrêter de regarder le tableau de bord. Complètement.</li>
+ <li><b>La méthode :</b> fermez vos onglets de supervision, désactivez votre bot de notification de blocs et éloignez-vous physiquement de l’écran pendant au moins 24 heures. L’univers sait que vous le regardez, et il est timide.</li>
+ <li><b>La « science » :</b> cela réduit votre niveau de stress, et le temps passe plus vite jusqu’à ce que le prochain bloc tombe naturellement.</li></ul>
+<h3 id="lk-10" data-src="cff0a1b573b2">2. La transaction « sacrificielle »</h3>
+<p id="lk-11" data-src="40f3863fcdae">Aux débuts de Bitcoin, des mineurs envoyaient de petites quantités de pièces à des « adresses de destruction » (burn addresses) ou à des adresses célèbres (comme celle du bloc Genesis) en offrande aux dieux de la crypto.</p>
+<ul id="lk-12" data-src="ede6d9c58f08"><li><b>Le rituel :</b> prenez une infime quantité de la monnaie que vous minez (un peu de poussière) et envoyez-la à une association caritative ou à une adresse au hasard.</li>
+ <li><b>La logique :</b> vous créez un « flux karmique positif » sur la blockchain. Si vous ne faites que prendre (la récompense de minage) sans rien donner (des frais de transaction), le réseau vous punit.</li></ul>
+<h3 id="lk-13" data-src="3cad74dc26e0">3. Feng shui des serveurs et « purification »</h3>
+<p id="lk-14" data-src="8280fad1f284">L’état physique de la machine est censé influer sur son « aura numérique ».</p>
+<ul id="lk-15" data-src="8499e4dfcfd9"><li><b>Gestion des câbles :</b> si vos câbles sont en désordre, la chance s’« emmêle ». Démêlez vos câbles Ethernet pour que « les paquets circulent bien » (évidemment faux, mais satisfaisant).</li>
+ <li><b>Dépoussiérage :</b> éteignez complètement la machine. Utilisez de l’air comprimé. Pendant ce temps, dites à voix haute au serveur que c’est une « bonne machine ».</li>
+ <li><b>Rebranchement :</b> débranchez le câble Ethernet et rebranchez-le. Parfois, la chance reste simplement « coincée » dans le port.</li></ul>
+<h3 id="lk-16" data-src="11cfb6960a37">4. La ruse du « changement de nom »</h3>
+<p id="lk-17" data-src="37386077a1d9">Certains mineurs pensent que le pool ou le réseau a « maudit » un nom de worker ou une adresse de portefeuille en particulier.</p>
+<ul id="lk-18" data-src="997e85704a46"><li><b>Le rituel :</b> changez les noms de vos workers dans la configuration. S’il s’appelait <code>worker1</code>, renommez-le <code>lucky_strike</code> ou <code>block_finder</code>.</li>
+ <li><b>Le changement d’identité :</b> changez temporairement la couleur du thème CSS ou le logo du pool. Faites croire à l’univers qu’il s’agit d’un tout nouveau pool, chanceux, qui mérite un bonus de « chance du débutant ».</li></ul>
+<h3 id="lk-19" data-src="1aa9913190ac">5. Le « cycle d’alimentation complet » (la réinitialisation matérielle)</h3>
+<p id="lk-20" data-src="8e8509d1bd35">Pas un simple redémarrage &mdash; une remise à zéro spirituelle.</p>
+<ul id="lk-21" data-src="01cdfec2f396"><li><b>Le rituel :</b> arrêtez le logiciel du pool et le serveur. Débranchez le cordon d’alimentation de la prise murale. Attendez 5 minutes.</li>
+ <li><b>Le but :</b> laisser tous les condensateurs se décharger. Laisser les « mauvais électrons » se dissiper. Au redémarrage, c’est une nouvelle ligne temporelle.</li></ul>
+<h3 id="lk-22" data-src="ff03e6db287e">6. La « psychologie inversée »</h3>
+<ul id="lk-23" data-src="d1230d6fbff5"><li><b>Le rituel :</b> annoncez à voix haute dans votre pièce (ou sur Discord) que vous « envisagez de fermer le pool » ou de « passer à une autre monnaie ».</li>
+ <li><b>La croyance :</b> le matériel est doué de conscience et a peur d’être éteint. Il va soudain trouver un bloc pour prouver sa valeur et sauver sa peau.</li></ul>
+<h3 id="lk-24" data-src="7d84eb53c66c">7. Le réajustement lunaire <span class="label">(nouveau dans cette édition)</span></h3>
+<ul id="lk-25" data-src="9c4a75b7207a"><li><b>Le rituel :</b> comparez les horodatages de vos blocs avec les phases de la lune. Les blocs trouvés une nuit de pleine lune sont des « blocs loups-garous » et emportent un surplus de puissance de hachage dans l’époque suivante.</li>
+ <li><b>La croyance :</b> la difficulté se réajuste tous les 2016 blocs ; la lune se réajuste tous les 29,5 jours ; de toute évidence, les deux sont liés, et de toute évidence, personne n’a prouvé le contraire.</li></ul>
+<h3 id="lk-26" data-src="5ee84e97f632">8. La taxe du café <span class="label">(nouveau dans cette édition)</span></h3>
+<ul id="lk-27" data-src="cd8741f4cee3"><li><b>Le rituel :</b> versez le premier café du matin <i>avant</i> de consulter le pool, et laissez une gorgée dans la tasse à côté de la machine. La machine travaille au pourboire.</li>
+ <li><b>La croyance :</b> une machine qui sent le café croit que son opérateur est éveillé et vigilant, et s’abstient poliment de rendre vos shares orphelines, par courtoisie professionnelle.</li></ul>
+<h2 id="lk-28" data-src="8e76a94ac832">Résumé</h2>
+<p id="lk-29" data-src="2ade43dd70cf">Au fond, la variance est une bête cruelle. Vous pouvez avoir 300 % de chance une semaine et 10 % la suivante. Mais si vous avez vérifié vos journaux, contrôlé votre connectivité et vous êtes assuré que votre latence est faible, il ne reste parfois plus qu’à nettoyer les filtres à poussière, prendre un verre et arrêter de fixer le taux de hachage (hashrate).</p>
+<h2 id="lk-dash-h" data-src="ee2d44cc9421">Comment le tableau de bord de c2pool mesure la chance</h2>
+<p id="lk-dash-01" data-src="17232cdc5c9b">Folklore mis à part, le tableau de bord de chaque nœud c2pool, depuis la v0.2.12.9, calcule la chance comme le faisaient les pages p2pool.info de 2012. Un pool qui hache au taux <i>H</i> face à une difficulté réseau <i>D</i> trouve des blocs selon un processus de Poisson. L’<b>effort</b> d’un tour est le nombre de blocs que le pool s’attendait à trouver pendant ce tour : l’intégrale de <code>H(t) / (D(t) &times; 2<sup>32</sup>)</code> entre le bloc précédent et celui-ci. Autrement dit, l’effort est le temps écoulé divisé par le temps attendu.</p>
+<ul id="lk-dash-02" data-src="47bdee18814b">
+ <li>Pour un pool équitable, l’effort suit une loi exponentielle de moyenne 1 et de médiane 0,69. La moitié des tours sont plus rapides que 69 % du temps attendu, et aucun tour ne garde la mémoire du précédent.</li>
+ <li>La <b>chance d’un bloc</b> vaut 100&nbsp;/&nbsp;effort. Elle est affichée par bloc et n’est jamais moyennée : l’espérance de 1/effort est infinie, si bien qu’une moyenne des chances par bloc paraît bien supérieure à 100 % pour un pool parfaitement équitable (environ 450 % avec 30 blocs).</li>
+ <li>La <b>chance sur une période</b> correspond aux blocs trouvés &divide; blocs attendus, soit <code>k / &Sigma; effort</code>, avec un intervalle de Poisson exact à 95 %. Un seul bloc ne dit presque rien ; quelques dizaines de blocs commencent à parler.</li>
+ <li>Le taux <i>H</i> est le taux brut du pool : l’estimation tirée de la chaîne de shares, divisée par (1&nbsp;&minus;&nbsp;proportion de shares périmées, dites stale). Le nœud l’échantillonne une fois par minute. Lorsque son historique ne couvre qu’une partie d’un tour, la ligne affiche la meilleure estimation pour ce tour, et le chiffre de la période ne compte que le temps pendant lequel le nœud observait.</li>
+ <li>Un tour court depuis le bloc précédent de la chaîne principale, sur la même chaîne. Un bloc orphelin ne termine jamais un tour.</li>
+ <li>Les marqueurs de la liste des blocs : &#9889; pour un tour de moins de 1/3 du temps attendu (&#9889;&#9889; sous 0,1), &#128034; pour un tour de plus de 2&times; (&#128034;&#128034; au-delà de 3&times;).</li>
+</ul>
+<p id="lk-dash-03" data-src="289e3872772e">Il s’agit uniquement d’un chiffre d’affichage. Rien de tout cela n’entre dans une cible de share, un paiement ou un bloc.</p>
+<div id="lk-30" class="v37" data-src="8a2cbeb62b0b"><span class="tag">V37</span><b>Voici la vraie bête (elle a une loi de probabilité, et pas d’espérance).</b>
+ <p>La bête cruelle n’est pas une superstition &mdash; c’est une <i>loi de puissance</i>. Le dépassement d’un hash gagnant par rapport à sa cible, <code>R = target / hash</code>, obéit à <code>Pr[R &ge; r] = 1/r</code> &mdash; une queue de Pareto dont l’espérance ne converge pas. Concrètement : la moitié des blocs dépassent leur cible de moins de 2&times;, mais de temps en temps un seul hash la dépasse de <b>plusieurs milliers</b> de fois, et un pool qui paierait selon le dépassement pourrait accorder à ce seul coup de chance l’équivalent d’un mois entier de labeur honnête. Ce pic <i>est</i> le Monstre de la variance, et vous pouvez <a href="/fr/real-difficulty/">le voir tracé à partir de vrais blocs Bitcoin</a> &mdash; la tour solitaire au bloc 1430, qui atteint R&nbsp;&asymp;&nbsp;7000, c’est tout un mois de chance d’un mineur comprimé en un seul hash.</p>
+ <p>Il existe exactement un rituel qui dompte vraiment la bête, et ce n’est pas le café : <b>être payé pour le travail réellement fourni, pas pour la chance qu’on a eue.</b> C’est tout l’intérêt de la mise en commun &mdash; et de la comptabilité de V37, à poids décroissant et neutre vis-à-vis de la chance, qui crédite votre travail <i>à la cible</i> et jamais le hash chanceux. La bête rugit toujours ; elle cesse simplement de dévorer votre paie. Voir le <a href="/fr/purple-paper/">Purple Paper</a>, &sect;5 (La preuve de travail comme mesure).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Publié à l’origine par Technocore One dans « P2Pool scientific basics », mis à jour en novembre 2026. © 2026 technocore.one.</p>
+<p>Faits sur c2pool vérifiés par rapport à la version v0.2.12.16 le 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

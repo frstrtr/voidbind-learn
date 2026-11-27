@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Повышение безопасности с помощью кошельков со взвешенной мультиподписью в PoW-блокчейнах — Научные основы P2Pool</title>
+<meta name="description" content="Взвешенные условия расходования с мультиподписью в PoW-блокчейнах и корректный скрипт.">
+<link rel="canonical" href="https://learn.voidbind.com/ru/weighted-multisig/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/weighted-multisig/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/weighted-multisig/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/weighted-multisig/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/weighted-multisig/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/weighted-multisig/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Перейти к содержанию</a>
+<header class="top">
+<a class="brand" href="/ru/">Научные основы P2Pool</a>
+<nav class="langs" aria-label="Язык"><a class="lang" href="/en/weighted-multisig/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/weighted-multisig/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/weighted-multisig/" hreflang="ru" lang="ru" data-lang="ru" aria-current="true">Русский</a> · <a class="lang" href="/de/weighted-multisig/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/weighted-multisig/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Содержание"><ul>
+<li><a href="/ru/">Главная</a></li>
+<li><a href="/ru/c2pool-today/">c2pool сегодня</a></li>
+<li><a href="/ru/references/">Источники</a></li>
+<li><a href="/ru/making-of-c2pool/">Как создавался c2pool</a></li>
+<li><a href="/ru/luck/">Удача</a></li>
+<li><a href="/ru/real-difficulty/">Реальная сложность</a></li>
+<li><a href="/ru/difficulty-adjustment/">Корректировка сложности</a></li>
+<li><a href="/ru/taproot-coinbase/">Taproot в coinbase</a></li>
+<li><a href="/ru/weighted-multisig/" aria-current="page">Взвешенная мультиподпись</a></li>
+<li><a href="/ru/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/ru/purple-paper/">Purple Paper</a></li>
+<li><a href="/ru/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Этот перевод ещё не проверен. <a href="/en/weighted-multisig/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Взвешенная мультиподпись" data-desc="Взвешенные условия расходования с мультиподписью в PoW-блокчейнах и корректный скрипт.">
+<h1 id="wm-02" data-src="425817595a2c">Повышение безопасности с помощью кошельков со взвешенной мультиподписью в PoW-блокчейнах</h1>
+<p id="wm-03" class="sub" data-src="64d6fce7ce3f">Взвешенное одобрение в блокчейнах proof-of-work и рабочий скрипт</p>
+<div id="wm-upd" class="update" data-src="764be6615f00"><p><b>Обновлено в ноябре 2026 года.</b> Скрипт в первой версии этой страницы не был корректным скриптом Bitcoin: в <code>OP_CHECKMULTISIG</code> нет понятия веса. Ниже он заменён конструкцией, которая работает в Bitcoin уже сегодня. Мультиподпись определяет, <i>кто может одобрить</i> расходование средств; делить средства по весам она не умеет. Любое разделение задаётся выходами расходующей транзакции.</p></div>
+<h2 id="wm-04" data-src="b605350bc002">Введение</h2>
+<p id="wm-05" data-src="50c0fb73ec95">В меняющемся мире блокчейн-технологий безопасность и распределённый контроль над средствами остаются первостепенными задачами. В этой статье рассматривается концепция кошельков со взвешенной мультиподписью (multisig) — инновационного подхода к управлению средствами и их защите в блокчейнах Proof of Work (PoW), таких как Bitcoin. Мы рассмотрим, как такие кошельки можно настроить так, чтобы для одобрения требовались голоса с заранее заданными весами, что даёт надёжное решение для партнёрств, корпоративного управления и других совместных финансовых операций.</p>
+<h2 id="wm-06" data-src="88c8b3581386">Концепция кошельков со взвешенной мультиподписью</h2>
+<p id="wm-07" data-src="f3656c293f8f">Кошелёк с мультиподписью обычно требует нескольких подписей для одобрения транзакции и тем самым добавляет уровень защиты по сравнению с обычными кошельками с одной подписью. В схеме со взвешенной мультиподписью у участников кошелька разная степень влияния, или «вес», при одобрении транзакций. Такая гибкость позволяет динамично и безопасно управлять транзакциями в блокчейне.</p>
+<h2 id="wm-08" data-src="d7c5bab311cf">Практический пример</h2>
+<p id="wm-09" data-src="8bf8295c6241">Рассмотрим сценарий с тремя участниками — Алисой, Бобом и Чарли, — которые создали совместное предприятие и решили управлять своими средствами через кошелёк с мультиподписью. Их веса при голосовании распределены так:</p>
+<ul id="wm-10" data-src="6da87a435f9a"><li>Алиса: 50% голосов.</li><li>Боб: 30% голосов.</li><li>Чарли: 20% голосов.</li></ul>
+<p id="wm-11" data-src="4aec33a34252">Чтобы транзакция была выполнена, суммарный вес одобривших подписей должен достичь порога не менее 60%.</p>
+<h2 id="wm-12" data-src="d65a130b5efe">Сценарий транзакции</h2>
+<p id="wm-13" data-src="037fe02e65ce">Для иллюстрации предположим, что трое партнёров хотят вывести 1000 единиц криптовалюты. Транзакция проходит так: одного одобрения Алисы с её 50% недостаточно. С дополнительными 30% Боба суммарный вес достигает 80% и превышает требуемый порог. Транзакция выполняется. Алиса и Чарли вместе (70%) тоже могли бы её одобрить; Боб и Чарли вместе (50%) — нет.</p>
+<h2 id="wm-14" data-src="1d3b6769c03f">Реализация взвешенной мультиподписи в PoW-блокчейнах</h2>
+<p id="wm-15" data-src="19a7aadc432e"><code>OP_CHECKMULTISIG</code> в Bitcoin и <code>OP_CHECKSIGADD</code> в Taproot считают каждую подпись за одну. Взвешенный порог строится иначе: каждый ключ проверяется отдельно, и к сумме прибавляется его вес. При весах Алиса&nbsp;=&nbsp;5, Боб&nbsp;=&nbsp;3, Чарли&nbsp;=&nbsp;2 и пороге 6 (60% от 10) скрипт выглядит так:</p>
+<pre id="wm-16" data-src="370f7e7bfc01"><code>&lt;Alice_pubkey&gt;   OP_CHECKSIG  OP_IF 5 OP_ELSE 0 OP_ENDIF
+OP_SWAP &lt;Bob_pubkey&gt;     OP_CHECKSIG  OP_IF 3 OP_ADD OP_ENDIF
+OP_SWAP &lt;Charlie_pubkey&gt; OP_CHECKSIG  OP_IF 2 OP_ADD OP_ENDIF
+6 OP_GREATERTHANOREQUAL</code></pre>
+<ul id="wm-16b" data-src="a58618e110df">
+ <li>Witness (свидетель) передаёт три подписи в порядке <code>&lt;sig_Charlie&gt; &lt;sig_Bob&gt; &lt;sig_Alice&gt;</code>, подпись Алисы — на вершине стека. Подписант, который не одобряет расходование, передаёт пустое значение. Тогда <code>OP_CHECKSIG</code> кладёт на стек false, и его вес не прибавляется; невалидная непустая подпись приводит к провалу всего скрипта (в листе Taproot это правило консенсуса, BIP 342; для P2WSH — стандартная политика ретрансляции NULLFAIL).</li>
+ <li>Скрипт может быть witness-скриптом выхода P2WSH или одним листом дерева Taproot (в листе Taproot действуют те же опкоды, но с подписями Шнорра и 32-байтовыми ключами).</li>
+ <li>С Taproot типичный случай может также пойти по дешёвому пути ключа (key path): объединённый ключ для наиболее вероятного набора подписантов, а взвешенный скрипт хранится как лист, который раскрывается, только если его используют.</li>
+</ul>
+<h2 id="wm-17" data-src="89db2ad881f2">Заключение</h2>
+<p id="wm-18" data-src="221f4ef7be72">Кошельки со взвешенной мультиподписью в PoW-блокчейнах, таких как Bitcoin, дают усиленную модель безопасности: для транзакций требуется заранее заданный порог взвешенных одобрений. Такой подход не только защищает средства от несанкционированного доступа, но и закладывает гибкость и справедливость в финансовые операции между несколькими участниками. По мере развития блокчейн-технологий подобные решения в устройстве кошельков играют ключевую роль в широком распространении и полезности криптовалют в сложных транзакционных сценариях.</p>
+<div id="wm-19" class="v37" data-src="e64afcfc5f82"><span class="tag">V37</span><b>Почему децентрализованный пул <i>не</i> использует для выплат взвешенный (или любой другой) общий кошелёк.</b>
+ <p>Взвешенная мультиподпись — это <b>кастодиальная</b> конструкция: общие средства лежат на одном общем адресе, которым управляет кворум подписантов. Именно такой схемы децентрализованный пул должен избегать: она возвращает оператора, доверенный набор подписантов и ключ, который можно потерять или отобрать под давлением.</p>
+ <p>P2Pool и c2pool платят иначе и <b>вообще не держат общих средств.</b> Выходы coinbase (coinbase-транзакции) найденного блока — детерминированная функция цепочки шар: каждый узел вычисляет одинаковые выходы: доля каждого майнера выплачивается напрямую на его собственный скрипт выплаты, а рядом стоит небольшой выход пожертвования на фиксированный скрипт. Награды майнеров никогда не проходят через общий кошелёк, кворум подписантов или кастодиана, и дизайн V37 это сохраняет. «Вес» в пуле действительно важен, но как <b>учёт, взвешенный по работе</b> (зачёт по proof of work), и голосование за версию (одна шара — один голос, с хвостовой проверкой, взвешенной по работе), — в рамках консенсуса, а не как право одобрять расходы из кошелька. Эта страница — вводный материал по скриптам для казначейских задач и задач управления; децентрализованный пул распределяет награды не так. См. <a href="/ru/purple-paper/">краткое изложение Purple Paper</a>, &sect;5 (Proof-of-Work as Measurement — «proof-of-work как измерение») и &sect;15 (Incentive — «стимулы»).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Впервые опубликовано Technocore One в «P2Pool scientific basics», обновлено в ноябре 2026 года. © 2026 technocore.one.</p>
+<p>Сведения о c2pool проверены по выпуску v0.2.12.16 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Echte Schwierigkeit — Wissenschaftliche Grundlagen von P2Pool</title>
+<meta name="description" content="Target, erreichte Schwierigkeit und was das Verhältnis target/hash bedeutet.">
+<link rel="canonical" href="https://learn.voidbind.com/de/real-difficulty/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/real-difficulty/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/real-difficulty/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/real-difficulty/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/real-difficulty/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/real-difficulty/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="top">
+<a class="brand" href="/de/">Wissenschaftliche Grundlagen von P2Pool</a>
+<nav class="langs" aria-label="Sprache"><a class="lang" href="/en/real-difficulty/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/real-difficulty/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/real-difficulty/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/real-difficulty/" hreflang="de" lang="de" data-lang="de" aria-current="true">Deutsch</a> · <a class="lang" href="/zh/real-difficulty/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Inhalt"><ul>
+<li><a href="/de/">Startseite</a></li>
+<li><a href="/de/c2pool-today/">c2pool heute</a></li>
+<li><a href="/de/references/">Quellen</a></li>
+<li><a href="/de/making-of-c2pool/">Making-of c2pool</a></li>
+<li><a href="/de/luck/">Glück</a></li>
+<li><a href="/de/real-difficulty/" aria-current="page">Echte Schwierigkeit</a></li>
+<li><a href="/de/difficulty-adjustment/">Schwierigkeitsanpassung</a></li>
+<li><a href="/de/taproot-coinbase/">Taproot-Coinbase</a></li>
+<li><a href="/de/weighted-multisig/">Gewichtetes Multisig</a></li>
+<li><a href="/de/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/de/purple-paper/">Purple Paper</a></li>
+<li><a href="/de/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Maschinengestützte Übersetzung, noch nicht von Muttersprachlern geprüft. <a href="/en/real-difficulty/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Echte Schwierigkeit" data-desc="Target, erreichte Schwierigkeit und was das Verhältnis target/hash bedeutet.">
+<h1 id="rd-02" data-src="7e4f901aecb4">Echte Schwierigkeit</h1>
+<p id="rd-03" class="sub" data-src="4e6bfc614a92">Target, Hash und erreichte Schwierigkeit</p>
+<div id="rd-upd" class="update" data-src="ad913b22edfb"><p><b>Aktualisiert im November 2026.</b> Die Definitionen von Target, „real target“ und dem Verhältnis target/hash widersprachen sich in der ersten Fassung dieser Seite stellenweise, und der Aufbau des Feldes „bits“ war falsch. Diese Absätze sind unten neu geschrieben. Die Diagramme sind unverändert.</p></div>
+<p id="rd-04" data-src="83ab1a28f5ef">Ein Block ist gültig, wenn sein Proof-of-Work-Hash, gelesen als 256-Bit-Zahl, nicht über dem Target liegt, das die Chain verlangt. Target, Schwierigkeit und Hash sind drei Sichtweisen auf diesen einen Vergleich.</p>
+<h2 id="rd-05" data-src="978354db0c00">Target</h2>
+<p id="rd-06" data-src="427db2c8a37e">Das Target ist eine 256-Bit-Zahl. Der Header speichert es nicht vollständig: Das 4-Byte-Feld <code>nBits</code> („bits“) kodiert es kompakt. Das erste Byte ist ein Exponent <i>e</i>, die übrigen drei Bytes sind eine Mantisse <i>m</i>:</p>
+<pre id="rd-07" data-src="cda5e12b685f">target = m &times; 2^(8 &times; (e &minus; 3))</pre>
+<p id="rd-08" data-src="fe6fb57eaf5e">Der Genesis-Block von Bitcoin hat zum Beispiel <code>nBits = 0x1d00ffff</code>: <i>e</i>&nbsp;=&nbsp;0x1d, <i>m</i>&nbsp;=&nbsp;0x00ffff, also Target&nbsp;=&nbsp;0xffff&nbsp;&times;&nbsp;2<sup>208</sup>. Das ist das größte Target, das Bitcoin erlaubt, das „Schwierigkeit&nbsp;1“-Target.</p>
+<h2 id="rd-09" data-src="be44133ed57f">Schwierigkeit</h2>
+<p id="rd-10" data-src="bf0cd4ae0641">Die Schwierigkeit ist das Schwierigkeit-1-Target geteilt durch das aktuelle Target: <code>difficulty = target<sub>max</sub> / target</code>. Ein <b>kleineres</b> Target bedeutet eine <b>höhere</b> Schwierigkeit und mehr Arbeit pro Block. Auf Chains nach Bitcoin-Art braucht ein Block bei Schwierigkeit <i>D</i> im Mittel etwa <i>D</i>&nbsp;&times;&nbsp;2<sup>32</sup> Hashes.</p>
+<p id="rd-11" data-src="4d6b741fab3e">Das Target wird regelmäßig angepasst (bei Bitcoin alle 2016 Blöcke), damit Blöcke weiterhin etwa im vorgesehenen Abstand eintreffen; siehe <a href="/de/difficulty-adjustment/">Schwierigkeitsanpassung</a>.</p>
+<h2 id="rd-12" data-src="748a92ffe045">Der Proof-of-Work-Hash</h2>
+<p id="rd-13" data-src="5f304adc648c">Miner ändern die Nonce (und andere Header-Felder) und hashen den Header erneut, bis das Ergebnis auf oder unter dem Target liegt. Jeder Versuch gelingt mit einer Wahrscheinlichkeit von etwa Target&nbsp;/&nbsp;2<sup>256</sup>, unabhängig von den vorherigen Versuchen.</p>
+<p id="rd-14" data-src="1ddd452919f5">Bei Bitcoin ist der Proof-of-Work-Hash der doppelte SHA-256 des 80-Byte-Headers, der zugleich die ID des Blocks ist. Die Chains, die c2pool mined, verwenden unterschiedliche Proof-of-Work-Funktionen. Bei Litecoin und Dogecoin wird der Block weiterhin über seinen SHA-256d-Hash benannt, während sein Proof of Work mit Scrypt geprüft wird; bei Dash ist beides X11:</p>
+<div id="rd-15" class="table-wrap" data-src="b0b2f459a0a0"><table>
+ <thead><tr><th>Chain</th><th>Proof-of-Work-Funktion</th></tr></thead>
+ <tbody>
+ <tr><td>Bitcoin (BTC), Bitcoin Cash (BCH)</td><td>SHA-256d</td></tr>
+ <tr><td>Litecoin (LTC), Dogecoin (DOGE, per Merged Mining), DigiByte (DGB, so wie c2pool es mined)</td><td>Scrypt</td></tr>
+ <tr><td>Dash (DASH)</td><td>X11</td></tr>
+ <tr><td>BIP-110-Fork</td><td>SHA-256d unterhalb von Höhe 961.640, BLAKE2b ab dieser Höhe</td></tr>
+ <tr><td>Monero (XMR, experimentell in c2pool)</td><td>RandomX</td></tr>
+ </tbody>
+</table></div>
+<h2 id="rd-16" data-src="ad96e32ee007">Erreichte Schwierigkeit und der Überschuss</h2>
+<p id="rd-17" data-src="1cb0697f7a28">Die erste Fassung dieser Seite verwendete den Begriff „real target“ für den Wert, den der tatsächlich gefundene Hash eines Miners noch erfüllt hätte. Zwei Verhältnisse sind nützlich, und man sollte sie nicht vermischen:</p>
+<ul id="rd-18" data-src="bbd1c696c9b4">
+ <li><b>Erreichte Schwierigkeit</b> = target<sub>max</sub>&nbsp;/&nbsp;hash. Die Schwierigkeit, bei der genau dieser Hash noch gültig gewesen wäre. Der Wert „best share“ (Übersetzung: „bester Share“) im Dashboard ist von dieser Art.</li>
+ <li><b>Überschuss</b> (Overshoot) R = target&nbsp;/&nbsp;hash = erreichte Schwierigkeit&nbsp;/&nbsp;Schwierigkeit. Ein gültiger Block hat R&nbsp;&ge;&nbsp;1. R gibt an, wie weit dieser Hash zufällig unter seinem Target lag.</li>
+</ul>
+<p id="rd-19" data-src="65eca43dc797">Der Überschuss misst Glück, nicht Aufwand. Jeder gültige Block bei einer gegebenen Schwierigkeit hat dieselbe erwartete Arbeit gekostet, unabhängig von seinem R. Unter der Bedingung, dass ein Hash das Target erfüllt, folgt R der Verteilung <code>Pr[R &ge; r] = 1/r</code>: Die Hälfte aller Blöcke hat R unter 2, einer von tausend hat R über 1.000, und der Mittelwert existiert nicht.</p>
+<figure id="rd-29" data-src="af12333ee29e">
+ <img src="/assets/img/real-diff-epochs.png" alt="ursprüngliches Faktor-Diagramm">
+ <figcaption>Ursprüngliches Diagramm (wie veröffentlicht): target/real_target pro Block für epoch_0 (0&ndash;2015) und epoch_1 (2016&ndash;4031) der Bitcoin-Blockchain. Hier zur Referenz erhalten.</figcaption>
+ </figure>
+
+<figure id="rd-30" data-src="8103ad98238f">
+ <img src="/assets/img/real-diff-real.png" alt="erreichte Schwierigkeit pro Block, echte BTC-Daten">
+ <figcaption>Dieselben Daten, neu berechnet über alle 4.032 Blöcke (R = target/hash; die Schwierigkeit ist in beiden Epochen durchgehend 1, also ist R der eigene Überschuss des Blocks). Die Chain verlangt nur R &ge; 1; die seltenen Ausschläge sind reines Glück. Median von R &asymp; 2.</figcaption>
+ </figure>
+
+<p id="rd-20" data-src="6c161e351884">Im zweiten Diagramm ist die Schwierigkeit in beiden Epochen durchgehend 1, daher ist R die erreichte Schwierigkeit jedes Blocks. Der Median nahe 2 ist das, was <code>Pr[R &ge; r] = 1/r</code> vorhersagt.</p>
+<div id="rd-45" class="v37" data-src="7dc8701aaccc"><span class="tag">V37</span><b>Wofür die erreichte („echte“) Schwierigkeit verwendet wird – und wofür nicht.</b>
+ <p>Die <b>erreichte</b> Schwierigkeit eines Hashes (das „real target“ der ersten Fassung dieser Seite) gibt an, wie weit der Hash zufällig unter seinem Target lag. Es ist verlockend, Miner proportional dazu zu bezahlen: „Du hast einen selteneren Hash gefunden, also verdienst du mehr.“ <b>Das ist falsch, und zwar beweisbar.</b></p>
+ <p>Die erreichte Schwierigkeit ist <b>reines Glück</b>. Unter der Bedingung, dass das Target erfüllt ist, folgt der Überschuss <code>R = target/hash</code> einem Potenzgesetz, <code>Pr[R &ge; r] = 1/r</code>, dessen Mittelwert nicht konvergiert: Ein einzelner glücklicher Hash kann die Summe aller anderen übertreffen. Eine Bezahlung nach erreichter Schwierigkeit ließe einen einzigen glücklichen Share ein ganzes Auszahlungsfenster einstreichen – und brächte genau die Varianz in den Pool zurück, die das Pooling beseitigen soll.</p>
+ <p><b>Arbeit wird daher nach dem <i>Target</i> gutgeschrieben, das ein Share erfüllen musste, nie nach dem Wert, den sein Hash zufällig erreicht hat.</b> Zwei Shares, die dasselbe Target erfüllen, werden gleich gutgeschrieben – die Abrechnung bleibt <i>glücksneutral</i>.</p>
+ <p>Arbeit unterhalb des Share-Targets wird nach derselben Regel gezählt. Ein Hash, der ein leichteres (numerisch größeres) Target erfüllt hat, ist selbst eine Arbeitseinheit bei diesem leichteren Target. So kann einem Worker, der zu schwach ist, um oft Shares zu finden, die geleistete Arbeit trotzdem gutgeschrieben werden, indem man seine Hashes bei diesem leichteren Target zählt. Der Überschuss wird dafür nicht gebraucht. <b>Messung, nicht Bezahlung.</b> So schreibt das Paper zu Work Receipts (Arbeitsquittungen) Arbeit gut; siehe die <a href="/de/purple-paper/">Zusammenfassung des Purple Paper</a>, &sect;5 (Proof of Work als Messung) und &sect;8 (Arbeit unterhalb der Reihenfolge zurückgewinnen).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Ursprünglich von Technocore One in „P2Pool scientific basics“ veröffentlicht, im November 2026 aktualisiert. © 2026 technocore.one.</p>
+<p>Angaben zu c2pool geprüft gegen Release v0.2.12.16 am 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

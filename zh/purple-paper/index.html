@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Purple Paper：Work Receipts（工作收据） — P2Pool 科学基础</title>
+<meta name="description" content="Work Receipts（工作收据）论文摘要，附 2026 年 10 月 4 日的勘误和指向权威版本的链接。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/purple-paper/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/purple-paper/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/purple-paper/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/purple-paper/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/purple-paper/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/purple-paper/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/purple-paper/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/purple-paper/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/purple-paper/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/purple-paper/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/purple-paper/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/purple-paper/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/" aria-current="page">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/purple-paper/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Purple Paper" data-desc="Work Receipts（工作收据）论文摘要，附 2026 年 10 月 4 日的勘误和指向权威版本的链接。">
+<h1 id="pp-01" data-src="163732f69eb0">Purple Paper：Work Receipts（工作收据）</h1>
+<p id="pp-02" class="sub" data-src="779b5b072f54">“Work Receipts: A Peer-to-Peer Mining-Reward Accounting System”（译文：“工作收据：一种点对点的挖矿奖励记账系统”）（frstrtr，2026）的摘要</p>
+<p id="pp-03" data-src="78c4302fc405">论文以 MIT 许可证发布于 <a href="https://frstrtr.github.io/c2pool/">frstrtr.github.io/c2pool</a>。该版本连同其勘误是参考依据。本页只是逐节对它做摘要，以便本站的文章可以引用。本摘要与论文不一致之处，以论文为准。</p>
+<div id="pp-04" class="update" data-src="e07dd9906482"><p><b>2026 年 10 月 4 日勘误（摘自论文）。</b>第 9 节，以及摘要和第 10、14 节中依赖欠付余额的部分，均已撤回。一项独立审查表明，没有托管方的矿池无法在欠付一部分矿工的同时不多付给其他矿工，而多付的部分永远无法收回。论文表示，修订后的第 9 节将描述如何在每个区块中全额支付该区块的窗口；该修订尚未发布。第 3 节的范围被收窄：在底层链上一个已被超越的链顶端所做的工作不获得任何报酬。</p></div>
+<p id="pp-05" data-src="36765c1be46a"><b>状态。</b>论文描述的是一种设计，而不是一个正在运行的网络：V37 是 c2pool 中以这篇论文为基础的设计路线，目前处于设计和原型阶段，尚未在生产环境中运行。特别是，第 4 节和第 6 节中按时间分箱的窗口，并不是实验性门罗币通道目前所运行的方式。</p>
+<h2 id="pp-10" data-src="2599e87b4740">基本思路</h2>
+<p id="pp-11" data-src="ab27eead5226">一个 P2Pool 份额承担两项工作：它证明工作量，并在一个排序中占据一个位置。一个在争夺位置时落败的份额会连同其证明一起被丢弃，而低于份额难度的工作则完全不被计算。论文把这两项工作分开。份额链只对<i>载体</i>（普通份额）排序。工作量则依据载体中嵌入的<i>收据</i>来计算：收据是与矿池、与应得报酬的矿机以及与底层链上一个已确定的区块绑定的工作量证明。</p>
+<h2 id="pp-20" data-src="9bae918add9a">各节内容</h2>
+<ul id="pp-21" data-src="78611d2d8430">
+ <li id="pp-s2"><b>&sect;2 收据。</b>收据无法伪造、转让、重放或倒填时间，也不依赖任何前驱。一个已过期（stale）的份额就是一张工作量满足了份额目标值的收据；它被携带在该矿机的下一个份额中，并被完整计入（受勘误中收窄后的第 3 节限制）。</li>
+ <li><b>&sect;3 时间。</b>每张收据都承诺底层链上的一个区块，这个区块充当一个无人能控制的时钟。一旦该区块被埋得足够深、不会再被重组，工作就按其完成的时间被放到时间线上。</li>
+ <li><b>&sect;4 时间的混合评估。</b>时间被划分为若干个箱：一个开放的现在、一个随着时间推移以越来越粗的粒度保存的已确定的过去，以及一个预留的未来。论文指出，最初发布的门罗币通道是第 3 节和第 4 节的一个例外。</li>
+ <li id="pp-s5"><b>&sect;5 工作量证明作为度量。</b>一个工作单位按它必须满足的目标值记账，从不按其哈希比目标值低了多少来记账。超出倍数会让一个幸运的哈希拿走整份奖励。参见<a href="/zh/real-difficulty/">真实难度</a>和<a href="/zh/luck/">运气</a>。</li>
+ <li><b>&sect;6 记账。</b>工作量在一个由最近工作单位组成的窗口中计算，并按时间远近衰减，采用整数定点运算，因此每个节点都得到相同的结果。窗口是在同一目标值下固定数量的工作单位，论文论证了脉冲式挖矿、跳池和扣块在期望上都得不到任何好处。只有配合一条能消除论文所述偏差的规则，才会采用按时间度量的窗口。</li>
+ <li><b>&sect;7 多条链。</b>一套记账为多条底层链服务，这些链作为通道共享同一组矿机。</li>
+ <li id="pp-s8"><b>&sect;8 找回排序之下的工作。</b>满足更容易（数值更大）的目标值的哈希作为收据被携带，并按该更容易的目标值的工作量记账，在期望上完全准确，而且无论使用一个身份还是多个身份，结果都相同。</li>
+ <li><b>&sect;9 用小 coinbase 向众多矿工付款。</b><i>已于 2026 年 10 月 4 日撤回</i>（见上方勘误）。</li>
+ <li><b>&sect;10 coinbase 之外的结算</b>和<b>&sect;11 其他用途。</b>已交付的工作量是一个任何人都能验证的量；依赖欠付余额的部分已撤回。</li>
+ <li><b>&sect;12 回收空间。</b>旧的工作按层级汇总，因此整个历史只需几兆字节即可容纳，而任何过去时段的精确奖励仍然可以还原。</li>
+ <li id="pp-s13"><b>&sect;13 验证支付。</b>已承诺的状态是 coinbase 中的一个默克尔根。一个只保存区块头的设备就能用对数大小的证明来核验它，并且每个节点都会重新计算一个区块必须携带的 coinbase。</li>
+ <li><b>&sect;14 网络</b>和<b>&sect;16 结论。</b>节点和矿机可以无需许可地加入和离开；依赖欠付余额的部分已撤回。</li>
+ <li id="pp-s15"><b>&sect;15 激励。</b>诚实的策略，即持续工作并发送自己的收据，是收益最高的策略。</li>
+</ul>
+<p id="pp-30" data-src="5a2abe3d117e">阅读论文：<a href="https://frstrtr.github.io/c2pool/">Work Receipts: A Peer-to-Peer Mining-Reward Accounting System</a>（英文）。</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>摘要 © 2026 technocore.one。论文本身 © 2026 frstrtr，以 MIT 许可证发布。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

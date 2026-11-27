@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>La proposition au CCS de Monero : une chronologie — Bases scientifiques de P2Pool</title>
+<meta name="description" content="Une chronologie datée de la proposition CCS Monero de 2026 pour c2pool, de la revue externe du modèle de paiement et de l’abandon du modèle de solde dû.">
+<link rel="canonical" href="https://learn.voidbind.com/fr/monero-ccs/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/monero-ccs/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/monero-ccs/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/monero-ccs/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/monero-ccs/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/monero-ccs/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/monero-ccs/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Aller au contenu</a>
+<header class="top">
+<a class="brand" href="/fr/">Bases scientifiques de P2Pool</a>
+<nav class="langs" aria-label="Langue"><a class="lang" href="/en/monero-ccs/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/monero-ccs/" hreflang="fr" lang="fr" data-lang="fr" aria-current="true">Français</a> · <a class="lang" href="/ru/monero-ccs/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/monero-ccs/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/monero-ccs/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Sommaire"><ul>
+<li><a href="/fr/">Accueil</a></li>
+<li><a href="/fr/c2pool-today/">c2pool aujourd’hui</a></li>
+<li><a href="/fr/references/">Références</a></li>
+<li><a href="/fr/making-of-c2pool/">Coulisses de c2pool</a></li>
+<li><a href="/fr/luck/">Chance</a></li>
+<li><a href="/fr/real-difficulty/">Difficulté réelle</a></li>
+<li><a href="/fr/difficulty-adjustment/">Ajustement de la difficulté</a></li>
+<li><a href="/fr/taproot-coinbase/">Coinbase Taproot</a></li>
+<li><a href="/fr/weighted-multisig/">Multisignature pondérée</a></li>
+<li><a href="/fr/bitcoin-leveldb/">LevelDB de Bitcoin</a></li>
+<li><a href="/fr/purple-paper/">Purple Paper</a></li>
+<li><a href="/fr/monero-ccs/" aria-current="page">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Traduction assistée par machine, pas encore relue par un locuteur natif. <a href="/en/monero-ccs/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Monero CCS" data-desc="Une chronologie datée de la proposition CCS Monero de 2026 pour c2pool, de la revue externe du modèle de paiement et de l’abandon du modèle de solde dû.">
+<h1 id="mc-01" data-src="ce195c119e99">La proposition au CCS de Monero : une chronologie</h1>
+<p id="mc-02" class="sub" data-src="d64f6cd2d8ec">De septembre à octobre 2026, d’après les sources publiques</p>
+<p id="mc-03" data-src="1a5881305d51">En septembre 2026, c2pool a demandé au Monero Community Crowdfunding System (CCS) de financer un pool Monero sans démon. Cette page recense, dans l’ordre et avec des liens, les traces publiques de cette proposition et d’une revue du modèle de paiement de c2pool publiée au même moment. Les citations sont brèves et attribuées. Les heures sont en UTC.</p>
+<h2 id="mc-10" data-src="9dcff98e275f">Chronologie</h2>
+<ul id="mc-11" data-src="191d926c2a9a">
+ <li><b>2026-09-19 19:25.</b> SChernykh, l’auteur du P2Pool de Monero, publie une revue du code de paiement de c2pool (<code>frstrtr/c2pool</code> master, les étapes de règlement et de coinbase de V37) : <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba">« Fairness gaps in the c2pool payout ledger »</a> (traduction : « Les failles d’équité du registre de paiements de c2pool »). Son résumé : « Eight ways the <i>Work Receipts</i> owed-ledger and coinbase selection can pay the wrong miner &mdash; several of them with every participant behaving honestly. » (traduction : « Huit façons dont le registre des soldes dus de <i>Work Receipts</i> (reçus de travail) et la sélection de la coinbase peuvent payer le mauvais mineur — plusieurs d’entre elles alors que chaque participant se comporte honnêtement. »)</li>
+ <li><b>2026-09-25 06:30.</b> La <a href="https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/699">merge request !699</a> est ouverte dans le dépôt du CCS : « c2pool: a Monero pool with no operator and no daemon (mainnet milestone, 25 XMR) » (traduction : « c2pool : un pool Monero sans opérateur et sans démon (jalon mainnet, 25 XMR) »).</li>
+ <li><b>2026-09-28 17:24.</b> frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6394929#gistcomment-6394929">répond sur la revue</a> : « Thanks for the review, will check and revert. » (traduction : « Merci pour la revue, je vérifie et je reviens vers vous. »)</li>
+ <li><b>2026-10-02 10:32.</b> frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6402841#gistcomment-6402841">publie une réponse point par point</a> : « We re-checked every finding against the code and reproduced most of them. » (traduction : « Nous avons revérifié chaque constat par rapport au code et en avons reproduit la plupart. »)</li>
+ <li><b>2026-10-03.</b> La proposition est discutée sur le <a href="https://libera.monerologs.net/monero-community/20261003">canal #monero-community</a> (journal public). À 20:07, frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6405381#gistcomment-6405381">publie sur la revue</a> une réponse à la question que SChernykh (sech1) y avait posée : « if a full reward must be paid out, and &lsquo;owed&rsquo; wallets are not owed enough to cover the full reward, what do you do? » (traduction : « si une récompense complète doit être versée et que les sommes dues aux portefeuilles “créanciers” ne suffisent pas à couvrir la récompense complète, que faites-vous ? »)</li>
+ <li><b>2026-10-04 09:11.</b> SChernykh <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6406006#gistcomment-6406006">répond chiffres à l’appui</a> : « owed balances can&rsquo;t be fair. » (traduction : « les soldes dus ne peuvent pas être équitables. ») Dans son exemple, l’allocateur de c2pool lui-même donne à un mineur qui a fourni 20 % du travail « 0.47 XMR of each 0.6 XMR block instead of 0.12, which is 3.94&times; its share » (traduction : « 0,47 XMR de chaque bloc de 0,6 XMR au lieu de 0,12, soit 3,94 fois sa part »). Il montre aussi qu’un bloc qui paie à partir d’une fenêtre figée 61 hauteurs plus tôt donne à un pool hopper qui choisit bien son moment 1,312 là où un paiement à partir de la propre fenêtre du bloc donne 1,000, dans le propre test d’impulsions (pulse test) de c2pool.</li>
+ <li><b>2026-10-04 11:46 et 12:18.</b> frstrtr <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6406115#gistcomment-6406115">répond</a> (« refuted and recreating the canonical Work Receipts design » ; traduction : « réfuté, et nous recréons la conception canonique de Work Receipts ») et <a href="https://gist.github.com/SChernykh/636eca0b73181277ea85401b6b1e24ba?permalink_comment_id=6406130#gistcomment-6406130">explique le changement</a> : « You&rsquo;re right, and your numbers leave little room to argue. » (traduction : « Vous avez raison, et vos chiffres laissent peu de place à la discussion. ») et « So the ledger goes. Each pool block pays its own window in full, in its own coinbase, from state fixed before the block. » (traduction : « Le registre disparaît donc. Chaque bloc du pool paie intégralement sa propre fenêtre, dans sa propre coinbase, à partir d’un état figé avant le bloc. »)</li>
+ <li><b>2026-10-04 13:37.</b> frstrtr <a href="https://repo.getmonero.org/monero-project/ccs-proposals/-/merge_requests/699">ferme la merge request !699</a>, avec ce commentaire : « Closing this. The payout model needs to change first; I&rsquo;ll come back with working code and numbers. » (traduction : « Je la ferme. Le modèle de paiement doit d’abord changer ; je reviendrai avec du code qui fonctionne et des chiffres. »)</li>
+ <li><b>2026-10-04.</b> L’<a href="/fr/purple-paper/">article Work Receipts</a> publie des errata : la section 9 (le paiement à partir de soldes dus) et les parties de l’article qui reposent sur un solde dû sont retirées.</li>
+</ul>
+<h2 id="mc-20" data-src="b55f380c6901">Où en est la proposition</h2>
+<p id="mc-21" data-src="a15afb05c1be">Monero CCS: the funding proposal (MR !699) was withdrawn by its author on 2026-10-04 while the payout model is replaced by Work Receipts (Path B). No funding application is open. (traduction : « Monero CCS : la proposition de financement (MR !699) a été retirée par son auteur le 2026-10-04, pendant que le modèle de paiement est remplacé par Work Receipts (Path B). Aucune demande de financement n’est ouverte. »)</p>
+<p id="mc-22" data-src="58c665bd3dde">La voie Monero de c2pool, selon les termes du <a href="https://github.com/frstrtr/c2pool/blob/master/README.md#supported-chains">README</a> du projet : « <b>Experimental</b> (v37 lane, Path B payouts; <code>c2pool-v37-xmr</code>, can run daemonless; not built by the release workflow): regtest, stagenet and testnet run a pool; mainnet runs only <code>--follow-only</code> and needs <code>--i-understand-mainnet</code> even for that. » (traduction : « <b>Expérimental</b> (voie v37, paiements Path B ; <code>c2pool-v37-xmr</code>, peut fonctionner sans démon ; non compilé par le workflow de publication des versions) : regtest, stagenet et testnet font tourner un pool ; le mainnet ne fonctionne qu’en <code>--follow-only</code> et exige <code>--i-understand-mainnet</code> même pour cela. ») Et : « Mainnet pool mode is disabled in code. » (traduction : « Le mode pool est désactivé dans le code pour le mainnet. »)</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>© 2026 technocore.one.</p>
+<p>Faits sur c2pool vérifiés par rapport à la version v0.2.12.16 le 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

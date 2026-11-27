@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Glück – die grausame Bestie — Wissenschaftliche Grundlagen von P2Pool</title>
+<meta name="description" content="Ein Leitfaden zur Mining-Varianz, zur Folklore, die nichts gegen sie ausrichtet, und dazu, wie das c2pool-Dashboard das Glück misst.">
+<link rel="canonical" href="https://learn.voidbind.com/de/luck/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/luck/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/luck/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/luck/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/luck/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/luck/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/luck/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="top">
+<a class="brand" href="/de/">Wissenschaftliche Grundlagen von P2Pool</a>
+<nav class="langs" aria-label="Sprache"><a class="lang" href="/en/luck/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/luck/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/luck/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/luck/" hreflang="de" lang="de" data-lang="de" aria-current="true">Deutsch</a> · <a class="lang" href="/zh/luck/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Inhalt"><ul>
+<li><a href="/de/">Startseite</a></li>
+<li><a href="/de/c2pool-today/">c2pool heute</a></li>
+<li><a href="/de/references/">Quellen</a></li>
+<li><a href="/de/making-of-c2pool/">Making-of c2pool</a></li>
+<li><a href="/de/luck/" aria-current="page">Glück</a></li>
+<li><a href="/de/real-difficulty/">Echte Schwierigkeit</a></li>
+<li><a href="/de/difficulty-adjustment/">Schwierigkeitsanpassung</a></li>
+<li><a href="/de/taproot-coinbase/">Taproot-Coinbase</a></li>
+<li><a href="/de/weighted-multisig/">Gewichtetes Multisig</a></li>
+<li><a href="/de/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/de/purple-paper/">Purple Paper</a></li>
+<li><a href="/de/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Maschinengestützte Übersetzung, noch nicht von Muttersprachlern geprüft. <a href="/en/luck/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Glück" data-desc="Ein Leitfaden zur Mining-Varianz, zur Folklore, die nichts gegen sie ausrichtet, und dazu, wie das c2pool-Dashboard das Glück misst.">
+<h1 id="lk-02" data-src="8985ac05cd64">Glück – die grausame Bestie</h1>
+<p id="lk-03" class="sub" data-src="469a110c7b18">P2Pool scientific basics – ein Leitfaden zur Mining-Varianz und zu den Ritualen, die sie (nicht) besiegen</p>
+<h2 id="lk-04" data-src="b18592d75af0">Manchmal trifft dich das Pech …</h2>
+<p id="lk-05" data-src="60cf44b2a235">In der Welt des Krypto-Minings ist „Glück“ statistisch nur Varianz, aber jeder erfahrene Miner weiß: Wenn das <b>Varianz-Monster</b> zuschlägt, fühlt es sich persönlich an. Wenn die Mathematik sagt, dass du Blöcke finden solltest, der Pool aber trocken bleibt, geht die Logik oft über Bord.</p>
+<p id="lk-06" data-src="f51c2a46030e">Was folgt, ist unkonventionell, unwissenschaftlich und abergläubisch – die Art von Dingen, die man sich in alten Bitcoin-Talk-Foren und IRC-Kanälen zuraunt. Hier eine Sammlung von Mining-Folklore und „Ritualen“, um dein Glück zurückzusetzen.</p>
+<h3 id="lk-07" data-src="214a609c09dd">1. Der „Beobachter“-Effekt (Quanten-Zeno-Effekt)</h3>
+<p id="lk-08" data-src="ec2daa2960b6">Der am häufigsten zitierte Aberglaube: <i>„Ein beobachteter Miner findet nie einen Block.“</i></p>
+<ul id="lk-09" data-src="7e01fce36687"><li><b>Das Ritual:</b> Du musst aufhören, aufs Dashboard zu schauen. Komplett.</li>
+ <li><b>Die Methode:</b> Schließe deine Monitoring-Tabs, deaktiviere deinen Bot für Block-Benachrichtigungen und entferne dich mindestens 24 Stunden lang physisch vom Bildschirm. Das Universum weiß, dass du hinschaust, und es ist schüchtern.</li>
+ <li><b>Die „Wissenschaft“:</b> Es senkt deinen Stresspegel, sodass die Zeit schneller vergeht, bis der nächste Block ganz natürlich kommt.</li></ul>
+<h3 id="lk-10" data-src="cff0a1b573b2">2. Die „Opfer“-Transaktion</h3>
+<p id="lk-11" data-src="40f3863fcdae">In den Anfangstagen von Bitcoin schickten Miner kleine Beträge an „Burn-Adressen“ oder berühmte Adressen (etwa die des Genesis-Blocks), als Opfergabe an die Krypto-Götter.</p>
+<ul id="lk-12" data-src="ede6d9c58f08"><li><b>Das Ritual:</b> Nimm einen winzigen Betrag des Coins, den du minest (etwas Dust), und schicke ihn an eine wohltätige Organisation oder an eine zufällige Adresse.</li>
+ <li><b>Die Logik:</b> Du erzeugst einen „positiven karmischen Fluss“ auf der Blockchain. Wenn du nur nimmst (Mining-Belohnung), ohne zu geben (Transaktionsgebühren), bestraft dich das Netzwerk.</li></ul>
+<h3 id="lk-13" data-src="3cad74dc26e0">3. Server-Feng-Shui &amp; die „Reinigung“</h3>
+<p id="lk-14" data-src="8280fad1f284">Der physische Zustand der Maschine soll ihre „digitale Aura“ beeinflussen.</p>
+<ul id="lk-15" data-src="8499e4dfcfd9"><li><b>Kabelmanagement:</b> Wenn deine Kabel ein Chaos sind, „verheddert“ sich das Glück. Ordne deine Ethernet-Kabel, damit die „Pakete reibungslos fließen“ (offensichtlich falsch, aber befriedigend).</li>
+ <li><b>Entstauben:</b> Schalte das Rig komplett aus. Nimm Druckluft. Sag dem Server dabei laut, dass er eine „gute Maschine“ ist.</li>
+ <li><b>Neu einstecken:</b> Zieh das Ethernet-Kabel ab und steck es wieder ein. Manchmal bleibt das Glück einfach im Port „stecken“.</li></ul>
+<h3 id="lk-16" data-src="11cfb6960a37">4. Die Täuschung per „Namensänderung“</h3>
+<p id="lk-17" data-src="37386077a1d9">Manche Miner glauben, der Pool oder das Netzwerk habe einen bestimmten Worker-Namen oder eine bestimmte Wallet-Adresse „verflucht“.</p>
+<ul id="lk-18" data-src="997e85704a46"><li><b>Das Ritual:</b> Ändere die Namen deiner Worker in der Konfiguration. Hieß einer <code>worker1</code>, nenne ihn <code>lucky_strike</code> oder <code>block_finder</code>.</li>
+ <li><b>Der Identitätswechsel:</b> Ändere vorübergehend die CSS-/Theme-Farbe oder das Logo des Pools. Mach dem Universum weis, dies sei ein brandneuer, glücklicher Pool, der einen Bonus für „Anfängerglück“ verdient.</li></ul>
+<h3 id="lk-19" data-src="1aa9913190ac">5. Der „komplette Power-Cycle“ (der harte Reset)</h3>
+<p id="lk-20" data-src="8e8509d1bd35">Nicht nur ein Neustart – ein spiritueller Reset.</p>
+<ul id="lk-21" data-src="01cdfec2f396"><li><b>Das Ritual:</b> Fahre die Pool-Software und den Server herunter. Zieh den Netzstecker aus der Steckdose. Warte 5 Minuten.</li>
+ <li><b>Das Ziel:</b> Lass alle Kondensatoren sich entladen. Lass die „schlechten Elektronen“ entweichen. Wenn du wieder hochfährst, beginnt eine frische Zeitlinie.</li></ul>
+<h3 id="lk-22" data-src="ff03e6db287e">6. Die „umgekehrte Psychologie“</h3>
+<ul id="lk-23" data-src="d1230d6fbff5"><li><b>Das Ritual:</b> Verkünde laut in deinem Zimmer (oder auf Discord), dass du „darüber nachdenkst, den Pool abzuschalten“ oder „auf einen anderen Coin umzusteigen“.</li>
+ <li><b>Der Glaube:</b> Hardware hat ein Bewusstsein und fürchtet sich davor, abgeschaltet zu werden. Sie wird plötzlich einen Block finden, um ihren Wert zu beweisen und ihr eigenes Leben zu retten.</li></ul>
+<h3 id="lk-24" data-src="7d84eb53c66c">7. Das Mond-Retarget <span class="label">(neu in dieser Ausgabe)</span></h3>
+<ul id="lk-25" data-src="9c4a75b7207a"><li><b>Das Ritual:</b> Gleiche die Zeitstempel deiner Blöcke mit den Mondphasen ab. Bei Vollmond gefundene Blöcke sind „Werwolf-Blöcke“ und tragen zusätzliche Hashpower in die nächste Epoche.</li>
+ <li><b>Der Glaube:</b> Die Schwierigkeit wird alle 2016 Blöcke neu berechnet; der Mond alle 29,5 Tage; offensichtlich hängt das zusammen, und offensichtlich hat niemand bewiesen, dass es nicht so ist.</li></ul>
+<h3 id="lk-26" data-src="5ee84e97f632">8. Die Kaffeesteuer <span class="label">(neu in dieser Ausgabe)</span></h3>
+<ul id="lk-27" data-src="cd8741f4cee3"><li><b>Das Ritual:</b> Schenk dir den ersten Kaffee des Morgens ein, <i>bevor</i> du den Pool prüfst, und lass einen Schluck in der Tasse neben dem Rig. Die Maschine arbeitet für Trinkgeld.</li>
+ <li><b>Der Glaube:</b> Ein Rig, das Kaffee riecht, glaubt, sein Betreiber sei wach und wachsam, und verzichtet aus professioneller Höflichkeit darauf, deine Shares verwaisen zu lassen.</li></ul>
+<h2 id="lk-28" data-src="8e76a94ac832">Zusammenfassung</h2>
+<p id="lk-29" data-src="2ade43dd70cf">Letztlich ist Varianz eine grausame Bestie. Du kannst in einer Woche 300&nbsp;% Glück haben und in der nächsten 10&nbsp;%. Aber wenn du deine Logs geprüft, deine Verbindung verifiziert und für niedrige Latenz gesorgt hast, bleibt manchmal nur noch, die Staubfilter zu reinigen, dir etwas zu trinken zu holen und aufzuhören, auf die Hashrate zu starren.</p>
+<h2 id="lk-dash-h" data-src="ee2d44cc9421">Wie das c2pool-Dashboard das Glück misst</h2>
+<p id="lk-dash-01" data-src="17232cdc5c9b">Folklore beiseite: Das Dashboard jedes c2pool-Knotens ab v0.2.12.9 berechnet das Glück so, wie es die p2pool.info-Seiten von 2012 taten. Ein Pool, der mit der Rate <i>H</i> gegen die Netzwerk-Schwierigkeit <i>D</i> hasht, findet Blöcke als Poisson-Prozess. Der <b>Aufwand (Effort)</b> einer Runde ist die Zahl der Blöcke, die der Pool über diese Runde zu finden erwartete: das Integral von <code>H(t) / (D(t) &times; 2<sup>32</sup>)</code> vom vorigen Block bis zu diesem. Einfach gesagt: Der Aufwand ist die benötigte Zeit geteilt durch die erwartete Zeit.</p>
+<ul id="lk-dash-02" data-src="47bdee18814b">
+ <li>Bei einem fairen Pool folgt der Aufwand einer Exponentialverteilung mit Mittelwert 1 und Median 0,69. Die Hälfte aller Runden ist schneller als 69&nbsp;% der erwarteten Zeit, und keine Runde erinnert sich an die vorherige.</li>
+ <li><b>Glück eines Blocks</b> ist 100&nbsp;/&nbsp;Aufwand. Es wird pro Block angezeigt und nie gemittelt: Der Mittelwert von 1/Aufwand ist unendlich, daher liegt ein Durchschnitt der Glückswerte einzelner Blöcke bei einem vollkommen fairen Pool weit über 100&nbsp;% (etwa 450&nbsp;% bei 30 Blöcken).</li>
+ <li><b>Glück über einen Zeitraum</b> ist gefundene Blöcke &divide; erwartete Blöcke, also <code>k / &Sigma; effort</code>, mit einem exakten Poisson-Intervall zu 95&nbsp;%. Ein einzelner Block sagt fast nichts; Dutzende Blöcke beginnen, etwas zu sagen.</li>
+ <li>Die Rate <i>H</i> ist die Brutto-Rate des Pools: die Schätzung aus der Share-Chain geteilt durch (1&nbsp;&minus;&nbsp;Anteil veralteter (stale) Shares). Der Knoten erfasst sie einmal pro Minute. Wo seine Historie nur einen Teil einer Runde abdeckt, zeigt die Zeile die beste Schätzung für diese Runde, und der Wert für den Zeitraum zählt nur die Zeit, in der der Knoten beobachtet hat.</li>
+ <li>Eine Runde läuft ab dem vorigen Block derselben Chain auf deren Hauptkette. Ein verwaister Block beendet nie eine Runde.</li>
+ <li>Die Markierungen in der Blockliste: &#9889; für eine Runde unter 1/3 der erwarteten Zeit (&#9889;&#9889; unter 0,1), &#128034; für eine über 2&times; (&#128034;&#128034; über 3&times;).</li>
+</ul>
+<p id="lk-dash-03" data-src="289e3872772e">Dies ist nur ein Anzeigewert. Nichts davon fließt in ein Share-Target, eine Auszahlung oder einen Block ein.</p>
+<div id="lk-30" class="v37" data-src="8a2cbeb62b0b"><span class="tag">V37</span><b>Die echte Bestie (sie hat eine Wahrscheinlichkeitsverteilung, aber keinen Mittelwert).</b>
+ <p>Die grausame Bestie ist kein Aberglaube – sie ist ein <i>Potenzgesetz</i>. Der Faktor, um den ein gewinnender Hash sein Target übertrifft (Überschuss), <code>R = target / hash</code>, gehorcht <code>Pr[R &ge; r] = 1/r</code> – einem Pareto-Tail, dessen Erwartungswert nicht konvergiert. Einfach gesagt: Die Hälfte aller Blöcke übertrifft ihr Target um weniger als das 2-Fache, aber hin und wieder übertrifft ein einzelner Hash es um ein <b>Vieltausendfaches</b>, und ein Pool, der nach Überschuss bezahlte, könnte diesem einen Glückstreffer so viel zusprechen, wie ein ganzer Monat ehrlicher Arbeit einbringt. Dieser Ausschlag <i>ist</i> das Varianz-Monster, und du kannst <a href="/de/real-difficulty/">ihn anhand echter Bitcoin-Blöcke im Diagramm sehen</a> – der einsame Turm bei Block 1.430 mit R&nbsp;&asymp;&nbsp;7.000 ist der Glücksvorrat eines ganzen Monats eines Miners, komprimiert in einen einzigen Hash.</p>
+ <p>Es gibt genau ein Ritual, das die Bestie wirklich zähmt, und es ist nicht der Kaffee: <b>Lass dich für die Arbeit bezahlen, die du wirklich geleistet hast, nicht für das Glück, das du zufällig hattest.</b> Genau darum geht es beim Pooling – und bei der glücksneutralen Abrechnung von V37 mit abklingenden Gewichten, die deine <i>Target</i>-Arbeit gutschreibt und nie den glücklichen Hash. Die Bestie brüllt weiter; sie frisst nur nicht mehr deinen Lohn. Siehe das <a href="/de/purple-paper/">Purple Paper</a>, &sect;5 (Proof of Work als Messung).</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Ursprünglich von Technocore One in „P2Pool scientific basics“ veröffentlicht, im November 2026 aktualisiert. © 2026 technocore.one.</p>
+<p>Angaben zu c2pool geprüft gegen Release v0.2.12.16 am 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

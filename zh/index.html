@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>P2Pool 科学基础</title>
+<meta name="description" content="关于去中心化挖矿、P2Pool 与 c2pool 的笔记：难度、运气、coinbase 设计以及 c2pool 的现状。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/" aria-current="page">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="首页" data-desc="关于去中心化挖矿、P2Pool 与 c2pool 的笔记：难度、运气、coinbase 设计以及 c2pool 的现状。">
+<h1 id="hm-01" data-src="be8d09249bb9">P2Pool 科学基础</h1>
+<p id="hm-02" class="sub" data-src="9a5688e2bebb">关于去中心化挖矿、P2Pool 与 c2pool 的笔记</p>
+<p id="hm-03" data-src="a0b68b31d780">这些页面最初是 Technocore One 发布的 Google 网站“P2Pool scientific basics”（P2Pool 科学基础）：一份关于弱区块、联合挖矿和矿池的阅读清单，以及一组关于难度、运气和 coinbase（coinbase 交易）设计的文章。它们现已迁移到这里，对照当今的 c2pool 做了核对，并提供五种语言版本。</p>
+<ul id="hm-04" class="cards" data-src="b5dd5c7d5746">
+ <li><a href="/zh/c2pool-today/">c2pool 现状</a><p>c2pool 在版本 v0.2.12.16 中运行的内容：支持的链、无需守护进程的节点、公共节点。</p></li>
+ <li><a href="/zh/making-of-c2pool/">用 C++ 重新实现 p2pool 的笔记</a><p>用 C++ 重新实现 p2pool 的笔记，写于 2026 年 6 月，附更新说明。</p></li>
+ <li><a href="/zh/luck/">运气——残酷的野兽</a><p>挖矿圈的民间说法、其背后的幂律，以及仪表板如何衡量运气。</p></li>
+ <li><a href="/zh/real-difficulty/">真实难度</a><p>目标值、难度、实际达到的难度，以及一个哈希的超出倍数。</p></li>
+ <li><a href="/zh/difficulty-adjustment/">难度调整</a><p>比特币、莱特币、狗狗币，以及份额链自身的难度。</p></li>
+ <li><a href="/zh/taproot-coinbase/">Taproot coinbase</a><p>coinbase 中的 Taproot 输出，以及它们无法为矿池解决的问题。</p></li>
+ <li><a href="/zh/weighted-multisig/">在 PoW 区块链上用加权多重签名钱包提升安全性</a><p>对一笔支出进行加权批准，附一段可用的脚本。</p></li>
+ <li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a><p>从磁盘读取 Bitcoin Core 的区块索引和链状态（chainstate）。</p></li>
+ <li><a href="/zh/purple-paper/">Purple Paper：Work Receipts（工作收据）</a><p>Work Receipts 论文及其勘误的摘要。</p></li>
+ <li><a href="/zh/monero-ccs/">Monero CCS 提案：时间线</a><p>2026 年门罗币资助提案的带日期时间线。</p></li>
+ <li><a href="/zh/references/">参考资料</a><p>原始阅读清单，已检查链接。</p></li>
+</ul>
+<p id="hm-05" data-src="49d394d1cc60">同一作者的另一部作品（英文）：<a href="https://frstrtr.github.io/c2pool/ego-and-self-reliance.html">Ego and Self-Reliance. A Plain-Language Handbook</a>（MIT 许可证；与挖矿无关）。</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>最初由 Technocore One 发布于 Google 网站“P2Pool scientific basics”。© 2026 technocore.one。</p>
+<p>有关 c2pool 的事实已于 2026-11-27 按版本 v0.2.12.16 核对。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

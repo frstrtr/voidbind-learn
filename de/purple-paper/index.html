@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="de">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Purple Paper: Work Receipts — Wissenschaftliche Grundlagen von P2Pool</title>
+<meta name="description" content="Eine Zusammenfassung des Papers zu Work Receipts, mit seinen Errata vom 4. Oktober 2026 und einem Link zur maßgeblichen Fassung.">
+<link rel="canonical" href="https://learn.voidbind.com/de/purple-paper/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/purple-paper/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/purple-paper/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/purple-paper/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/purple-paper/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/purple-paper/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/purple-paper/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Zum Inhalt springen</a>
+<header class="top">
+<a class="brand" href="/de/">Wissenschaftliche Grundlagen von P2Pool</a>
+<nav class="langs" aria-label="Sprache"><a class="lang" href="/en/purple-paper/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/purple-paper/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/purple-paper/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/purple-paper/" hreflang="de" lang="de" data-lang="de" aria-current="true">Deutsch</a> · <a class="lang" href="/zh/purple-paper/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Inhalt"><ul>
+<li><a href="/de/">Startseite</a></li>
+<li><a href="/de/c2pool-today/">c2pool heute</a></li>
+<li><a href="/de/references/">Quellen</a></li>
+<li><a href="/de/making-of-c2pool/">Making-of c2pool</a></li>
+<li><a href="/de/luck/">Glück</a></li>
+<li><a href="/de/real-difficulty/">Echte Schwierigkeit</a></li>
+<li><a href="/de/difficulty-adjustment/">Schwierigkeitsanpassung</a></li>
+<li><a href="/de/taproot-coinbase/">Taproot-Coinbase</a></li>
+<li><a href="/de/weighted-multisig/">Gewichtetes Multisig</a></li>
+<li><a href="/de/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/de/purple-paper/" aria-current="page">Purple Paper</a></li>
+<li><a href="/de/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Maschinengestützte Übersetzung, noch nicht von Muttersprachlern geprüft. <a href="/en/purple-paper/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Purple Paper" data-desc="Eine Zusammenfassung des Papers zu Work Receipts, mit seinen Errata vom 4. Oktober 2026 und einem Link zur maßgeblichen Fassung.">
+<h1 id="pp-01" data-src="163732f69eb0">Purple Paper: Work Receipts</h1>
+<p id="pp-02" class="sub" data-src="779b5b072f54">Eine Zusammenfassung von „Work Receipts: A Peer-to-Peer Mining-Reward Accounting System“ (Übersetzung: „Work Receipts (Arbeitsquittungen): Ein Peer-to-Peer-System zur Abrechnung von Mining-Belohnungen“) (frstrtr, 2026)</p>
+<p id="pp-03" data-src="78c4302fc405">Das Paper ist unter <a href="https://frstrtr.github.io/c2pool/">frstrtr.github.io/c2pool</a> unter der MIT-Lizenz veröffentlicht. Diese Fassung ist die Referenz, samt ihren Errata. Diese Seite fasst es nur zusammen, Abschnitt für Abschnitt, damit die Artikel auf dieser Website darauf verweisen können. Wo diese Zusammenfassung und das Paper voneinander abweichen, hat das Paper recht.</p>
+<div id="pp-04" class="update" data-src="e07dd9906482"><p><b>Errata vom 4. Oktober 2026 (aus dem Paper).</b> Abschnitt 9 sowie die Teile des Abstracts und der Abschnitte 10 und 14, die auf einem geschuldeten Saldo beruhen, sind zurückgezogen. Eine unabhängige Prüfung hat gezeigt, dass ein Pool ohne Verwahrer nicht einigen Minern etwas schulden kann, ohne anderen zu viel auszuzahlen, und die Überzahlung wird nie zurückgeholt. Laut Paper wird ein überarbeiteter Abschnitt 9 beschreiben, wie das Fenster jedes Blocks vollständig in diesem Block ausgezahlt wird; diese Überarbeitung ist nicht veröffentlicht. Abschnitt 3 ist eingeschränkt: Arbeit auf einer Spitze der zugrunde liegenden Chain, die bereits überholt war, bringt nichts ein.</p></div>
+<p id="pp-05" data-src="36765c1be46a"><b>Status.</b> Das Paper beschreibt ein Design. Es ist keine Beschreibung eines laufenden Netzwerks: V37, die Designlinie in c2pool, die auf diesem Paper aufbaut, befindet sich in der Design- und Prototypphase und läuft nicht produktiv. Insbesondere ist das in Zeit-Bins eingeteilte Fenster der Abschnitte 4 und 6 nicht das, was die experimentelle Monero-Lane heute betreibt.</p>
+<h2 id="pp-10" data-src="2599e87b4740">Die Idee</h2>
+<p id="pp-11" data-src="ab27eead5226">Ein P2Pool-Share erfüllt zwei Aufgaben: Er beweist Arbeit, und er nimmt einen Platz in einer Reihenfolge ein. Ein Share, der das Rennen um seinen Platz verliert, wird samt seinem Beweis verworfen, und Arbeit unterhalb der Share-Schwierigkeit wird gar nicht gezählt. Das Paper trennt die beiden Aufgaben. Die Share-Chain ordnet nur <i>Träger</i> (gewöhnliche Shares). Arbeit wird anhand von <i>Quittungen</i> gezählt, die die Träger einbetten: Proofs of Work, die an den Pool, an den auszuzahlenden Worker und an einen endgültigen (settled) Block der zugrunde liegenden Chain gebunden sind.</p>
+<h2 id="pp-20" data-src="9bae918add9a">Abschnitte</h2>
+<ul id="pp-21" data-src="78611d2d8430">
+ <li id="pp-s2"><b>&sect;2 Quittungen.</b> Eine Quittung lässt sich nicht fälschen, übertragen, erneut einreichen (Replay) oder rückdatieren, und sie hängt von keinem Vorgänger ab. Ein Share, der veraltet (stale) ist, ist eine Quittung, deren Arbeit das Share-Target erfüllt hat; er wird im nächsten Share des Workers mitgeführt und voll gezählt (vorbehaltlich des in den Errata eingeschränkten Abschnitts 3).</li>
+ <li><b>&sect;3 Zeit.</b> Jede Quittung legt sich auf einen Block der zugrunde liegenden Chain fest, der als Uhr dient, die niemand kontrolliert. Arbeit wird danach zeitlich eingeordnet, wann sie geleistet wurde, sobald dieser Block so tief liegt, dass keine Reorganisation ihn mehr erreicht.</li>
+ <li><b>&sect;4 Die hybride Bewertung der Zeit.</b> Die Zeit ist in Bins eingeteilt: eine offene Gegenwart, eine abgeschlossene Vergangenheit, die mit zunehmendem Alter gröber gehalten wird, und eine reservierte Zukunft. Das Paper merkt an, dass die Monero-Lane in ihrer ersten veröffentlichten Form eine Ausnahme von den Abschnitten 3 und 4 ist.</li>
+ <li id="pp-s5"><b>&sect;5 Proof of Work als Messung.</b> Eine Arbeitseinheit wird nach dem Target gutgeschrieben, das sie erfüllen musste, nie danach, wie weit ihr Hash unter dem Target lag. Mit dem Überschuss könnte ein einziger glücklicher Hash eine ganze Belohnung an sich ziehen. Siehe <a href="/de/real-difficulty/">Echte Schwierigkeit</a> und <a href="/de/luck/">Glück</a>.</li>
+ <li><b>&sect;6 Abrechnung.</b> Arbeit zählt in einem Fenster jüngster Einheiten mit altersabhängigem Abklingen, in ganzzahliger Festkomma-Arithmetik, sodass jeder Knoten dasselbe Ergebnis erhält. Das Fenster ist eine feste Anzahl von Einheiten bei einem Target, und das Paper argumentiert, dass Pulsing, Hopping und Withholding im Erwartungswert nichts bringen. Ein in Zeit gemessenes Fenster wird nur zusammen mit einer Regel übernommen, die einen im Paper beschriebenen Bias beseitigt.</li>
+ <li><b>&sect;7 Mehrere Chains.</b> Eine einzige Abrechnung bedient mehrere zugrunde liegende Chains als Lanes, die sich eine Menge von Workern teilen.</li>
+ <li id="pp-s8"><b>&sect;8 Arbeit unterhalb der Reihenfolge zurückgewinnen.</b> Hashes, die ein leichteres (numerisch größeres) Target erfüllen, werden als Quittungen mitgeführt und mit der Arbeit dieses leichteren Targets gutgeschrieben, exakt im Erwartungswert und gleich, ob unter einer Identität oder unter vielen.</li>
+ <li><b>&sect;9 Viele aus einer kleinen Coinbase bezahlen.</b> <i>Zurückgezogen am 4. Oktober 2026</i> (siehe die Errata oben).</li>
+ <li><b>&sect;10 Settlement über die Coinbase hinaus</b> und <b>&sect;11 Weitere Anwendungen.</b> Gelieferte Arbeit als eine Größe, die jeder überprüfen kann; die Teile, die auf einem geschuldeten Saldo beruhen, sind zurückgezogen.</li>
+ <li><b>&sect;12 Platz zurückgewinnen.</b> Alte Arbeit wird in Stufen zusammengefasst, sodass die gesamte Historie in wenige Megabyte passt, während die exakte Belohnung jedes vergangenen Zeitabschnitts rekonstruierbar bleibt.</li>
+ <li id="pp-s13"><b>&sect;13 Zahlungen überprüfen.</b> Der festgeschriebene Zustand ist eine Merkle-Root in der Coinbase. Ein Gerät, das nur Header hält, kann ihn mit einem Proof logarithmischer Größe prüfen, und jeder Knoten berechnet die Coinbase neu, die ein Block tragen muss.</li>
+ <li><b>&sect;14 Netzwerk</b> und <b>&sect;16 Fazit.</b> Knoten und Worker kommen und gehen ohne Erlaubnis; die Teile, die auf einem geschuldeten Saldo beruhen, sind zurückgezogen.</li>
+ <li id="pp-s15"><b>&sect;15 Anreiz.</b> Die ehrliche Strategie, kontinuierlich zu arbeiten und die eigenen Quittungen einzusenden, ist diejenige, die am meisten einbringt.</li>
+</ul>
+<p id="pp-30" data-src="5a2abe3d117e">Zum Paper: <a href="https://frstrtr.github.io/c2pool/">Work Receipts: A Peer-to-Peer Mining-Reward Accounting System</a> (Englisch).</p>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Zusammenfassung © 2026 technocore.one. Das Paper selbst ist © 2026 frstrtr, veröffentlicht unter der MIT-Lizenz.</p>
+<p>Angaben zu c2pool geprüft gegen Release v0.2.12.16 am 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

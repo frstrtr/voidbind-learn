@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Корректировка сложности — Научные основы P2Pool</title>
+<meta name="description" content="Как Bitcoin, Litecoin, Dogecoin и цепочка шар c2pool корректируют сложность.">
+<link rel="canonical" href="https://learn.voidbind.com/ru/difficulty-adjustment/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/difficulty-adjustment/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/difficulty-adjustment/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/difficulty-adjustment/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/difficulty-adjustment/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/difficulty-adjustment/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/difficulty-adjustment/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">Перейти к содержанию</a>
+<header class="top">
+<a class="brand" href="/ru/">Научные основы P2Pool</a>
+<nav class="langs" aria-label="Язык"><a class="lang" href="/en/difficulty-adjustment/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/difficulty-adjustment/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/difficulty-adjustment/" hreflang="ru" lang="ru" data-lang="ru" aria-current="true">Русский</a> · <a class="lang" href="/de/difficulty-adjustment/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/difficulty-adjustment/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">中文</a></nav>
+</header>
+<nav class="site" aria-label="Содержание"><ul>
+<li><a href="/ru/">Главная</a></li>
+<li><a href="/ru/c2pool-today/">c2pool сегодня</a></li>
+<li><a href="/ru/references/">Источники</a></li>
+<li><a href="/ru/making-of-c2pool/">Как создавался c2pool</a></li>
+<li><a href="/ru/luck/">Удача</a></li>
+<li><a href="/ru/real-difficulty/">Реальная сложность</a></li>
+<li><a href="/ru/difficulty-adjustment/" aria-current="page">Корректировка сложности</a></li>
+<li><a href="/ru/taproot-coinbase/">Taproot в coinbase</a></li>
+<li><a href="/ru/weighted-multisig/">Взвешенная мультиподпись</a></li>
+<li><a href="/ru/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/ru/purple-paper/">Purple Paper</a></li>
+<li><a href="/ru/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">Этот перевод ещё не проверен. <a href="/en/difficulty-adjustment/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="Корректировка сложности" data-desc="Как Bitcoin, Litecoin, Dogecoin и цепочка шар c2pool корректируют сложность.">
+<h1 id="da-02" data-src="f033a0116ab4">Корректировка сложности</h1>
+<p id="da-03" class="sub" data-src="10a466e95bc4">Как Bitcoin, Litecoin, Dogecoin и цепочка шар c2pool задают свою сложность</p>
+<div id="da-upd" class="update" data-src="dc42335420cc"><p><b>Обновлено в ноябре 2026 г.</b> В первой версии этой страницы говорилось, что перерасчёт сложности в Bitcoin использует «block mediantime» и умножает сложность на отношение временных интервалов. И то и другое неверно: перерасчёт использует метки времени блоков, и пропорционально этому отношению масштабируется именно <i>цель</i> (target), поэтому сложность движется в обратную сторону. Страница переписана по исходному коду Bitcoin Core, добавлены разделы о Litecoin, Dogecoin и цепочке шар c2pool.</p></div>
+<h2 id="da-10" data-src="4984920e9a8f">Перерасчёт сложности в Bitcoin</h2>
+<p id="da-11" data-src="83308a5883b4">Каждые 2016 блоков Bitcoin устанавливает новую цель, чтобы блоки по-прежнему появлялись примерно раз в 10 минут (2016 блоков за 14 дней — <i>целевой интервал</i>, target timespan, T&nbsp;=&nbsp;1&nbsp;209&nbsp;600&nbsp;с). Шаги — как в <code>src/pow.cpp</code> Bitcoin Core:</p>
+<ol id="da-12" data-src="1e1243c3990e">
+ <li><b>Измерение.</b> Фактический интервал — это метка времени (<code>nTime</code>) последнего блока периода минус метка времени первого блока периода, на 2015 блоков раньше. Это собственные метки времени из заголовков блоков, а не их медианное время (MTP).</li>
+ <li><b>Ограничение.</b> Фактический интервал ограничивается диапазоном [T/4, 4T], поэтому за один перерасчёт цель меняется не более чем в 4 раза в любую сторону.</li>
+ <li><b>Масштабирование цели.</b> новая цель = старая цель &times; фактический интервал / T. Если блоки шли слишком быстро, отношение меньше 1, цель становится меньше, а сложность — выше.</li>
+ <li><b>Верхний предел и кодирование.</b> Новая цель ограничивается сверху наибольшей допустимой для цепи целью (цель «сложности 1», то есть <i>наименьшая</i> сложность) и записывается в следующие заголовки в компактной форме <code>nBits</code>, которая её слегка округляет.</li>
+</ol>
+<p id="da-13" data-src="58b997439399">Сложность — это цель сложности 1, делённая на текущую цель, поэтому она меняется обратно пропорционально отношению интервалов.</p>
+<pre id="da-14" data-src="6bc5a93b55bf"><code>TARGET_TIMESPAN = 14 * 24 * 60 * 60      # 2016 blocks x 10 minutes
+POW_LIMIT = 0xffff &lt;&lt; 208                 # difficulty-1 target (nBits 0x1d00ffff)
+
+def bits_to_target(bits):
+    exponent, mantissa = bits &gt;&gt; 24, bits &amp; 0x007fffff
+    return mantissa &lt;&lt; (8 * (exponent - 3)) if exponent &gt;= 3 else mantissa &gt;&gt; (8 * (3 - exponent))
+
+def next_target(last_bits, last_time, first_time):
+    """last_time: nTime of the last block of the period.
+    first_time: nTime of the block 2015 blocks before it."""
+    actual = last_time - first_time
+    actual = max(TARGET_TIMESPAN // 4, min(actual, TARGET_TIMESPAN * 4))
+    new = bits_to_target(last_bits) * actual // TARGET_TIMESPAN
+    return min(new, POW_LIMIT)
+
+def difficulty(target):
+    return POW_LIMIT / target</code></pre>
+<p id="da-15" data-src="e9d630cc57a5">Затем Bitcoin Core кодирует результат обратно в <code>nBits</code> (<code>GetCompact</code>), сохраняя три байта мантиссы. Окно охватывает 2015 интервалов, а не 2016, — известная ошибка на единицу (off-by-one) ещё из первого выпуска, которая теперь стала частью консенсуса. Пример: по меткам времени блоков 30&nbsp;240 и 32&nbsp;255 функция даёт <code>nBits = 0x1d00d86a</code> для высоты 32&nbsp;256 — первое повышение сложности в Bitcoin (сложность около 1,18).</p>
+<h2 id="da-20" data-src="e5c11677a413">Медианное время (MTP)</h2>
+<p id="da-21" data-src="ef88c45da13e">Медианное время (MTP, median time past) блока — это медиана меток времени этого блока и десяти предыдущих. Его вычисляет каждый узел; это не поле заголовка. Оно устойчиво к одной неверной или подделанной метке времени, и Bitcoin использует его в двух правилах:</p>
+<ul id="da-22" data-src="f725e5d6edeb">
+ <li>метка времени нового блока должна быть позже MTP его родителя (иначе «time-too-old»);</li>
+ <li>блокировки по времени (time-based lock time) сравниваются с MTP, а не с собственной меткой времени блока (BIP 113).</li>
+</ul>
+<p id="da-22b" data-src="d3a4f0b25cf3">В перерасчёт сложности оно не входит. Вот пример с исходной страницы, который вычисляет MTP вершины цепи через RPC (<code>getblock</code> в Bitcoin Core также возвращает его напрямую как <code>mediantime</code>):</p>
+<pre id="da-23" data-src="eeafa1c83a84">import bitcoin.rpc
+def calculate_mediantime():
+    proxy = bitcoin.rpc.Proxy()  # Establish connection to Bitcoin Core client
+    block_count = proxy.getblockcount()
+    if block_count &gt;= 10:
+        timestamps = []
+        for height in range(block_count, block_count - 11, -1):
+            block_hash = proxy.getblockhash(height)
+            timestamp = proxy.getblockheader(block_hash).nTime
+            timestamps.append(timestamp)
+        sorted_timestamps = sorted(timestamps)
+        mediantime = sorted_timestamps[5]  # Take the middle timestamp
+        return mediantime
+    return None  # Return None if there are not enough blocks to calculate mediantime
+# Example usage
+mediantime = calculate_mediantime()
+print(mediantime)</pre>
+<p id="da-24" data-src="40d5a008e974">В приведённом фрагменте кода мы подключаемся к работающему клиенту Bitcoin Core через класс bitcoin.rpc.Proxy. Функция calculate_mediantime сначала получает текущее число блоков вызовом getblockcount. Если в блокчейне не меньше 11 блоков (высота вершины 10 или больше), она переходит к вычислению. Она перебирает 11 последних блоков, начиная с текущего, и читает метку времени каждого блока (nTime) из getblockheader. Метки времени сохраняются в списке timestamps. Затем список timestamps сортируется по возрастанию функцией sorted. Наконец, средняя метка времени отсортированного списка (с индексом 5) берётся как mediantime. Функция возвращает mediantime. Если блоков для вычисления mediantime недостаточно, возвращается None.</p>
+
+<h2 id="da-30" data-src="eaa4e0ba3c89">Litecoin</h2>
+<p id="da-31" data-src="b1681d53e458">Litecoin сохраняет правило Bitcoin при интервале между блоками 2,5 минуты: 2016 блоков за 3,5 дня. Одно отличие: после первого периода окно уходит назад на полные 2016 блоков, а не на 2015 (исправление против манипуляций сложностью, которое приписывают Art Forz). Встроенный узел Litecoin в c2pool сам вычисляет следующую цель по синхронизированным заголовкам, с тем же ограничением и по тем же меткам времени.</p>
+<h2 id="da-32" data-src="bbc8f6fd09a9">Dogecoin</h2>
+<p id="da-33" data-src="b52a959ce3f8">У Dogecoin, который c2pool майнит объединённо с Litecoin, до высоты 145&nbsp;000 окно перерасчёта составляло 4 часа (240 одноминутных блоков). С этой высоты он использует DigiShield, который пересчитывает сложность на каждом блоке. Объединённый майнинг (AuxPoW) начался с высоты 371&nbsp;337. Встроенный узел Dogecoin в c2pool следует обоим правилам.</p>
+<h2 id="da-40" data-src="2e3f15e1888d">Собственная сложность цепочки шар</h2>
+<p id="da-41" data-src="aa53fce15723">У цепочки шар P2Pool есть своя сложность, которая задаётся для каждой шары, а не для периода. В c2pool, как и в p2pool:</p>
+<ul id="da-42" data-src="1b24d2abac2a">
+ <li>узел оценивает хешрейт пула по недавним шарам и вычисляет цель, которая давала бы одну шару за <i>период шары</i>: 15 секунд в цепочке шар Litecoin, 30 секунд в Bitcoin;</li>
+ <li>результат ограничивается пределами &plusmn;10% от цели предыдущей шары, поэтому сложность шар меняется плавно;</li>
+ <li>если за 20 периодов шары (5 минут на Litecoin) не пришло ни одной шары, аварийное правило сложности (из p2pool V36; в исходном p2pool его нет) ослабляет опорную цель: она удваивается за каждые следующие 10 периодов шары, с линейной интерполяцией между ними, и только затем применяется ограничение &plusmn;10%. Это не даёт застрять пулу, который внезапно потерял большую часть хешрейта.</li>
+</ul>
+<div id="da-25" class="v37" data-src="0794c950e7a1"><span class="tag">V37</span><b>Цель и сложность; абсолютное расписание.</b>
+ <p>Сложность и цель обратны друг другу (difficulty = max_target / target), поэтому перерасчёт умножает цель на отношение интервалов, а сложность движется в обратную сторону: более быстрые блоки (меньшее отношение) повышают сложность.</p>
+ <p>Перерасчёт по окну зависит от меток времени на двух концах этого окна. Абсолютное расписание (в стиле ASERT) вычисляет цель напрямую по опорному блоку и последнему блоку за постоянное время. Оно не проходит по окну, поэтому метки времени внутри окна не могут заставить цель дрейфовать, хотя собственная метка времени последнего блока по-прежнему имеет значение. Bitcoin Cash использует такое расписание с ноября 2020 года. Это кандидат на роль механизма собственной сложности цепочки шар в проектной работе V37; цепочки шар c2pool сегодня используют описанное выше правило для каждой шары.</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>Впервые опубликовано Technocore One в «P2Pool scientific basics», обновлено в ноябре 2026 года. © 2026 technocore.one.</p>
+<p>Сведения о c2pool проверены по выпуску v0.2.12.16 2026-11-27.</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

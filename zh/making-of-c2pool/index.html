@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<!-- chrome:head -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>用 C++ 重新实现 p2pool 的笔记 — P2Pool 科学基础</title>
+<meta name="description" content="用 C++ 重新实现 p2pool 的笔记：无需守护进程的节点、V36 过渡以及七个共识问题。">
+<link rel="canonical" href="https://learn.voidbind.com/zh/making-of-c2pool/">
+<link rel="alternate" hreflang="en" href="https://learn.voidbind.com/en/making-of-c2pool/">
+<link rel="alternate" hreflang="fr" href="https://learn.voidbind.com/fr/making-of-c2pool/">
+<link rel="alternate" hreflang="ru" href="https://learn.voidbind.com/ru/making-of-c2pool/">
+<link rel="alternate" hreflang="de" href="https://learn.voidbind.com/de/making-of-c2pool/">
+<link rel="alternate" hreflang="zh-Hans" href="https://learn.voidbind.com/zh/making-of-c2pool/">
+<link rel="alternate" hreflang="x-default" href="https://learn.voidbind.com/en/making-of-c2pool/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/lang.js" defer></script>
+<!-- /chrome:head -->
+</head>
+<body>
+<!-- chrome:top -->
+<a class="skip" href="#main">跳到正文</a>
+<header class="top">
+<a class="brand" href="/zh/">P2Pool 科学基础</a>
+<nav class="langs" aria-label="语言"><a class="lang" href="/en/making-of-c2pool/" hreflang="en" lang="en" data-lang="en">English</a> · <a class="lang" href="/fr/making-of-c2pool/" hreflang="fr" lang="fr" data-lang="fr">Français</a> · <a class="lang" href="/ru/making-of-c2pool/" hreflang="ru" lang="ru" data-lang="ru">Русский</a> · <a class="lang" href="/de/making-of-c2pool/" hreflang="de" lang="de" data-lang="de">Deutsch</a> · <a class="lang" href="/zh/making-of-c2pool/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh" aria-current="true">中文</a></nav>
+</header>
+<nav class="site" aria-label="目录"><ul>
+<li><a href="/zh/">首页</a></li>
+<li><a href="/zh/c2pool-today/">c2pool 现状</a></li>
+<li><a href="/zh/references/">参考资料</a></li>
+<li><a href="/zh/making-of-c2pool/" aria-current="page">c2pool 开发纪实</a></li>
+<li><a href="/zh/luck/">运气</a></li>
+<li><a href="/zh/real-difficulty/">真实难度</a></li>
+<li><a href="/zh/difficulty-adjustment/">难度调整</a></li>
+<li><a href="/zh/taproot-coinbase/">Taproot coinbase</a></li>
+<li><a href="/zh/weighted-multisig/">加权多重签名</a></li>
+<li><a href="/zh/bitcoin-leveldb/">Bitcoin LevelDB</a></li>
+<li><a href="/zh/purple-paper/">Purple Paper</a></li>
+<li><a href="/zh/monero-ccs/">Monero CCS</a></li>
+</ul></nav>
+<p class="note review">机器辅助翻译，尚未经母语者审校。 <a href="/en/making-of-c2pool/" lang="en" hreflang="en">English</a></p>
+<!-- /chrome:top -->
+<main id="main">
+<article data-nav="c2pool 开发纪实" data-desc="用 C++ 重新实现 p2pool 的笔记：无需守护进程的节点、V36 过渡以及七个共识问题。">
+<h1 id="mk-02" data-src="b83a64496cba">用 C++ 重新实现 p2pool 的笔记</h1>
+<p id="mk-03" class="sub" data-src="2048c17ee578">c2pool 开发纪实</p>
+<div id="mk-u00" class="update" data-src="a2cb682fcb41"><p><b>2026 年 11 月更新。</b>这些笔记写于 2026 年 6 月，当时 c2pool 运行莱特币并联合挖矿狗狗币，与 Python 版 p2pool 并行。笔记保持原样，事实有变之处附有注明日期的说明。如今 c2pool 为每条父链构建一个二进制程序：莱特币（联合挖矿狗狗币）以及 Dash 已投入生产；比特币、DigiByte 和比特币现金节点已在线运行，无需币种守护进程；BIP-110 和门罗币处于实验阶段。参见<a href="/zh/c2pool-today/">c2pool 现状</a>。</p></div>
+<p id="mk-04" data-src="eddaa14a0c8e">p2pool 是一种去中心化挖矿协议。它没有矿池运营者。矿工组成点对点网络，就一条共享的“份额”（低难度区块）链达成一致；当找到真正的区块时，coinbase（coinbase 交易）奖励会在所有贡献了工作的人之间分配。它最初为比特币编写，后来被分叉用于莱特币、狗狗币、Vertcoin 以及几乎所有其他 PoW 币种。它自 2011 年起一直在运行。</p>
+<p id="mk-05" data-src="05009fd177c1">我们用 C++ 从零重新实现了它的莱特币分叉——这是一个净室（clean-room）实现，从 V35 开始加入现有的份额链，然后跟随网络完成 V36 过渡。我们称之为 c2pool。</p>
+<p id="mk-06" data-src="8a2f5ef910f1">有人说过，第二个兼容实现会是 &ldquo;a menace to the network&rdquo;（译文：“对网络的威胁”），因为太多东西依赖于所有节点步调一致地得出完全相同的结果。其中说它困难的那部分后来证明是对的（尽管我们认为结论是错的——第二个实现能发现单一代码库永远发现不了的共识漏洞）。这个项目花费的时间远超预期，原因不在于 C++ 移植本身，而在于 p2pool 的共识规则远比代码所显示的微妙得多。以下是我们的发现。</p>
+<h2 id="mk-07" data-src="14fcf5bb2084">站在现有代码之上</h2>
+<p id="mk-08" data-src="7e7c6d1a5bf6">净室实现并不意味着一切都从头写。Bitcoin Core 的代码库提供了经过充分测试的密码学原语（带硬件加速的 SHA-256、RIPEMD-160、用于致密区块的 SipHash）、uint256 类型、二进制序列化框架、base58 和 bech32 编码以及脚本类型。我们把这些纳入一个静态库并直接使用。仅序列化层就有 37&nbsp;KB 久经考验的代码，处理了比特币网络传输格式中的每一种边界情况。</p>
+<p id="mk-09" data-src="7d6658aafdaf">我们从 Litecoin Core 中采用了 scrypt 工作量证明实现（Colin Percival 的原始版本，由 pooler 改编）以及 MWEB 结构。从 Dogecoin Core 中采用了 AuxPoW 区块头格式和 DigiShield v3 难度重定逻辑。在每种情况下，参考守护进程的源代码都是权威——不是文档，不是规范，而是网络实际运行的代码。</p>
+<p id="mk-10" data-src="1cdf2c1859ff">p2pool 把份额链和状态存储在平面文件中。我们的所有数据都使用 LevelDB：份额链、UTXO 集、内存池索引、内置节点所用的两条链的区块头、已找到区块的记录、联合挖矿区块的记录。所有持久状态都在同一个存储层中，意味着各组件之间可以原子访问——一次份额验证可以在同一个事务中查询 UTXO 币、区块头难度和 PPLNS（按最近 N 份额支付）权重。崩溃恢复很简单，因为 WriteBatch 要么完全提交，要么完全不提交。布隆过滤器提供快速的否定查询，Snappy 压缩使占用空间保持较小。而且键值结构意味着未来的组件——时间层累加器、自适应窗口状态、跨链结算记录——可以作为新的键前缀加入，无需重组任何结构。</p>
+<h2 id="mk-11" data-src="15287929822b">无需守护进程的挖矿</h2>
+<p id="mk-12" data-src="3bec4af76158">每个矿池——无论中心化还是去中心化——都假定可以在本地币种守护进程上调用 getblocktemplate。这个 RPC 调用返回一个区块模板：当前的难度目标值、一组来自内存池的交易，以及 coinbase 金额（区块奖励加交易手续费）。矿池根据该模板组装候选区块并分发给矿工。</p>
+<p id="mk-13" data-src="547a8a59ba8a">p2pool 也不例外。它需要一个完全同步的 litecoind（50 GB 以上），如果联合挖矿，还需要一个完全同步的 dogecoind（80 GB 以上）。它用 Python 2 编写，而现代系统已不再自带 Python 2——在当前操作系统上运行它意味着要手动安装一个已弃用的运行时。Windows 支持多年前就已失效。macOS 需要各种变通办法。实际上，你需要一台 Linux 机器、管理员技能、处理依赖问题的耐心，以及维护两个完整币种守护进程的意愿。大多数矿工看到这些，就转而使用中心化矿池。</p>
+<p id="mk-14" data-src="991f9a701be5">挖矿应该可以不需要这些。c2pool 是一个编译好的二进制程序——支持 Linux、Windows（安装版和便携版）、macOS（Intel 和 Apple Silicon）。它内置了莱特币和狗狗币的轻量级 SPV 节点，通过 P2P 从 DNS 种子节点同步区块头，跟踪 UTXO 集以计算手续费，维护内存池，并在内部构建区块模板。</p>
+<p id="mk-15" data-src="18fca7d29cba">事实证明，这比 C++ 移植更难。</p>
+<h2 id="mk-16" data-src="54f4955e34b6">补贴不匹配</h2>
+<p id="mk-17" data-src="b7fd800721b8">我们发现的第一件事是，getblocktemplate 不只是返回一个区块模板。它还返回一个 coinbasevalue 字段：coinbase 交易可以领取的最大聪数。这个值等于 block_reward + total_mempool_fees。p2pool 网络上的每个份额都承诺这个数值。其他每个节点都会重建 coinbase 来验证它。如果数值不匹配，份额就会被拒绝。</p>
+<p id="mk-18" data-src="4090e22c40c9">我们的内置 SPV 节点没有 UTXO 集，这意味着无法计算交易手续费（fee = sum(inputs) &minus; sum(outputs)，而查询输入金额需要 UTXO 集）。我们的 coinbasevalue 只是区块奖励，不含手续费。</p>
+<p id="mk-19" data-src="2e7b384e7a93">109 个测试份额中有 81 个因 GENTX-MISMATCH 失败。补贴差了几千聪——正是我们无法计算的内存池手续费总和。</p>
+<p id="mk-20" data-src="60fc74359b0d">修复需要构建一整套 UTXO 跟踪系统：基于 LevelDB 的 UTXO 存储、内存中的回写缓存、用于重组的 connect_block 和 disconnect_from_undo、coinbase 成熟度规则（LTC 为 100 个区块，DOGE 为 240 个），以及按费率排序、用于最优区块构建的内存池索引。我们还启用了 BIP&nbsp;35 内存池同步，以便在连接后立即从对等节点填充内存池。</p>
+<p id="mk-21" data-src="a5d89565c0a7">由此生成的区块模板与 litecoind 的 getblocktemplate 输出相差不超过几聪（不同节点的内存池构成可能略有不同，这在预期之内）。</p>
+<h2 id="mk-22" data-src="1630b4cd9a75">看不见的同步关卡</h2>
+<p id="mk-23" data-src="ea65a203bf4b">p2pool 在启动时没有显式的“等待同步”检查。它不需要。它的启动流程调用 getblocktemplate，并一直阻塞到守护进程响应。如果守护进程仍在同步，RPC 调用会失败，重试循环不断空转，stratum 服务器永远不会开启。同步是隐式的。</p>
+<p id="mk-24" data-src="1ffdb019744c">没有守护进程，就没有阻塞的 RPC 调用。我们第一次测试内置节点时，它在区块头链完成同步之前就产生了份额。难度位是错的。每个份额的难度都接近于零。p2pool 对等节点收到大量无效份额，于是断开了连接。</p>
+<p id="mk-25" data-src="dbc8fa34aff0">我们必须发现这个看不见的关卡，并显式地重建它：stratum 服务器保持关闭，直到区块头链的链尖与实际时钟时间相差不到两小时，并且第一个区块模板成功构建。对于狗狗币这样的联合挖矿链，我们不阻塞启动——挖矿先只用莱特币的工作开始，等狗狗币的区块头链追上后再加入狗狗币的工作。这与 p2pool 的行为一致：联合挖矿链会平稳降级。</p>
+<h2 id="mk-26" data-src="8189a7fb906c">自我验证悖论</h2>
+<p id="mk-27" data-src="a1c60c9d603d">这个问题我们花了一段时间才弄明白。c2pool 无法验证它自己的份额。</p>
+<p id="mk-28" data-src="e37781aa45b7">在内置 UTXO 集和内存池之后，我们的份额补贴正确了，p2pool 也接受了它们。p2pool 一侧零 GENTX 失败。但 c2pool 自身的验证对它片刻之前刚创建的份额产生了 683 次 GENTX-MISMATCH 重试。</p>
+<p id="mk-29" data-src="a9ff4d325612">根本原因在于误解了份额验证究竟是什么。它不是重建——而是重放。c2pool 创建份额时，存储了 subsidy = 156251106（创建时的区块奖励 + 手续费）。之后，当验证引擎检查该份额时，它用当前的内存池手续费重建 coinbase，而手续费已经变了。补贴不同，coinbase 交易不同，哈希也不同。验证失败。</p>
+<p id="mk-30" data-src="4e6468d58ac7">p2pool 的 check() 方法使用 self.share_data['subsidy']——即份额自身存储的、在创建时就固定下来的值。验证是重放份额的参数，而不是根据当前状态重新计算。一旦理解了这个区别，修复只需一行：使用 share.m_subsidy，而不是实时模板的 coinbasevalue。我认为正是这类事情让第二个实现变得危险——原始代码让它显而易见，但抽象层却没有。</p>
+<h2 id="mk-31" data-src="a9218fbb89d5">设计升级</h2>
+<p id="mk-32" data-src="62a8164fcf95">在用 C++ 重新实现 p2pool 之前，我们必须先设计要重新实现的东西。现有的莱特币 p2pool（V35）没有联合挖矿——矿工可以挖 LTC，但不能同时挖 DOGE。它使用平坦的 PPLNS 加权，份额按难度加权但不按时间加权，这容易受到跳池的影响。捐赠脚本使用未压缩的 P2PK 输出（67 字节），浪费 coinbase 空间。</p>
+<p id="mk-33" data-src="253bad4d3fd4">我们先用 Python 编写了 V36，作为 p2pool 本身的一个分叉。它加入了带有每份额地址承诺的联合挖矿、指数衰减 PPLNS、紧凑的 P2SH 捐赠脚本（23 字节），以及在 coinbase 中对 bech32/P2SH 地址类型的原生支持。这些都是共识变更——份额链上的每个节点都必须认同新规则，否则网络就会分裂。</p>
+<p id="mk-34" data-src="e9e653a740aa">问题在于你不能直接切换。份额链在运行，矿工在挖矿，硬切换会把网络分割成理解 V36 的节点和不理解 V36 的节点。原版 p2pool 已经为早先的过渡设计了版本投票机制（desired_version 字段和份额版本信号是 forrestv 的设计）。我们把它扩展成了一个用于 V36 的完整状态机。</p>
+<h2 id="mk-35" data-src="8df683821b6b">按算力加权的投票</h2>
+<p id="mk-36" data-src="94935f1d22c6">每个份额携带两个版本字段：份额格式版本（35 或 36，决定其结构）和 desired_version 字段（矿工希望网络升级到的版本）。处于投票模式的节点产生 V35 格式的份额，但在每个份额上都设置 desired_version = 36。投票按难度加权——难度为 64 的份额获得的投票权重是难度为 16 的份额的四倍。这可以防止有人用低难度投票淹没网络。</p>
+<p id="mk-37" data-src="64ed9f4c0d93">激活逻辑是一个三状态的状态机，我们称之为 AutoRatchet：</p>
+<ul id="mk-38" data-src="c3f132b68577">
+ <li><b>VOTING：</b>节点产生 V35 份额，投票支持 V36。当采样窗口中 95% 的难度加权投票支持 V36 时（另有尾部保护，要求窗口最旧部分达到 60%），棘轮前进一级。</li>
+ <li><b>ACTIVATED：</b>节点开始产生 V36 份额。如果投票降到 50% 以下，就退回 VOTING。该状态会持久化到磁盘，因此重启后仍然保留。</li>
+ <li><b>CONFIRMED：</b>在持续 2&times; CHAIN_LENGTH 个份额保持 95% V36 之后，过渡成为永久性的。最低协议版本锁定为 3600，仅支持 V35 的旧对等节点会被断开。</li>
+ </ul>
+<div id="mk-u38" class="update" data-src="253b570294ce"><p><b>2026 年 11 月更新。</b>在 c2pool 和 p2pool-merged-v36 的代码中，棘轮的 95% 和 50% 阈值统计的是份额数：一个份额一票。只有在尾部保护中，投票才按工作量加权：窗口最旧的十分之一中，至少 60% 的工作量必须发出 V36 信号。</p></div>
+<p id="mk-39" data-src="1378c6a92aa0">迟滞（上行 95%，下行 50%）防止状态来回振荡。尾部保护防止在整个 PPLNS 窗口完成过渡之前过早激活。而且即使处于 CONFIRMED 状态，如果网络不知何故回落到 50% 以下，节点也会遵循共识产生 V35 份额——持久化的状态是一种偏好，而不是强制覆盖。</p>
+<div id="mk-u39" class="update" data-src="2e74a716ca13"><p><b>2026 年 11 月更新。</b>2026 年 7 月，AutoRatchet 的某些特定误激活模式仍可能被触发并来回翻转，导致份额链失去同步。这些模式现在已有回归测试防护；c2pool 的 README 并未声称这一整类问题已经解决。</p></div>
+<p id="mk-40" data-src="4de75499aa8e">c2pool 以协议版本 3500 加入网络，产生 V35 份额，投票支持 V36。它遵循移植到 C++ 的同一套棘轮逻辑，读写同一个 v36_ratchet.json 持久化文件。在已经确认 V36 的网络上，新的 c2pool 节点加载持久化状态后会立即开始产生 V36 份额。</p>
+<div id="mk-u40" class="update" data-src="cb214fa133ec"><p><b>2026 年 11 月更新。</b>V35&nbsp;&rarr;&nbsp;V36 棘轮已经完成。自 2026-11-13 00:00:00 UTC 起，莱特币份额链上的每个份额都是<b>份额版本 3601</b> 的份额。那次切换是一个写定在版本（c2pool v0.2.12.1）中的固定激活日（flag day），而不是投票。协议版本低于 3601 的对等节点（包括 Python 版 p2pool）会被断开，已不在莱特币份额链上。</p></div>
+<h2 id="mk-41" data-src="624f7a2f2ba6">混合窗口</h2>
+<p id="mk-42" data-src="8d51c1b7c68c">过渡并不发生在一个干净的边界上。V36 激活时，PPLNS 窗口中仍然混合着 V35 和 V36 份额，需要几个小时才能清空。在此期间，两件事同时进行，任何一件哪怕错一个份额都会引发连锁反应。</p>
+<p id="mk-43" data-src="c17e19356d8a">PPLNS 遍历必须对 V35 份额应用平坦加权，对 V36 份额应用指数衰减，并在确切的激活份额处切换公式。p2pool 和 c2pool 都支持份额链窗口更短的测试网配置——400 个份额，而不是主网的 8,640 个。这把几小时的过渡压缩到几分钟，对反复调试共识漏洞来说必不可少。在我们的测试网份额链上，V36 大约在第 400 个份额时激活。PPLNS 窗口为 400 个份额。在第 800 个份额时，V36 边界进入窗口。在第 870 个份额时，GENTX 失败开始出现。PPLNS 权重从 36% 降到 14%。这在每次测试运行中都可复现——跨越边界总会触发它。在主网上，同样的过渡大约需要三天。</p>
+<p id="mk-44" data-src="58d5a91c910c">最难发现的漏洞之一：c2pool 在编译期选择 PPLNS 公式（份额类型在模板层面决定 V35 还是 V36），而 p2pool 在运行时根据 AutoRatchet 状态选择。在过渡期间，p2pool 用 V36 衰减权重验证 V35 份额（因为棘轮处于 ACTIVATED），而 c2pool 用平坦权重验证同一个 V35 份额（因为份额结构体是 V35）。coinbase 输出不同，GENTX 不匹配，对等节点被封禁。修复方法是与 p2pool 的逻辑保持一致：用棘轮状态而不是份额版本来选择公式。</p>
+<div id="mk-u44" class="update" data-src="328983a84ea6"><p><b>2026 年 11 月更新。</b>公开代码最终采用了相反的做法：p2pool 和 c2pool 都按份额自身版本对应的公式验证每个份额（v36_active = VERSION &ge; 36）。棘轮状态只决定节点产生哪个版本的份额。</p></div>
+<p id="mk-45" data-src="3bf33862ed8b">在后来一次通宵运行中，AutoRatchet 本身失去了同步。c2pool 按绝对份额高度衡量链的进度；p2pool 按链深度衡量。c2pool 提前 56 个份额进入了 CONFIRMED 状态。在四个小时里，两个实现对同样的份额使用了不同的 PPLNS 公式。1,164 次 GENTX 失败，956 次对等节点断开，提交了 21 个 LTC 区块但无一被接受。修复只改了一个字段：用链深度，而不是绝对高度。</p>
+<div id="mk-u45" class="update" data-src="009dd8abe5f9"><p><b>2026 年 11 月更新。</b>针对这次失同步的公开修复（2026 年 3 月 31 日）记录的是：提前约 100 个份额进入 CONFIRMED，一夜之间出现超过 24,000 次 GENTX 失败。</p></div>
+<p id="mk-46" data-src="20753a1bee5d">地址处理同样是分层的。V35 份额只携带 LTC 收款脚本——没有联合挖矿地址字段。在混合窗口期间，V35 份额的 DOGE 支付必须从 LTC 脚本自动转换：从矿工所用的任何格式（P2PKH、bech32、P2SH）中解码出公钥哈希，并推导出 DOGE P2PKH 地址。V36 份额可以携带矿工在 stratum 登录字段中显式设置的联合挖矿地址（LTC_ADDR,DOGE_ADDR.worker）。因此，同一次 PPLNS 遍历会遇到三种 DOGE 地址：从 V35 份额自动转换的、从省略了该字段的 V36 份额自动转换的，以及在 V36 份额上显式提供的。一个在 stratum 登录中设置了显式 DOGE 地址的矿工，在混合窗口期间会在联合挖矿支付列表中出现两次——一次是自动转换的地址（来自仍在窗口中的较早 V35 份额），一次是显式地址（来自较新的 V36 份额）。两者都是同一矿工的有效支付，但它们是不同的脚本键。每个节点都必须以完全相同的金额生成这两个条目，否则 merged_payout_hash 就会出现分歧，份额会被拒绝。</p>
+<p id="mk-47" data-src="fc50d2117e18">我们在 bech32 自动转换路径中发现了一个字节序漏洞。p2pool 的 IntType(160) 把 20 字节的见证（witness）程序读作小端整数，然后再格式化回大端十六进制，用于推导 DOGE 地址。字节顺序就此被颠倒。在我们有 3 个矿工的测试网上，DOGE 支付列表中出现了第四个幽灵矿工——那是 bech32 矿工的地址，只是 hash160 的字节被调换了。P2PKH 地址不受影响，因为两次反转相互抵消。</p>
+<p id="mk-48" data-src="39f0beda8832">我认为这次过渡有一点值得注意：机制比它所支持的功能更复杂。联合挖矿逻辑、指数衰减、紧凑脚本——每一项本身都很直接。难的是在网络运行中、而 PPLNS 窗口还记着两个时代的情况下修改它们。</p>
+<h2 id="mk-49" data-src="4691d7aea419">狗狗币 auxblock 问题</h2>
+<p id="mk-50" data-src="382a5b7bdd59">联合挖矿需要构建一个向多个矿工进行 PPLNS 支付的狗狗币区块模板。狗狗币为此提供的标准 RPC 是 createauxblock，但它只接受一个收款地址，并返回一个预先构建好的区块哈希。你无法自定义 coinbase。对于向单一运营者支付的中心化矿池，这没有问题。对于需要在 coinbase 中放入 27 个矿工的去中心化矿池，这行不通。</p>
+<p id="mk-51" data-src="f8b70ae84c83">我们为 p2pool 编写了一个 mm-adapter——一个 JSON-RPC 中间件，它完全绕过 createauxblock，改为在狗狗币守护进程上调用 getblocktemplate，让 p2pool 用完整的 PPLNS 支付列表构建自己的 coinbase。该适配器负责计算默克尔根和区块哈希，并通过 submitblock 提交完整区块。这是针对一个并非为多地址支付而设计的 RPC 接口的变通方案。</p>
+<p id="mk-52" data-src="38d11f12b202">c2pool 不需要这个适配器。内置的 DOGE SPV 节点直接构建联合挖矿模板，方式与构建 LTC 模板相同。coinbase 在内部按完整的 PPLNS 支付结构构建。</p>
+<h2 id="mk-53" data-src="b7fdc9e94df5">区块传播</h2>
+<p id="mk-54" data-src="d6f54c954974">p2pool 与币种网络之间有两个接口：一个 RPC 连接和一个 P2P 连接，都连到同一个本地守护进程。找到区块时，它通过 submitblock RPC 提交。然后守护进程通过自己的对等节点转发。矿池只能通过单个守护进程观察网络。</p>
+<p id="mk-55" data-src="71a3b7053711">我们在 p2pool-merged-v36 中加入了一个广播器来改变这一点。它从守护进程的对等节点列表启动，但随后通过 P2P addr 消息独立发现自己的对等节点。评分是刻意设计的：来自守护进程的对等节点基础分较低（30），因为守护进程无论如何都会向它们广播。通过 P2P 发现的对等节点得分较高（150），因为它们代表守护进程到达不了的独特传播路径。本地守护进程连接受到保护（得分 999999，永不断开），作为锚点。低延迟、出站连接以及成功的广播历史都会提高对等节点的得分。其结果是广播器优先连接守护进程不知道的对等节点，从而最大化覆盖面。</p>
+<p id="mk-56" data-src="a0b29c0fa4b6">这很重要，因为区块传播是一场竞赛。运行在数据中心的中心化矿池到连接良好的节点的传播时间不到一秒。运行在家庭网络上的去中心化矿池如果输掉传播竞赛，就会失去区块奖励。如果区块到得晚了，奖励归最先传播的人。</p>
+<p id="mk-57" data-src="e0c825b93b21">c2pool 与莱特币和狗狗币网络各自维持独立的 P2P 连接——与任何守护进程无关。找到区块时，它会同时广播给所有已连接的对等节点（5 到 20 个，并通过按子网限制连接数来抵御女巫攻击）。对于莱特币，我们实现了 BIP&nbsp;152 致密区块中继：节点不发送完整区块，而是发送区块头以及每笔交易 6 字节的 SipHash 短 ID。对等节点用自己的内存池重建区块。一个典型区块在网络上传输的大小从一兆字节以上降到约 50&nbsp;KB。对于狗狗币联合挖矿区块，我们发送库存（inv）通告，让对等节点请求完整区块——辅助链不需要像父链那样紧迫的传播。</p>
+<div id="mk-u57" class="update" data-src="72f478688ab7"><p><b>2026 年 11 月更新。</b>每个莱特币区块都以 HogEx 结尾，而版本 2 的致密区块没有容纳 MWEB 扩展的位置，因此 c2pool 在莱特币上找到的区块会以完整区块的形式发送。它仍然接收致密区块。</p></div>
+<p id="mk-58" data-src="83c15c504072">区别在于架构。p2pool 把守护进程当作它与币种网络之间唯一的接口。c2pool 则直接参与币种网络。</p>
+<h2 id="mk-59" data-src="7986e8e259b5">七个共识问题</h2>
+<h3 id="mk-60" data-src="e0779fba0822">1. 异步计算问题</h3>
+<p id="mk-61" data-src="13dd301c2bea">p2pool 的 think() 函数是份额跟踪器的核心循环。它为链头打分、验证份额、选择最佳链。在基于 Twisted 的 Python 中，它以协作方式运行在 reactor 线程上。Twisted 的事件循环自然地把 think() 与网络 I/O 交错执行。</p>
+<p id="mk-62" data-src="4feb5c632340">Boost.Asio 的工作方式与 Twisted 不同。当 think() 在 io_context 上同步运行时，它阻塞了一切：P2P 消息处理、stratum 响应、联合挖矿模板重建。我们观察到 47 分钟的日志空白、四个对等节点同时超时，以及看门狗报告 &ldquo;think last fired 18 seconds ago.&rdquo;（译文：“think 上次触发是在 18 秒前。”）节点每隔 15 到 60 分钟就像死掉一样。</p>
+<p id="mk-63" data-src="d3ebbf439edd">修复方法是重新设计同步机制。think() 在专用计算线程上运行，持有独占的 std::shared_mutex。IO 线程永远不会因它阻塞——写操作排入待处理缓冲区，读操作使用 shared_lock。关键改动是把工作刷新移出独占锁。仅这一项改动就把独占锁的持有时间从 6 秒降到 100&ndash;400 毫秒。这个差别很重要：没有它，P2P 对等节点会超时断开，stratum 矿工会拿到过期（stale）的工作，节点会慢慢把自己孤立起来。</p>
+<p id="mk-64" data-src="146328fbe05e">p2pool 从不需要这些，因为 Twisted 的协作式多任务隐式地处理了这一点。在 C++ 中，你必须显式地设计并发，而且每个细节都很重要。</p>
+<h3 id="mk-65" data-src="6f6fb665eb0c">2. 跳表、增量缓存与链遍历问题</h3>
+<p id="mk-66" data-src="2417f841acaa">p2pool 的份额链是一个有链头、链尾和主链的 DAG。导航和聚合无处不在：获取份额的高度，计算两点之间的累计工作量，在 8,640 个份额的窗口上聚合 PPLNS 权重。</p>
+<p id="mk-67" data-src="16c65d0fc82a">原始 Python 实现为此使用了几种分层的数据结构。我们移植并扩展了全部这些结构：</p>
+<p id="mk-68" data-src="11f9eb52e8d3"><b>概率跳表。</b>三个独立的跳表实现——DistanceSkipList 用于 O(log n) 的祖先导航，WeightsSkipList 用于带增量缓存的 O(log n) PPLNS 权重累加，StatsSkipList 用于 O(log n) 的仪表板统计聚合（版本计数、矿工分布、难度总和）。每个都使用服从几何分布的随机跳跃长度：一个份额拥有 k 级跳跃指针的概率为 0.5^k。跳跃层级在遍历过程中惰性构建——第一次查询某个区域是 O(n)，之后的查询摊还为 O(log n)。</p>
+<p id="mk-69" data-src="72ca78315c33"><b>基于引用的增量缓存。</b>TrackerView 维护一个四级缓存，存储 (head, tail, height, work, min_work) 增量。每个份额映射到一个引用 ID，引用映射到一个到链末端的增量。删除份额时，只有使用该引用的条目会失效——O(1) 的选择性失效，而不是清空整个缓存。</p>
+<p id="mk-70" data-src="981b61960af2">令人意外的发现是：具体到 PPLNS 遍历，这些都帮不上忙。V36 指数衰减取决于每个份额相对于链尖的位置，而不仅仅是聚合统计量。同一个份额所贡献的权重取决于它所处的位置。跳表增量缓存无法预先计算依赖位置的值。PPLNS 遍历本质上是 O(chain_length) 的，这促使我们采用了一种完全不同的结构。</p>
+<h3 id="mk-71" data-src="88f5f19e5dde">3. 指数衰减 PPLNS</h3>
+<p id="mk-72" data-src="d4c0afaa50fc">原版 p2pool（V35）使用平坦的 PPLNS 窗口：份额按难度（找到它所需的工作量）加权，但不按其在窗口中的位置加权。位于链尖的份额与即将滑出窗口的份额同等计数。这造成了跳池漏洞。跳池者在运气好的时期加入，积累仅按难度加权的份额，在出块荒期离开——只要他们的份额还留在窗口中，就一直拥有完整的权重。</p>
+<p id="mk-73" data-src="c4d68735b5f7">V36 将指数衰减作为一项共识变更引入：</p>
+<pre id="mk-74" data-src="93a6437c0e8c">weight(share) = work * 2^(-depth / half_life)
+half_life      = CHAIN_LENGTH / 4   (~2160 shares, ~18 hours)</pre>
+<div id="mk-u74" class="update" data-src="e60e629e0988"><p><b>2026 年 11 月更新。</b>莱特币份额链和比特币份额链上的半衰期都是 2160 个份额。莱特币份额链的目标是每 15 秒一个份额，因此 2160 个份额约为 <b>9 小时</b>；上面的 18 小时适用于 30 秒的份额周期，例如比特币。</p></div>
+<p id="mk-75" data-src="d6a28423a7b1">近期份额的权重比旧份额高出指数级。但在 C++ 中实现逐位精确的衰减比预期更难。该函数使用 40 位定点运算并逐步截断：每个深度的衰减因子都由前一个深度的因子通过一次 128 位乘法加移位算出。我们需要跨平台可移植的 128 位乘法——GCC/Clang 上用 __uint128_t，MSVC 上用 _umul128。任何深度上 1 位的舍入差异都会在 8,640 个份额中层层放大，得出完全不同的 PPLNS 输出，进而变成不同的 coinbase 交易，也就意味着不同的份额哈希，而每个对等节点都会拒绝它。</p>
+<p id="mk-76" data-src="e87a7b4b4190">V35 到 V36 的过渡才是有意思的地方。V36 激活时，PPLNS 窗口中混合着 V35（平坦权重）和 V36（衰减权重）份额。遍历必须在恰好正确的份额处切换公式。在找到 V36 生效的确切份额高度之前，我们观察到 c2pool 的 PPLNS 权重在激活边界处从 33% 骤降到 8%。</p>
+<p id="mk-77" data-src="4afa2e76eb98">我们花了数周时间用跨实现比对工具调试这个问题：在 c2pool 和 p2pool 上记录每个份额的权重，对比输出，追踪二者出现分歧的第一位。最终实现在同一条份额链上与 p2pool 逐位一致。</p>
+<h3 id="mk-78" data-src="d1f1bf719c83">4. 密集 PPLNS 环形缓冲区</h3>
+<p id="mk-79" data-src="2c25c3ae8ee5">指数衰减遍历本质上是 O(chain_length) 的——由于衰减取决于每个份额的位置，无法使用跳表缓存。每次 attempt_verify() 都需要衰减后的权重，而每个周期要验证 100 多个份额，冗余的遍历占据了大部分运行时间。</p>
+<p id="mk-80" data-src="337b8589a700">我们构建了 DensePPLNSRing（后已更名为 DensePPLNSWindow）：一个由 PPLNSEntry 结构体（attempts、donation、script）组成的 std::deque，按链顺序保存，使内存访问基本是顺序的，而不是在哈希表中追逐指针。一张包含 chain_length 个条目的静态衰减表在启动时预先计算一次——decay_table[d] 给出深度 d 的精确 40 位定点乘数，消除了所有运行时的指数计算。该表以迭代方式构建：每个条目为 mul128_shift(prev, decay_per, 40)，其中 decay_per 由半衰期推导而来。这保证了与基于遍历的代码逐位一致的结果，同时把每个份额的算术运算替换为一次查表。</p>
+<p id="mk-81" data-src="4495fd8d93d6">在此基础上，HeadPPLNS 用 extend/slide 操作和惰性权重缓存封装了这个环。当 think() 验证 100 个连续份额时，它在第一个份额的位置构建一次环（一次 O(chain_length) 的遍历），然后对每个后续份额向后滑动——每个份额 O(1)，而不是 O(chain_length)。dirty 标志跟踪缓存的累计权重何时需要重新计算。</p>
+<pre id="mk-82" data-src="da258be88711">Before (hash-map walk):   100 shares * 500us = 50ms
+After  (ring + slide):    1 * 500us + 99 * 80us = 8.4ms   (~6x faster)</pre>
+<h3 id="mk-83" data-src="83b04de38064">5. 跨链地址转换</h3>
+<p id="mk-84" data-src="825f401a4e1d">在带联合挖矿的 p2pool 中，每个份额的 coinbase 同时支付 LTC 和 DOGE 奖励。矿工提供一个 LTC 地址。矿池必须从中推导出一个有效的 DOGE 地址。</p>
+<p id="mk-85" data-src="fe284613e6ab">事实证明这比听起来更难。LTC 支持 P2PKH、P2SH、P2WPKH（bech32）、P2WSH 和 P2TR。DOGE 只支持 P2PKH 和 P2SH——没有 SegWit，没有 Taproot。使用 ltc1q&hellip; bech32 地址的矿工无法直接接收 DOGE。矿池解码 20 字节的见证程序，并用同一个哈希推导出 DOGE P2PKH 地址。</p>
+<p id="mk-86" data-src="a72dcec02106">我们识别出 12 种不同的情况：显式地址、版本字节替换、bech32 解码路径、完全无法转换的 P2WSH/P2TR（其奖励会被重新分配）、地址顺序颠倒的检测，以及有人在 LTC 字段中填写 DOGE 地址时的反向推导。</p>
+<p id="mk-87" data-src="6b74dbc83d9c">此外还有裸多重签名（P2MS），这是一种没有标准地址表示的脚本格式。它还带着比特币中最著名的漏洞之一：由于原始实现中的差一错误，OP_CHECKMULTISIG 会从栈中多弹出一个元素。每条源自比特币的链都继承了这一点，因此每个花费脚本都必须额外提供一个虚拟元素供它弹出。NULLDUMMY 规则要求该元素必须为空。</p>
+<p id="mk-88" data-src="0ae163c4c588">在 V35 到 V36 的过渡期间，我们发现了幽灵矿工：测试网上有三个真实矿工，但 DOGE 支付列表中出现了四个。多出来的那个源于一个规范化漏洞——bech32 地址被解码为见证程序，映射为 hash160，再映射为 DOGE P2PKH，但字节顺序错了。同一个矿工以不同的推导结果出现了两次。</p>
+<h3 id="mk-89" data-src="33bbff053576">6. 联合挖矿共识</h3>
+<p id="mk-90" data-src="8794b1b7546a">V36 把联合挖矿作为共识层面的扩展加入。每个份额都承诺一个 merged_payout_hash——即 DOGE 奖励应如何分配的哈希。每个节点对同一份额都必须算出完全相同的哈希。</p>
+<p id="mk-91" data-src="79a169977070">地址解析遵循分级体系。带显式 DOGE 地址的 V36 份额直接使用这些地址。没有显式地址的 V36 份额从 LTC 脚本自动转换。混合窗口中的 V35 份额根本没有联合挖矿地址字段——从 LTC 自动转换，但 P2WPKH 必须从见证程序解码，P2SH 要替换版本字节，P2WSH/P2TR 则完全排除。</p>
+<p id="mk-92" data-src="c9b21ba04ff9">被排除矿工的奖励会被重新分配。共有四种模式：pplns（在所有矿工之间按比例分配）、fee（归节点运营者）、boost（分给连接到 stratum 但在窗口中没有份额的矿工——小矿工助手）和 donate（开发基金）。</p>
+<p id="mk-93" data-src="973c74b7b075">boost 模式对去中心化很有意义。在一个 90 GH/s 的矿池中，1 MH/s 的矿工大约需要三天才能找到一个份额。在这三天里，他们在贡献工作，却什么也得不到。boost 把重新分配的奖励恰好导向这些矿工。</p>
+<div id="mk-u93" class="update" data-src="9a24ebc2e2c8"><p><b>2026 年 11 月更新。</b>在一个 90 GH/s、每 15 秒一个份额的矿池中，1 MH/s 的矿工预计大约每 <b>15.6 天</b>才能找到一个份额（15&nbsp;s &divide; (1&nbsp;MH/s &divide; 90&nbsp;GH/s)），而不是三天。关于 boost 模式的论点依然成立。</p></div>
+<p id="mk-94" data-src="0a850129a97f">矿池重启还有一个微妙之处。节点重启时，矿工重新连接，但尚未完成 stratum 授权。ASIC 正在全速哈希，却没有分配收款地址。份额归入节点的默认地址，但难度不合适——系统不知道该矿工的真实算力。我们观察到在重新连接期间有 70% 的有效算力被浪费。修复方法：未授权会话根据本地总算力，而不是单个（未知）矿工的算力，来设置合适的难度。</p>
+<h3 id="mk-95" data-src="0b6d1e66cd61">7. 防止死亡螺旋</h3>
+<p id="mk-96" data-src="4e7ebe20105f">这大概是任何小型去中心化矿池最难的问题。p2pool 的目标是整个矿池的合计算力每 30 秒产生一个份额。如果一个 70 GH/s 的矿工离开一个 100 GH/s 的矿池，剩下的 30 GH/s 找到份额的速度只有预期的三分之一。原版 p2pool 将每个份额的难度变化限制在正负 10% 以内。从 3&times; 的算力下降中恢复，大约需要 23 个份额才能把难度减半。以降低后的份额速率，这需要 10 分钟以上。矿工看到长时间没有份额，仪表板显示数据陈旧的警告，于是他们离开。</p>
+<div id="mk-u96" class="update" data-src="9c3235ab7d0d"><p><b>2026 年 11 月更新。</b>30 秒的份额周期是 p2pool 针对比特币的数值。莱特币份额链，无论在 p2pool 还是 c2pool 中，目标都是每 <b>15 秒</b>一个份额。另外，每个份额 &plusmn;10% 的限幅能让目标值在约 8 个份额内翻倍（1.1<sup>8</sup>&nbsp;&asymp;&nbsp;2.1），在约 12 个份额内变为三倍，因此仅凭限幅无法解释上文的“大约 23 个份额”；该数字保留原文的写法。</p></div>
+<p id="mk-97" data-src="9fe04adb3ba1">V36 引入了一种混合式紧急难度调整，受 BCH EDA 启发，但设计不同。它在 10 分钟没有份额之后激活，对目标值施加指数衰减，并在每个减半周期内进行线性插值。线性插值是与 BCH 原始方案的关键区别——它产生平滑的难度曲线，而不是让 BCH 的 EDA 可被利用的阶梯式跳变。</p>
+<div id="mk-u97" class="update" data-src="7b4873f26bf2"><p><b>2026 年 11 月更新。</b>在代码中，紧急难度规则在 <b>20 个份额周期</b>没有份额之后开始生效（在莱特币上为 300 秒，而不是 10 分钟）。此后，每再过 10 个份额周期，参考目标值翻倍，其间进行线性插值，结果仍受通常的 &plusmn;10% 限幅约束。参见<a href="/zh/difficulty-adjustment/">难度调整</a>。</p></div>
+<p id="mk-98" data-src="8eedd034d402">c2pool 与 p2pool-v36 一样，有一个巨鲸离场检测器：当矿池算力降到其 30 分钟平均值的一半以下时，节点会请求 &plusmn;10% 限幅所允许的最容易的份额目标值，而不是等待正常收敛。这是一条本地规则，不属于共识。</p>
+<h2 id="mk-99" data-src="984443fca61e">理解 MWEB</h2>
+<p id="mk-100" data-src="3aa711ae04e2">莱特币激活了 MWEB（MimbleWimble Extension Blocks，MimbleWimble 扩展区块），用于可选的机密交易。大多数矿池对守护进程给出的内容照单全收、直接传递。内置 SPV 节点没有这种便利——它必须自己理解 MWEB 结构。</p>
+<p id="mk-101" data-src="7b406f751377">每个莱特币区块的最后一笔交易是 HogEx（“Hogwarts Express”，霍格沃茨特快，即 MWEB 集成交易）。这笔交易连接主 UTXO 集和 MWEB 扩展区块。我们的内置节点从通过 P2P 收到的每个完整区块中提取 MWEB 状态（各个根、MMR 大小、kernel/stealth 偏移量），并在构建下一个模板时将其延续下去。MWEB 区块哈希使用 blake3，与 Litecoin Core 的 libmw 一致。</p>
+<p id="mk-102" data-src="b1ff029ca565">我们采用延续（carry-forward）方法：从上一个区块提取状态，为下一个区块构造一个空的 MWEB 区块加 HogEx 交易。由于我们自己不处理 MWEB 交易（不支持机密交易），扩展区块始终为空。这样做的缺点是仅限 MWEB 的交易不会被纳入我们的区块模板。但 HogEx 必须在结构上有效，否则莱特币节点会拒绝该区块，所以把延续做对并不是可选项。</p>
+<div id="mk-u102" class="update" data-src="11266604b415"><p><b>2026 年 11 月更新。</b>如果有本地 litecoind，c2pool 现在可以在用自己的 MWEB 状态核对之后，把 litecoind 的 MWEB 扩展区块放入自己的模板（<code>--ltc-mweb-ext litecoind</code>）。默认情况下以及无需守护进程的节点，仍然使用空扩展区块。</p></div>
+<h2 id="mk-103" data-src="f6bc1fd956b0">OOM 崩溃：100 秒内 10 GB</h2>
+<p id="mk-104" data-src="c86815c0870e">生产节点悄无声息地崩溃了。没有崩溃日志，没有回溯。一个外部看门狗线程检测到了事件循环冻结，但内核的 OOM killer 更快。</p>
+<p id="mk-105" data-src="207ea9b36dbe">根本原因：IO 线程与计算线程之间的数据竞争。PPLNS 遍历在份额修剪期间跟随了一个悬空指针。随着被破坏的遍历不受限制地分配临时结构，RSS 在 100 秒内从 1.4 GB 涨到 11.3 GB。</p>
+<p id="mk-106" data-src="28421abf6261">修复方法是在所有 IO 线程的跟踪器回调中使用 shared_lock。教训是：在两个线程访问同一图结构的系统中，失败模式不是错误的答案——而是被破坏的遍历导致的指数级内存消耗。</p>
+<h2 id="mk-107" data-src="6057770a4a26">让份额链可见</h2>
+<p id="mk-108" data-src="67d28b438fcf">去中心化挖矿有一个验证问题：矿工怎么知道矿池在公平地支付他们？数学是可验证的，但原始的份额哈希和链长度对一个干活的矿工来说毫无意义。</p>
+<p id="mk-109" data-src="e1e12d71b3ad">我们的想法是，矿工应该能在几秒钟内核实自己的支付。</p>
+<p id="mk-110" data-src="b39a14b3c333">主视图是一个用 canvas 渲染的像素网格，显示 PPLNS 窗口中的全部 8,640 个份额。每个份额是一个彩色方块——布局借鉴了 Windows 磁盘碎片整理程序的可视化，它让磁盘健康状况一目了然。颜色对应矿工身份（由地址确定性生成的 HSL），亮度表示已验证或未验证状态，金色边框标记区块解。新份额通过 SSE 到达时，旧份额从一端滚出，新份额出现在另一端。</p>
+<p id="mk-111" data-src="4f5cd2ffb334">网格下方是一个方形化树图（squarified treemap），显示当前的支付分布。每个单元格的大小与矿工的 PPLNS 权重成正比。大单元格显示地址、百分比、算力、V36 状态。小单元格只显示百分比。仅支持 V35 的矿工以降低饱和度的颜色显示，并带有“NO DOGE”标签——他们得不到联合挖矿奖励。</p>
+<p id="mk-112" data-src="54f461ff05b8">每个份额都可以点击。单个份额页面显示该份额的技术细节（哈希、矿工、难度、版本、时间戳、coinbase 标签），以及该份额位置上的完整 PPLNS 树图——如果恰好在那一刻找到区块，谁会得到多少。这使得可以在过渡窗口中逐个份额地追踪支付变化。任何运行自己节点的人都能独立看到相同的数据——仪表板是份额链的本地视图，而不是托管服务。</p>
+<p id="mk-113" data-src="e2147b5ec5b7">我们保留了矿工期望的经典 p2pool 统计（算力、份额计数、对等连接、运行时间），并在仪表板上重新加入了运气计算和偏差跟踪。一段时间内的运气是找到的区块数除以预期的区块数。在没有上下文的情况下展示时，运气往往让人困惑，但它是验证矿池表现是否处于统计范围之内、以及 PPLNS 分配随时间推移是否公平的较好方法之一。</p>
+<div id="mk-u113" class="update" data-src="edd34a281d6e"><p><b>2026 年 11 月更新。</b>本段第一版把比值写反了（预期除以实际）。自 v0.2.12.9 起，仪表板根据<b>工作量（effort）</b>计算运气，并为每个时间段给出 95% 区间；参见<a href="/zh/luck/#lk-dash-h">仪表板如何衡量运气</a>。</p></div>
+<p id="mk-114" data-src="6e6dd37e40a9">V36 过渡进度以实时进度条显示：发出 V36 信号的份额百分比、95% 激活阈值、棘轮状态的推进。它使用 SSE 推送，因此打开的连接不会给节点增加负载。</p>
+<h2 id="mk-115" data-src="097dcaffefb3">跨实现测试</h2>
+<p id="mk-116" data-src="efbc04872abe">这些漏洞不是用单元测试发现的。单元测试验证的是你的实现内部是否自洽。它们无法告诉你，你的实现是否与运行同一协议的另一个实现的共识一致。</p>
+<p id="mk-117" data-src="1d03a48aad1a">我们的测试方法：在一个隔离的莱特币测试网上运行两个 p2pool 节点和一个 c2pool 节点，配三台 Scrypt ASIC 矿机（每个节点一台）。每个份额都会传播到全部三个节点。每次 GENTX 不匹配都会被记录下来，两个实现的输出并排列出。我们比较每个份额的 PPLNS 权重、coinbase 输出和难度目标值。</p>
+<p id="mk-118" data-src="5b76a4d743a9">狗狗币这边需要自己的基础设施。公共 DOGE 测试网有一个区块风暴漏洞——难度崩塌到区块以约每秒 3.3 个的速度到来，使它无法用于任何依赖真实出块时间的测试。我们分叉了狗狗币守护进程，创建了一个隔离的测试网（testnet4alpha），从创世区块起启用 AuxPoW，难度合理，对等连接受控。它不公开；只在我们的测试机器之间运行。我们在 c2pool 中捆绑了一个轻量级区块链浏览器，专门用于检查这条私有链：解码 coinbase 脚本、追踪 PPLNS 支付、验证 AuxPoW 承诺、查看哪些区块由哪个矿池找到。它先是开发工具，后来才成为一项功能。</p>
+<p id="mk-119" data-src="8acd50c0aecb">一次典型的测试运行会经历几个可预期的阶段：V35 健康运行（份额 0&ndash;800，PPLNS 攀升到预期的 33%）、V36 边界进入（份额 800&ndash;950，激活边界进入 PPLNS 窗口），以及持续的混合模式运行。V36 边界是所有共识漏洞浮出水面的地方。它是可复现的。</p>
+<p id="mk-120" data-src="bd5288fd0460">我们构建了一套完整的重启流程：终止所有节点，清空所有数据，清除守护进程的封禁，先启动 p2pool 并让它领先一段（单独运行 20 个份额），然后再引入 c2pool。监控脚本以单个份额为粒度跟踪 PPLNS 百分比、GENTX 失败、拓扑（链头数量、链长度）以及模板匹配情况（节点之间的 coinbasevalue 比较）。</p>
+<p id="mk-121" data-src="35a0dfd4760e">事实证明，在同一条份额链上运行第二个实现，是发现共识漏洞较可靠的方法之一。两个实现要么对同样的数据达成一致，要么不一致。没有任何模糊之处。</p>
+<h2 id="mk-122" data-src="5e0a96ef86c2">未解的问题</h2>
+<p id="mk-123" data-src="453e71e9e125">有几件事我们一直在思考。</p>
+<p id="mk-124" data-src="c874328ad552"><b>PPLNS 一定是单一时间维度的吗？</b>当前的系统——无论是平坦的（V35）还是指数衰减的（V36）——只看一个时间维度。窗口中的所有份额都按其相对于链尖的位置加权。但难度调整本身已经形成了自然的纪元边界（比特币和莱特币每 2016 个区块一次；狗狗币自 DigiShield 起每个区块都调整）。一个远远超出当前难度目标值的份额，比勉强通过的份额代表更多的熵。当前系统对二者一视同仁。份额能否跨纪元边界携带权重——计入其难度实际对应的纪元，而不是它恰好到达时所在的纪元——仍是一个开放问题。纪元坍缩时的结算机制会很快变得复杂，但其抵御跳池的特性很有意思。</p>
+<p id="mk-125" data-src="d37db6fc1cfc"><b>去中心化挖矿需要一个终端吗？</b>我们一直在试验一个基于 Qt 的桌面界面，它封装了完整的内置节点——启动页、概览、挖矿状态、份额链可视化工具、日志查看器、设置。一个自包含的应用程序，不依赖守护进程，也没有配置文件。这究竟会让去中心化挖矿更易于上手，还是只是多加了一层抽象，我们还不知道。</p>
+<div id="mk-u125" class="update" data-src="029ee223bef1"><p><b>2026 年 11 月更新。</b>c2pool 仓库现在在 <code>ui/</code> 下包含两个 Qt 应用：<code>c2pool-qt</code> 和 <code>c2wallet-qt</code>，后者包含一个不含任何网络代码的离线签名器。</p></div>
+<p id="mk-126" data-src="10a1dbca9652"><b>这个架构在多大程度上依赖特定的链？</b>内置 SPV 和 PPLNS 机制并不假定是莱特币。它们适用于任何 Scrypt 链。DigiByte 是一个显而易见的候选——又一条 Scrypt 链，可以作为第二条独立的份额链运行，并拥有自己的联合挖矿。份额格式相同。与链相关的部分（难度调整算法、出块时间、地址版本字节）都已参数化。我们在测试网上测试过。DGB 的挖矿算力是否足以支撑一个去中心化矿池，是另一个问题。</p>
+<div id="mk-u126" class="update" data-src="98687b83cc8a"><p><b>2026 年 11 月更新。</b>一个 DigiByte 节点现已在主网上在线运行，无需币种守护进程（<code>c2pool-dgb</code>）。它把 DigiByte 的 Scrypt 算法作为一条独立的父链来挖，而不是作为莱特币的辅助链，并且它没有测试网模式。</p></div>
+<p id="mk-127" data-src="5ef070b2eecc">我们一直在主网上与 p2pool v36 节点并行运行它。份额链保持同步。仍有一些不完善之处。</p>
+<div id="mk-u127" class="update" data-src="edc38be0156c"><p><b>2026 年 11 月更新。</b>自份额版本 3601 的固定激活日（2026-11-13）起，Python 版 p2pool 已不在莱特币份额链上；只有 c2pool v0.2.12.1 及更高版本在链上。Python 实现已不再维护。</p></div>
+<div id="mk-128" class="v37" data-src="7358b8c30624"><span class="tag">V37</span><b>未来走向。</b>
+ <p>上面的开放问题是 V37 的种子，V37 是 c2pool 的下一条设计路线。“PPLNS 一定是单一时间维度的吗？”演变成了多时间维度的 MRR 环岛缓冲区（roundabout buffer）：工作量计入其完成时所在的<i>起源时间区间（origin-time bin）</i>，而不是它到达时所处的位置。关于“远远超出”的观察演变成了一条规则：工作量按其满足的目标值记入，而绝不按某个哈希碰巧比该目标值低多少来记入（参见<a href="/zh/real-difficulty/">真实难度</a>）。“这个架构在多大程度上依赖特定的链？”演变成了原生的多链通道。这里记录的来之不易的教训（重放，而非重建；按每个份额自身的版本验证它；逐位精确的定点运算；用第二个实现发现漏洞）是 V37 设计的基础。V37 处于设计和原型阶段，未在生产中运行。参见<a href="/zh/purple-paper/">Purple Paper 摘要</a>。</p>
+ </div>
+</article>
+</main>
+<!-- chrome:foot -->
+<footer class="foot">
+<p>最初由 Technocore One 发布于“P2Pool scientific basics”，2026 年 11 月更新。© 2026 technocore.one。</p>
+<p>带日期的注释已于 2026-11-27 按 c2pool 版本 v0.2.12.16 核对；2026 年 6 月的原文保持不变。</p>
+</footer>
+<!-- /chrome:foot -->
+</body>
+</html>

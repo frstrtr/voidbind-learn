@@ -1,0 +1,85 @@
+{
+  "base": "https://learn.voidbind.com",
+  "langs": [
+    "en",
+    "fr",
+    "ru",
+    "de",
+    "zh"
+  ],
+  "lang_names": {
+    "en": "English",
+    "fr": "Français",
+    "ru": "Русский",
+    "de": "Deutsch",
+    "zh": "中文"
+  },
+  "html_lang": {
+    "en": "en",
+    "fr": "fr",
+    "ru": "ru",
+    "de": "de",
+    "zh": "zh-Hans"
+  },
+  "c2pool_tag": "v0.2.12.16",
+  "checked_date": "2026-11-27",
+  "csp": "default-src 'none'; img-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'",
+  "review": {
+    "en": "reviewed",
+    "ru": "pending",
+    "fr": "machine",
+    "de": "machine",
+    "zh": "machine"
+  },
+  "pages": [
+    {
+      "slug": "",
+      "attr": "home"
+    },
+    {
+      "slug": "c2pool-today",
+      "attr": "new"
+    },
+    {
+      "slug": "references",
+      "attr": "technocore"
+    },
+    {
+      "slug": "making-of-c2pool",
+      "attr": "technocore",
+      "checked": "checked_history"
+    },
+    {
+      "slug": "luck",
+      "attr": "technocore"
+    },
+    {
+      "slug": "real-difficulty",
+      "attr": "technocore"
+    },
+    {
+      "slug": "difficulty-adjustment",
+      "attr": "technocore"
+    },
+    {
+      "slug": "taproot-coinbase",
+      "attr": "technocore"
+    },
+    {
+      "slug": "weighted-multisig",
+      "attr": "technocore"
+    },
+    {
+      "slug": "bitcoin-leveldb",
+      "attr": "technocore"
+    },
+    {
+      "slug": "purple-paper",
+      "attr": "paper"
+    },
+    {
+      "slug": "monero-ccs",
+      "attr": "new"
+    }
+  ]
+}
