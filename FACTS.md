@@ -30,6 +30,8 @@ Legend: **C** = changed from the original text, **N** = new text, **K** = kept f
 |---|---|
 | Link states | checked with curl -L on 2026-11-27. 418/403 answers are bot blocks; those links are kept. |
 | Authors named only where the URL or file name carries them (Zamyatin) | link URLs |
+| TU Wien thesis: "Merged mining: analysis of effects and implications", Zamyatin, Alexei, 2017, thesis; DOI 10.34726/hss.2017.41136 | https://repositum.tuwien.at/handle/20.500.12708/5239 (record metadata, 2026-11-28) |
+| popeller.io answered 503 on 2026-11-27 and 2026-11-28; down for maintenance | HTTP check; the 503 page reads "Down for maintenance" |
 | SegWit done; Taproot soft fork required; P2TR payout not supported (20-byte payout hash); MWEB carried forward, empty extension block | `src/impl/ltc/params.hpp:51`; README.md:913-916, 949-954; `src/impl/ltc/coin/mweb_builder.hpp:6-12` |
 
 ## making-of-c2pool (H with C notes)
@@ -175,5 +177,5 @@ Legend: **C** = changed from the original text, **N** = new text, **K** = kept f
 
 ## Open items
 1. Hand-check in a browser: Medium links, the lists.linuxfoundation.org archive links, diyhpl.us transcripts (all refuse automated clients).
-2. Find current homes for the TU Wien thesis and the gnusha.org #bitcoin-wizards logs.
+2. Find the current home of the gnusha.org #bitcoin-wizards logs; re-check popeller.io after its maintenance.
 3. The `gh-pages` copy of the LevelDB article still carries the Stack Exchange text under "© technocore.one, all rights reserved".
